@@ -8,7 +8,7 @@ const STYLES: Record<string, { pill: string; dot: string }> = {
 };
 
 export function StatusBadge({ status }: { status: string }) {
-  const style = STYLES[status] ?? { pill: "bg-slate-100 text-slate-700 ring-slate-500/20", dot: "bg-slate-400" };
+  const style = STYLES[status] ?? { pill: "bg-zinc-100 text-zinc-700 ring-zinc-500/20", dot: "bg-zinc-400" };
   return (
     <span
       className={cn(

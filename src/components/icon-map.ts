@@ -7,6 +7,7 @@ import {
   BarChart3,
   ClipboardCheck,
   ShieldCheck,
+  Users,
 } from "lucide-react";
 
 // Server Components can't pass component references (functions) as props
@@ -22,6 +23,7 @@ export const ICONS = {
   BarChart3,
   ClipboardCheck,
   ShieldCheck,
+  Users,
 } as const;
 
 export type IconName = keyof typeof ICONS;

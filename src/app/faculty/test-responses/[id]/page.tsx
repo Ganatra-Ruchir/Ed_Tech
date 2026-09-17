@@ -38,11 +38,11 @@ export default async function TestResponseDetail({
     <div className="grid max-w-4xl grid-cols-1 gap-6 md:grid-cols-3">
       <div className="space-y-6 md:col-span-2">
         <div>
-          <h1 className="text-lg font-semibold text-slate-900">{response.test.title}</h1>
-          <p className="mt-1 text-sm text-slate-500">
+          <h1 className="text-[15px] font-semibold text-zinc-900">{response.test.title}</h1>
+          <p className="mt-1 text-sm text-zinc-500">
             {response.student.name} · {response.test.batch.name} · Submitted {fmtDateTime(response.submittedAt)}
           </p>
-          <p className="mt-1 text-sm font-medium text-slate-700">
+          <p className="mt-1 text-sm font-medium text-zinc-700">
             Score: {response.score ?? "-"} / {response.maxScore ?? "-"}
           </p>
         </div>

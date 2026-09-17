@@ -17,38 +17,23 @@ export function KpiCard({
   progress?: number;
 }) {
   return (
-    <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm transition-shadow hover:shadow-md">
-      <div className="flex items-start justify-between gap-2">
-        <div
-          className={cn(
-            "text-2xl font-semibold tracking-tight",
-            tone === "danger" && "text-rose-600",
-            tone === "success" && "text-emerald-600",
-            tone === "default" && "text-slate-900",
-          )}
-        >
-          {value}
-        </div>
-        {Icon && (
-          <span
-            className={cn(
-              "flex h-8 w-8 shrink-0 items-center justify-center rounded-lg",
-              tone === "danger" && "bg-rose-50 text-rose-600",
-              tone === "success" && "bg-emerald-50 text-emerald-600",
-              tone === "default" && "bg-indigo-50 text-indigo-600",
-            )}
-          >
-            <Icon size={16} strokeWidth={2} />
-          </span>
-        )}
+    <div className="rounded-lg border border-zinc-200 bg-white p-3.5 transition-colors hover:border-zinc-300">
+      <div className="flex items-center gap-1.5 text-zinc-400">
+        {Icon && <Icon size={13} strokeWidth={2} />}
+        <span className="text-[11px] font-medium uppercase tracking-wide">{label}</span>
       </div>
-      <div className="mt-1 text-xs font-medium text-slate-500">{label}</div>
+      <div
+        className={cn(
+          "mt-1.5 text-[22px] font-semibold tracking-tight",
+          tone === "danger" && "text-rose-600",
+          tone === "success" && "text-emerald-600",
+          tone === "default" && "text-zinc-900",
+        )}
+      >
+        {value}
+      </div>
       {progress !== undefined && (
-        <ProgressBar
-          value={progress}
-          tone={tone === "default" ? "auto" : tone}
-          className="mt-2.5"
-        />
+        <ProgressBar value={progress} tone={tone === "default" ? "auto" : tone} className="mt-2.5" />
       )}
     </div>
   );

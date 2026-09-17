@@ -1,11 +1,14 @@
-import Link from "next/link";
-import { Inbox, ClipboardCheck, ArrowRight } from "lucide-react";
+import { Inbox, ClipboardCheck, ArrowRight, CheckCircle2 } from "lucide-react";
 import { getSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { userBatchIds } from "@/lib/permissions";
 import { StatusBadge } from "@/components/StatusBadge";
 import { Avatar } from "@/components/Avatar";
 import { BatchFilterSelect } from "@/components/BatchFilterSelect";
+import { PageHeader } from "@/components/PageHeader";
+import { Card } from "@/components/Card";
+import { LinkButton } from "@/components/Button";
+import { EmptyState } from "@/components/EmptyState";
 
 function fmtDate(d: Date | null): string {
   if (!d) return "-";
@@ -47,101 +50,91 @@ export default async function FacultyReviewQueue({
   ]);
 
   return (
-    <div className="space-y-8">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <h1 className="text-xl font-semibold text-slate-900">Review Queue</h1>
-          <p className="text-sm text-slate-500">
-            Pending submissions and test responses across your batches.
-          </p>
-        </div>
-        <BatchFilterSelect batches={myBatches} value={batchFilter ?? ""} />
-      </div>
+    <div className="space-y-7">
+      <PageHeader
+        title="Review Queue"
+        description="Pending submissions and test responses across your batches."
+        actions={<BatchFilterSelect batches={myBatches} value={batchFilter ?? ""} />}
+      />
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-        <div className="flex items-center gap-3 rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
-          <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-amber-50 text-amber-600">
-            <Inbox size={18} />
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+        <Card className="flex items-center gap-3 p-4">
+          <span className="flex h-9 w-9 items-center justify-center rounded-md bg-amber-50 text-amber-600">
+            <Inbox size={16} />
           </span>
           <div>
-            <p className="text-2xl font-semibold text-slate-900">{pendingSubmissions.length}</p>
-            <p className="text-xs font-medium text-slate-500">Submissions awaiting review</p>
+            <p className="text-xl font-semibold text-zinc-900">{pendingSubmissions.length}</p>
+            <p className="text-xs font-medium text-zinc-500">Submissions awaiting review</p>
           </div>
-        </div>
-        <div className="flex items-center gap-3 rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
-          <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-indigo-50 text-indigo-600">
-            <ClipboardCheck size={18} />
+        </Card>
+        <Card className="flex items-center gap-3 p-4">
+          <span className="flex h-9 w-9 items-center justify-center rounded-md bg-indigo-50 text-indigo-600">
+            <ClipboardCheck size={16} />
           </span>
           <div>
-            <p className="text-2xl font-semibold text-slate-900">{ungradedResponses.length}</p>
-            <p className="text-xs font-medium text-slate-500">Test responses needing grading</p>
+            <p className="text-xl font-semibold text-zinc-900">{ungradedResponses.length}</p>
+            <p className="text-xs font-medium text-zinc-500">Test responses needing grading</p>
           </div>
-        </div>
+        </Card>
       </div>
 
       <section>
-        <h2 className="mb-3 text-base font-semibold text-slate-900">Submissions awaiting review</h2>
-        <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+        <h2 className="mb-2 text-[13px] font-semibold text-zinc-900">Submissions awaiting review</h2>
+        <Card>
           {pendingSubmissions.length === 0 ? (
-            <p className="p-4 text-sm text-slate-500">Nothing pending. Nice work.</p>
+            <EmptyState icon={CheckCircle2} title="Nothing pending" description="Nice work." />
           ) : (
-            <ul className="divide-y divide-slate-100">
+            <ul className="divide-y divide-zinc-100">
               {pendingSubmissions.map((s) => (
-                <li key={s.id} className="flex items-center justify-between gap-3 px-4 py-3 hover:bg-slate-50">
+                <li key={s.id} className="flex items-center justify-between gap-3 px-4 py-2.5 hover:bg-zinc-50">
                   <div className="flex min-w-0 items-center gap-3">
                     <Avatar name={s.student.name} />
                     <div className="min-w-0">
-                      <p className="truncate text-sm font-medium text-slate-900">{s.title}</p>
-                      <p className="truncate text-xs text-slate-400">
+                      <p className="truncate text-[13px] font-medium text-zinc-900">{s.title}</p>
+                      <p className="truncate text-xs text-zinc-400">
                         {s.student.name} · {s.batch.name} · {fmtDate(s.createdAt)}
                       </p>
                     </div>
                   </div>
                   <div className="flex shrink-0 items-center gap-3">
                     <StatusBadge status={s.status} />
-                    <Link
-                      href={`/faculty/submissions/${s.id}`}
-                      className="inline-flex items-center gap-1 rounded-md bg-indigo-600 px-2.5 py-1.5 text-xs font-medium text-white hover:bg-indigo-500"
-                    >
+                    <LinkButton href={`/faculty/submissions/${s.id}`} size="sm">
                       Review <ArrowRight size={12} />
-                    </Link>
+                    </LinkButton>
                   </div>
                 </li>
               ))}
             </ul>
           )}
-        </div>
+        </Card>
       </section>
 
       <section>
-        <h2 className="mb-3 text-base font-semibold text-slate-900">Test responses needing grading</h2>
-        <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+        <h2 className="mb-2 text-[13px] font-semibold text-zinc-900">Test responses needing grading</h2>
+        <Card>
           {ungradedResponses.length === 0 ? (
-            <p className="p-4 text-sm text-slate-500">All short-answer responses graded.</p>
+            <EmptyState icon={CheckCircle2} title="All short-answer responses graded" />
           ) : (
-            <ul className="divide-y divide-slate-100">
+            <ul className="divide-y divide-zinc-100">
               {ungradedResponses.map((r) => (
-                <li key={r.id} className="flex items-center justify-between gap-3 px-4 py-3 hover:bg-slate-50">
+                <li key={r.id} className="flex items-center justify-between gap-3 px-4 py-2.5 hover:bg-zinc-50">
                   <div className="flex min-w-0 items-center gap-3">
                     <Avatar name={r.student.name} />
                     <div className="min-w-0">
-                      <p className="truncate text-sm font-medium text-slate-900">{r.test.title}</p>
-                      <p className="truncate text-xs text-slate-400">
+                      <p className="truncate text-[13px] font-medium text-zinc-900">{r.test.title}</p>
+                      <p className="truncate text-xs text-zinc-400">
                         {r.student.name} · {r.test.batch.name} · {fmtDate(r.submittedAt)}
                       </p>
                     </div>
                   </div>
-                  <Link
-                    href={`/faculty/test-responses/${r.id}`}
-                    className="inline-flex shrink-0 items-center gap-1 rounded-md bg-indigo-600 px-2.5 py-1.5 text-xs font-medium text-white hover:bg-indigo-500"
-                  >
+                  <LinkButton href={`/faculty/test-responses/${r.id}`} size="sm">
                     Grade <ArrowRight size={12} />
-                  </Link>
+                  </LinkButton>
                 </li>
               ))}
             </ul>
           )}
-        </div>
+        </Card>
       </section>
     </div>
   );

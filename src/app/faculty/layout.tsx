@@ -10,6 +10,7 @@ export default async function FacultyLayout({ children }: { children: React.Reac
 
   const links: SidebarLink[] = [
     { href: "/faculty", label: "Review Queue", icon: "Inbox" },
+    { href: "/faculty/batches", label: "Batches", icon: "Users" },
     { href: "/faculty/tests", label: "Tests", icon: "ClipboardList" },
     { href: "/faculty/announcements", label: "Announcements", icon: "Megaphone" },
   ];

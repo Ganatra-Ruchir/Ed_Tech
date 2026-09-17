@@ -1,8 +1,10 @@
+import { FileText } from "lucide-react";
 import { notFound } from "next/navigation";
 import { getSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { canAccessSubmission } from "@/lib/permissions";
 import { StatusBadge } from "@/components/StatusBadge";
+import { Card } from "@/components/Card";
 import { ReviewPanel } from "./ReviewPanel";
 
 function fmtDateTime(d: Date | null): string {
@@ -41,28 +43,27 @@ export default async function FacultySubmissionDetail({
 
   return (
     <div className="grid max-w-4xl grid-cols-1 gap-6 md:grid-cols-3">
-      <div className="space-y-6 md:col-span-2">
+      <div className="space-y-5 md:col-span-2">
         <div>
           <div className="flex items-center gap-3">
-            <h1 className="text-lg font-semibold text-slate-900">{submission.title}</h1>
+            <h1 className="text-[15px] font-semibold text-zinc-900">{submission.title}</h1>
             <StatusBadge status={submission.status} />
           </div>
-          <p className="mt-1 text-sm text-slate-500">
+          <p className="mt-1 text-sm text-zinc-500">
             {submission.student.name} · {submission.batch.name} · Submitted {fmtDateTime(submission.createdAt)}
           </p>
         </div>
 
         {submission.notes && (
-          <div className="rounded-lg border border-slate-200 bg-white p-4 text-sm text-slate-700">
-            {submission.notes}
-          </div>
+          <Card className="p-4 text-sm text-zinc-700">{submission.notes}</Card>
         )}
 
         <div>
-          <h2 className="mb-2 text-sm font-semibold text-slate-900">Files</h2>
+          <h2 className="mb-2 text-xs font-semibold uppercase tracking-wide text-zinc-400">Files</h2>
           <ul className="space-y-1">
             {submission.files.map((f) => (
-              <li key={f.id}>
+              <li key={f.id} className="flex items-center gap-1.5">
+                <FileText size={13} className="text-zinc-400" />
                 <a href={f.fileUrl} target="_blank" className="text-sm text-indigo-600 hover:underline">
                   {f.fileName}
                 </a>
@@ -91,16 +92,16 @@ export default async function FacultySubmissionDetail({
       </div>
 
       <div>
-        <h2 className="mb-2 text-sm font-semibold text-slate-900">Audit trail</h2>
+        <h2 className="mb-2 text-xs font-semibold uppercase tracking-wide text-zinc-400">Audit trail</h2>
         <ul className="space-y-2">
-          {auditLogs.length === 0 && <p className="text-sm text-slate-500">No actions logged yet.</p>}
+          {auditLogs.length === 0 && <p className="text-sm text-zinc-500">No actions logged yet.</p>}
           {auditLogs.map((log) => (
-            <li key={log.id} className="rounded-md border border-slate-200 bg-white p-2 text-xs">
-              <p className="font-medium text-slate-800">{log.action}</p>
-              <p className="text-slate-500">
+            <Card key={log.id} className="p-2.5 text-xs">
+              <p className="font-medium text-zinc-800">{log.action}</p>
+              <p className="text-zinc-500">
                 {log.actor.name} · {fmtDateTime(log.createdAt)}
               </p>
-            </li>
+            </Card>
           ))}
         </ul>
       </div>

@@ -24,7 +24,7 @@ function fmtDate(iso: string): string {
 export function TrendChart({ history }: { history: TrendPoint[] }) {
   if (history.length === 0) {
     return (
-      <div className="flex h-64 items-center justify-center rounded-lg border border-dashed border-slate-300 text-sm text-slate-500">
+      <div className="flex h-64 items-center justify-center rounded-lg border border-dashed border-zinc-300 text-sm text-zinc-500">
         Not enough data yet to show a trend. Trends appear as reviews and test scores are recorded.
       </div>
     );
@@ -39,7 +39,7 @@ export function TrendChart({ history }: { history: TrendPoint[] }) {
   const data = [...byDate.values()];
 
   return (
-    <div className="rounded-lg border border-slate-200 bg-white p-4">
+    <div className="rounded-lg border border-zinc-200 bg-white p-4">
       <ResponsiveContainer width="100%" height={260}>
         <LineChart data={data} margin={{ top: 8, right: 16, left: -16, bottom: 0 }}>
           <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" vertical={false} />

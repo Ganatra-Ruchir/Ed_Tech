@@ -1,6 +1,7 @@
 "use client";
 
 import { useRouter, usePathname } from "next/navigation";
+import { Select } from "@/components/Field";
 
 export function BatchFilterSelect({
   batches,
@@ -13,14 +14,14 @@ export function BatchFilterSelect({
   const pathname = usePathname();
 
   return (
-    <select
+    <Select
       defaultValue={value}
       onChange={(e) => {
         const params = new URLSearchParams();
         if (e.target.value) params.set("batch", e.target.value);
         router.push(params.toString() ? `${pathname}?${params}` : pathname);
       }}
-      className="rounded-md border border-slate-300 px-3 py-1.5 text-sm"
+      className="w-auto text-xs"
     >
       <option value="">All my batches</option>
       {batches.map((b) => (
@@ -28,6 +29,6 @@ export function BatchFilterSelect({
           {b.name}
         </option>
       ))}
-    </select>
+    </Select>
   );
 }

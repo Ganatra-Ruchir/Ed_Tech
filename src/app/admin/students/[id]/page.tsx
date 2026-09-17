@@ -4,6 +4,9 @@ import { getLatestKpis } from "@/lib/kpi";
 import { KpiCard } from "@/components/KpiCard";
 import { StatusBadge } from "@/components/StatusBadge";
 import { GenerateReportButton } from "@/components/GenerateReportButton";
+import { PageHeader } from "@/components/PageHeader";
+import { Card } from "@/components/Card";
+import { Table, THead, Th, Tr, Td } from "@/components/Table";
 
 function fmtDate(d: Date | null): string {
   if (!d) return "-";
@@ -37,16 +40,12 @@ export default async function AdminStudentDrilldown({
   const batch = student.batchMemberships[0]?.batch;
 
   return (
-    <div className="space-y-8">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-lg font-semibold text-slate-900">{student.name}</h1>
-          <p className="text-sm text-slate-500">
-            {student.email} · {batch?.name ?? "Unassigned"}
-          </p>
-        </div>
-        <GenerateReportButton scope="student" studentId={id} />
-      </div>
+    <div className="space-y-7">
+      <PageHeader
+        title={student.name}
+        description={`${student.email} · ${batch?.name ?? "Unassigned"}`}
+        actions={<GenerateReportButton scope="student" studentId={id} />}
+      />
 
       <section className="grid grid-cols-2 gap-3 sm:grid-cols-4">
         <KpiCard label="Completion rate" value={`${(kpiByName["submission_completion_rate"] ?? 0).toFixed(0)}%`} />
@@ -60,51 +59,47 @@ export default async function AdminStudentDrilldown({
       </section>
 
       <section>
-        <h2 className="mb-2 text-sm font-semibold text-slate-900">Submissions</h2>
-        <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
-          <table className="w-full text-sm">
-            <thead className="bg-slate-50 text-left text-xs font-medium uppercase text-slate-500">
-              <tr>
-                <th className="px-4 py-2">Title</th>
-                <th className="px-4 py-2">Status</th>
-                <th className="px-4 py-2">Submitted</th>
-              </tr>
-            </thead>
+        <h2 className="mb-2 text-xs font-semibold uppercase tracking-wide text-zinc-400">Submissions</h2>
+        <Card className="overflow-hidden">
+          <Table>
+            <THead>
+              <Th>Title</Th>
+              <Th>Status</Th>
+              <Th>Submitted</Th>
+            </THead>
             <tbody>
               {submissions.map((s) => (
-                <tr key={s.id} className="border-t border-slate-100">
-                  <td className="px-4 py-2">{s.title}</td>
-                  <td className="px-4 py-2"><StatusBadge status={s.status} /></td>
-                  <td className="px-4 py-2 text-slate-500">{fmtDate(s.createdAt)}</td>
-                </tr>
+                <Tr key={s.id}>
+                  <Td>{s.title}</Td>
+                  <Td><StatusBadge status={s.status} /></Td>
+                  <Td className="text-zinc-500">{fmtDate(s.createdAt)}</Td>
+                </Tr>
               ))}
             </tbody>
-          </table>
-        </div>
+          </Table>
+        </Card>
       </section>
 
       <section>
-        <h2 className="mb-2 text-sm font-semibold text-slate-900">Test performance</h2>
-        <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
-          <table className="w-full text-sm">
-            <thead className="bg-slate-50 text-left text-xs font-medium uppercase text-slate-500">
-              <tr>
-                <th className="px-4 py-2">Test</th>
-                <th className="px-4 py-2">Score</th>
-                <th className="px-4 py-2">Submitted</th>
-              </tr>
-            </thead>
+        <h2 className="mb-2 text-xs font-semibold uppercase tracking-wide text-zinc-400">Test performance</h2>
+        <Card className="overflow-hidden">
+          <Table>
+            <THead>
+              <Th>Test</Th>
+              <Th>Score</Th>
+              <Th>Submitted</Th>
+            </THead>
             <tbody>
               {testResponses.map((r) => (
-                <tr key={r.id} className="border-t border-slate-100">
-                  <td className="px-4 py-2">{r.test.title}</td>
-                  <td className="px-4 py-2">{r.score ?? "-"} / {r.maxScore ?? "-"}</td>
-                  <td className="px-4 py-2 text-slate-500">{fmtDate(r.submittedAt)}</td>
-                </tr>
+                <Tr key={r.id}>
+                  <Td>{r.test.title}</Td>
+                  <Td>{r.score ?? "-"} / {r.maxScore ?? "-"}</Td>
+                  <Td className="text-zinc-500">{fmtDate(r.submittedAt)}</Td>
+                </Tr>
               ))}
             </tbody>
-          </table>
-        </div>
+          </Table>
+        </Card>
       </section>
     </div>
   );

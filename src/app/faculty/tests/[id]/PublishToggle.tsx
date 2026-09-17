@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { Button } from "@/components/Button";
 
 export function PublishToggle({ testId, published }: { testId: string; published: boolean }) {
   const router = useRouter();
@@ -22,16 +23,8 @@ export function PublishToggle({ testId, published }: { testId: string; published
   }
 
   return (
-    <button
-      onClick={toggle}
-      disabled={busy}
-      className={`rounded-md px-3 py-1.5 text-sm font-medium disabled:opacity-50 ${
-        published
-          ? "border border-slate-300 text-slate-700 hover:bg-slate-100"
-          : "bg-indigo-600 text-white hover:bg-indigo-500"
-      }`}
-    >
+    <Button onClick={toggle} disabled={busy} variant={published ? "secondary" : "primary"} size="sm">
       {published ? "Unpublish" : "Publish to batch"}
-    </button>
+    </Button>
   );
 }

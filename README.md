@@ -39,10 +39,16 @@ scoped from):
 - **Visual progress bars and intervention indicators** on KPI cards and roster tables, echoing
   Blackboard's "student progress monitoring / attention indicators" feedback, so an at-risk
   signal is visible at a glance rather than only as a number.
+- **Batch creation + email-based roster enrollment** (`/faculty/batches`) — faculty can create a
+  new batch and add students to it by email. If the email matches an existing student account,
+  they're just added to the batch; if not, a new student account is created on the spot and a
+  one-time temporary password is shown to the faculty member to relay (there's no email delivery
+  wired up, so this is a manual hand-off rather than an emailed invite).
 
-Real-time chat, video meetings, and native Google Drive integration (Microsoft Teams' and Google
-Classroom's strengths) were deliberately left out — they need infrastructure (WebSockets, a video
-SDK, OAuth to a third-party drive) disproportionate to what a single-department pilot needs, and
+Real-time chat, video meetings, native Google Drive integration, and class-code self-enrollment
+(Microsoft Teams' and Google Classroom's strengths) were deliberately left out — they need
+infrastructure (WebSockets, a video SDK, OAuth to a third-party drive, email delivery)
+disproportionate to what a single-department pilot needs, and
 the original brief already scoped out anything beyond web-first, evidence-linked review.
 
 ## Getting started (local)

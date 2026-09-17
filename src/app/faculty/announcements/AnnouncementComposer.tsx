@@ -3,6 +3,9 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Megaphone } from "lucide-react";
+import { Card } from "@/components/Card";
+import { Select, Input, Textarea } from "@/components/Field";
+import { Button } from "@/components/Button";
 
 export function AnnouncementComposer({ batches }: { batches: { id: string; name: string }[] }) {
   const router = useRouter();
@@ -40,43 +43,31 @@ export function AnnouncementComposer({ batches }: { batches: { id: string; name:
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-3 rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
-      <div className="flex items-center gap-2 text-sm font-semibold text-slate-900">
-        <Megaphone size={16} className="text-indigo-600" />
-        New announcement
-      </div>
-      <select
-        value={batchId}
-        onChange={(e) => setBatchId(e.target.value)}
-        className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
-      >
-        {batches.map((b) => (
-          <option key={b.id} value={b.id}>
-            {b.name}
-          </option>
-        ))}
-      </select>
-      <input
-        value={title}
-        onChange={(e) => setTitle(e.target.value)}
-        placeholder="Title"
-        className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
-      />
-      <textarea
-        value={body}
-        onChange={(e) => setBody(e.target.value)}
-        rows={3}
-        placeholder="Write an update for the class..."
-        className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
-      />
-      {error && <p className="text-sm text-rose-600">{error}</p>}
-      <button
-        type="submit"
-        disabled={submitting}
-        className="rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-500 disabled:opacity-60"
-      >
-        {submitting ? "Posting..." : "Post to class stream"}
-      </button>
-    </form>
+    <Card className="p-4">
+      <form onSubmit={handleSubmit} className="space-y-3">
+        <div className="flex items-center gap-2 text-[13px] font-semibold text-zinc-900">
+          <Megaphone size={15} className="text-zinc-400" />
+          New announcement
+        </div>
+        <Select value={batchId} onChange={(e) => setBatchId(e.target.value)}>
+          {batches.map((b) => (
+            <option key={b.id} value={b.id}>
+              {b.name}
+            </option>
+          ))}
+        </Select>
+        <Input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Title" />
+        <Textarea
+          value={body}
+          onChange={(e) => setBody(e.target.value)}
+          rows={3}
+          placeholder="Write an update for the class..."
+        />
+        {error && <p className="text-sm text-rose-600">{error}</p>}
+        <Button type="submit" disabled={submitting} size="sm">
+          {submitting ? "Posting..." : "Post to class stream"}
+        </Button>
+      </form>
+    </Card>
   );
 }

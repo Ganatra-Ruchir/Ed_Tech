@@ -16,7 +16,7 @@ export function ProgressBar({
 
   return (
     <div
-      className={cn("h-1.5 w-full overflow-hidden rounded-full bg-slate-100", className)}
+      className={cn("h-1 w-full overflow-hidden rounded-full bg-zinc-100", className)}
       role="progressbar"
       aria-valuenow={Math.round(clamped)}
       aria-valuemin={0}

@@ -2,6 +2,10 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { PageHeader } from "@/components/PageHeader";
+import { Card } from "@/components/Card";
+import { Label, Input, Textarea } from "@/components/Field";
+import { Button } from "@/components/Button";
 
 export default function NewSubmissionPage() {
   const router = useRouter();
@@ -41,49 +45,45 @@ export default function NewSubmissionPage() {
   }
 
   return (
-    <div className="max-w-xl">
-      <h1 className="mb-4 text-lg font-semibold text-slate-900">New Submission</h1>
-      <form onSubmit={handleSubmit} className="space-y-4 rounded-lg border border-slate-200 bg-white p-6">
-        <div>
-          <label className="mb-1 block text-sm font-medium text-slate-700">Title</label>
-          <input
-            required
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-slate-500 focus:outline-none"
-            placeholder="e.g. Sprint 2 Progress Report"
-          />
-        </div>
-        <div>
-          <label className="mb-1 block text-sm font-medium text-slate-700">Notes</label>
-          <textarea
-            value={notes}
-            onChange={(e) => setNotes(e.target.value)}
-            rows={4}
-            className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-slate-500 focus:outline-none"
-            placeholder="Anything your reviewer should know about this milestone"
-          />
-        </div>
-        <div>
-          <label className="mb-1 block text-sm font-medium text-slate-700">Files</label>
-          <input
-            type="file"
-            multiple
-            onChange={(e) => setFiles(e.target.files)}
-            className="block w-full text-sm text-slate-600 file:mr-3 file:rounded-md file:border-0 file:bg-indigo-600 file:px-3 file:py-1.5 file:text-sm file:font-medium file:text-white"
-          />
-        </div>
+    <div className="max-w-xl space-y-4">
+      <PageHeader title="New Submission" />
+      <Card className="p-5">
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <Label>Title</Label>
+            <Input
+              required
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              placeholder="e.g. Sprint 2 Progress Report"
+            />
+          </div>
+          <div>
+            <Label>Notes</Label>
+            <Textarea
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+              rows={4}
+              placeholder="Anything your reviewer should know about this milestone"
+            />
+          </div>
+          <div>
+            <Label>Files</Label>
+            <input
+              type="file"
+              multiple
+              onChange={(e) => setFiles(e.target.files)}
+              className="block w-full text-sm text-zinc-600 file:mr-3 file:rounded-md file:border-0 file:bg-zinc-900 file:px-3 file:py-1.5 file:text-sm file:font-medium file:text-white"
+            />
+          </div>
 
-        {error && <p className="text-sm text-rose-600">{error}</p>}
+          {error && <p className="text-sm text-rose-600">{error}</p>}
 
-        <button
-          type="submit"
-          disabled={submitting}
-          className="rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-500 disabled:opacity-60"
-        >
-          {submitting ? "Submitting..." : "Submit"}
-        </button>
-      </form>
+          <Button type="submit" disabled={submitting}>
+            {submitting ? "Submitting..." : "Submit"}
+          </Button>
+        </form>
+      </Card>
     </div>
   );
 }

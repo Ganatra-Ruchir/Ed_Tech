@@ -6,6 +6,9 @@ import { getBatchOverview } from "@/lib/dashboard";
 import { KpiCard } from "@/components/KpiCard";
 import { TrendChart } from "@/components/TrendChart";
 import { GenerateReportButton } from "@/components/GenerateReportButton";
+import { PageHeader } from "@/components/PageHeader";
+import { Card } from "@/components/Card";
+import { Table, THead, Th, Tr, Td } from "@/components/Table";
 
 export default async function CohortBatchDrilldown({
   params,
@@ -23,16 +26,12 @@ export default async function CohortBatchDrilldown({
   if (!overview) notFound();
 
   return (
-    <div className="space-y-8">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-lg font-semibold text-slate-900">{overview.batch.name}</h1>
-          <p className="text-sm text-slate-500">
-            {overview.batch.department} · Semester {overview.batch.semester}
-          </p>
-        </div>
-        <GenerateReportButton scope="batch" batchId={id} />
-      </div>
+    <div className="space-y-7">
+      <PageHeader
+        title={overview.batch.name}
+        description={`${overview.batch.department} · Semester ${overview.batch.semester}`}
+        actions={<GenerateReportButton scope="batch" batchId={id} />}
+      />
 
       <section className="grid grid-cols-2 gap-3 sm:grid-cols-4">
         <KpiCard label="Students" value={String(overview.kpi.studentCount)} />
@@ -46,42 +45,40 @@ export default async function CohortBatchDrilldown({
       </section>
 
       <section>
-        <h2 className="mb-3 text-base font-semibold text-slate-900">Trend</h2>
+        <h2 className="mb-2 text-[13px] font-semibold text-zinc-900">Trend</h2>
         <TrendChart history={overview.history} />
       </section>
 
       <section>
-        <h2 className="mb-3 text-base font-semibold text-slate-900">Student roster</h2>
-        <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
-          <table className="w-full text-sm">
-            <thead className="bg-slate-50 text-left text-xs font-medium uppercase text-slate-500">
-              <tr>
-                <th className="px-4 py-2">Student</th>
-                <th className="px-4 py-2">Completion</th>
-                <th className="px-4 py-2">Avg score</th>
-                <th className="px-4 py-2">Status</th>
-                <th className="px-4 py-2"></th>
-              </tr>
-            </thead>
+        <h2 className="mb-2 text-[13px] font-semibold text-zinc-900">Student roster</h2>
+        <Card className="overflow-hidden">
+          <Table>
+            <THead>
+              <Th>Student</Th>
+              <Th>Completion</Th>
+              <Th>Avg score</Th>
+              <Th>Status</Th>
+              <Th></Th>
+            </THead>
             <tbody>
               {overview.students.map((s) => (
-                <tr key={s.id} className="border-t border-slate-100">
-                  <td className="px-4 py-2 font-medium text-slate-900">{s.name}</td>
-                  <td className="px-4 py-2">{s.submissionCompletionRate.toFixed(0)}%</td>
-                  <td className="px-4 py-2">{s.avgTestScorePct.toFixed(0)}%</td>
-                  <td className={`px-4 py-2 ${s.atRisk ? "text-rose-600" : "text-emerald-700"}`}>
+                <Tr key={s.id}>
+                  <Td className="font-medium text-zinc-900">{s.name}</Td>
+                  <Td>{s.submissionCompletionRate.toFixed(0)}%</Td>
+                  <Td>{s.avgTestScorePct.toFixed(0)}%</Td>
+                  <Td className={s.atRisk ? "text-rose-600" : "text-emerald-700"}>
                     {s.atRisk ? "At risk" : "On track"}
-                  </td>
-                  <td className="px-4 py-2">
+                  </Td>
+                  <Td>
                     <Link href={`/faculty/students/${s.id}`} className="text-indigo-600 hover:underline">
                       View
                     </Link>
-                  </td>
-                </tr>
+                  </Td>
+                </Tr>
               ))}
             </tbody>
-          </table>
-        </div>
+          </Table>
+        </Card>
       </section>
     </div>
   );

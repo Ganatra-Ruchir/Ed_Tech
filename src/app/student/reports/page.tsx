@@ -1,6 +1,10 @@
+import { FileText } from "lucide-react";
 import { getSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { GenerateReportButton } from "@/components/GenerateReportButton";
+import { PageHeader } from "@/components/PageHeader";
+import { Card } from "@/components/Card";
+import { EmptyState } from "@/components/EmptyState";
 
 function fmtDateTime(d: Date): string {
   return new Date(d).toLocaleString("en-IN", { dateStyle: "medium", timeStyle: "short" });
@@ -16,28 +20,24 @@ export default async function StudentReportsPage() {
 
   return (
     <div className="max-w-2xl space-y-4">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-lg font-semibold text-slate-900">My Progress Report</h1>
-          <p className="text-sm text-slate-500">
-            Includes your submission history, test performance, and Project Development Canvas.
-          </p>
-        </div>
-        <GenerateReportButton scope="student" studentId={session!.sub} />
-      </div>
+      <PageHeader
+        title="My Progress Report"
+        description="Includes your submission history, test performance, and Project Development Canvas."
+        actions={<GenerateReportButton scope="student" studentId={session!.sub} />}
+      />
 
-      <div className="rounded-xl border border-slate-200 bg-white shadow-sm">
+      <Card>
         {reports.length === 0 ? (
-          <p className="p-4 text-sm text-slate-500">No reports generated yet.</p>
+          <EmptyState icon={FileText} title="No reports generated yet" />
         ) : (
-          <ul className="divide-y divide-slate-100">
+          <ul className="divide-y divide-zinc-100">
             {reports.map((r) => (
               <li key={r.id} className="flex items-center justify-between px-4 py-3 text-sm">
-                <span className="text-slate-600">Generated {fmtDateTime(r.generatedAt)}</span>
+                <span className="text-zinc-600">Generated {fmtDateTime(r.generatedAt)}</span>
                 <a
                   href={r.pdfPath}
                   target="_blank"
-                  className="rounded-md border border-slate-300 px-3 py-1 text-xs font-medium text-slate-700 hover:bg-slate-100"
+                  className="rounded-md border border-zinc-200 px-3 py-1 text-xs font-medium text-zinc-700 hover:bg-zinc-50"
                 >
                   View PDF
                 </a>
@@ -45,7 +45,7 @@ export default async function StudentReportsPage() {
             ))}
           </ul>
         )}
-      </div>
+      </Card>
     </div>
   );
 }

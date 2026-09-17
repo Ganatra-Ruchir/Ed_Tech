@@ -1,6 +1,10 @@
+import { Megaphone } from "lucide-react";
 import { getSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { userBatchIds } from "@/lib/permissions";
+import { PageHeader } from "@/components/PageHeader";
+import { Card } from "@/components/Card";
+import { EmptyState } from "@/components/EmptyState";
 import { AnnouncementComposer } from "./AnnouncementComposer";
 
 function fmtDateTime(d: Date): string {
@@ -24,35 +28,33 @@ export default async function FacultyAnnouncementsPage() {
   ]);
 
   return (
-    <div className="max-w-2xl space-y-6">
-      <div>
-        <h1 className="text-lg font-semibold text-slate-900">Announcements</h1>
-        <p className="text-sm text-slate-500">
-          Post updates to your batch&apos;s class stream — students see these on their dashboard.
-        </p>
-      </div>
+    <div className="max-w-2xl space-y-5">
+      <PageHeader
+        title="Announcements"
+        description="Post updates to your batch's class stream — students see these on their dashboard."
+      />
 
       <AnnouncementComposer batches={batches.map((b) => ({ id: b.id, name: b.name }))} />
 
-      <div className="space-y-3">
+      <div className="space-y-2.5">
         {announcements.length === 0 ? (
-          <p className="rounded-lg border border-dashed border-slate-300 p-4 text-sm text-slate-500">
-            No announcements posted yet.
-          </p>
+          <Card>
+            <EmptyState icon={Megaphone} title="No announcements posted yet" />
+          </Card>
         ) : (
           announcements.map((a) => (
-            <div key={a.id} className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+            <Card key={a.id} className="p-4">
               <div className="flex items-center justify-between">
-                <p className="text-sm font-semibold text-slate-900">{a.title}</p>
-                <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs text-slate-500">
+                <p className="text-[13px] font-semibold text-zinc-900">{a.title}</p>
+                <span className="rounded-md bg-zinc-100 px-2 py-0.5 text-xs text-zinc-500">
                   {a.batch.name}
                 </span>
               </div>
-              <p className="mt-1.5 whitespace-pre-wrap text-sm text-slate-700">{a.body}</p>
-              <p className="mt-2 text-xs text-slate-400">
+              <p className="mt-1.5 whitespace-pre-wrap text-sm text-zinc-700">{a.body}</p>
+              <p className="mt-2 text-xs text-zinc-400">
                 {a.faculty.name} · {fmtDateTime(a.createdAt)}
               </p>
-            </div>
+            </Card>
           ))
         )}
       </div>

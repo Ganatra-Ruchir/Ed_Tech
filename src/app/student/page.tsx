@@ -9,6 +9,7 @@ import {
   AlertCircle,
   Plus,
   ArrowRight,
+  Inbox,
 } from "lucide-react";
 import { getSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
@@ -16,6 +17,11 @@ import { getLatestKpis } from "@/lib/kpi";
 import { userBatchIds } from "@/lib/permissions";
 import { StatusBadge } from "@/components/StatusBadge";
 import { KpiCard } from "@/components/KpiCard";
+import { PageHeader } from "@/components/PageHeader";
+import { Card } from "@/components/Card";
+import { LinkButton } from "@/components/Button";
+import { EmptyState } from "@/components/EmptyState";
+import { Table, THead, Th, Tr, Td } from "@/components/Table";
 
 function fmtDate(d: Date | null): string {
   if (!d) return "-";
@@ -97,55 +103,56 @@ export default async function StudentDashboard() {
   const avgScore = kpiByName["avg_test_score_pct"] ?? 0;
 
   return (
-    <div className="space-y-8">
-      <section className="flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <h1 className="text-xl font-semibold text-slate-900">Welcome back, {session!.name.split(" ")[0]}</h1>
-          <p className="text-sm text-slate-500">Here&apos;s where your project work and tests stand.</p>
-        </div>
-        <Link
-          href="/student/submissions/new"
-          className="inline-flex items-center gap-1.5 rounded-md bg-indigo-600 px-3.5 py-2 text-sm font-medium text-white hover:bg-indigo-500"
-        >
-          <Plus size={16} /> New submission
-        </Link>
-      </section>
+    <div className="space-y-7">
+      <PageHeader
+        title={`Welcome back, ${session!.name.split(" ")[0]}`}
+        description="Here's where your project work and tests stand."
+        actions={
+          <LinkButton href="/student/submissions/new" size="sm">
+            <Plus size={14} /> New submission
+          </LinkButton>
+        }
+      />
 
       <section className="grid grid-cols-2 gap-3 sm:grid-cols-4">
         <KpiCard
-          label="Submission completion"
+          label="Completion"
           value={`${completionRate.toFixed(0)}%`}
           icon={CheckCircle2}
           progress={completionRate}
         />
         <KpiCard label="Avg test score" value={`${avgScore.toFixed(0)}%`} icon={TrendingUp} progress={avgScore} />
-        <KpiCard label="Total submissions" value={String(submissions.length)} icon={FileText} />
+        <KpiCard label="Submissions" value={String(submissions.length)} icon={FileText} />
         <KpiCard label="Tests assigned" value={String(tests.length)} icon={ClipboardList} />
       </section>
 
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+      <div className="grid grid-cols-1 gap-5 lg:grid-cols-3">
         <section className="lg:col-span-2">
-          <h2 className="mb-3 flex items-center gap-2 text-base font-semibold text-slate-900">
-            <Clock size={16} className="text-indigo-600" /> Upcoming
+          <h2 className="mb-2 flex items-center gap-1.5 text-[13px] font-semibold text-zinc-900">
+            <Clock size={14} className="text-zinc-400" /> Upcoming
           </h2>
-          <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+          <Card>
             {upcoming.length === 0 ? (
-              <p className="p-4 text-sm text-slate-500">Nothing due right now — you&apos;re all caught up.</p>
+              <EmptyState
+                icon={CheckCircle2}
+                title="Nothing due right now"
+                description="You're all caught up."
+              />
             ) : (
-              <ul className="divide-y divide-slate-100">
+              <ul className="divide-y divide-zinc-100">
                 {upcoming.map((item) => {
                   const overdue = item.dueAt && item.dueAt.getTime() < now;
                   return (
-                    <li key={item.key} className="flex items-center justify-between gap-3 px-4 py-3">
+                    <li key={item.key} className="flex items-center justify-between gap-3 px-4 py-2.5">
                       <div className="flex items-center gap-3">
                         {item.kind === "revision" ? (
-                          <AlertCircle size={16} className="shrink-0 text-rose-500" />
+                          <AlertCircle size={15} className="shrink-0 text-rose-500" />
                         ) : (
-                          <ClipboardList size={16} className="shrink-0 text-amber-500" />
+                          <ClipboardList size={15} className="shrink-0 text-amber-500" />
                         )}
                         <div>
-                          <p className="text-sm font-medium text-slate-900">{item.label}</p>
-                          <p className="text-xs text-slate-400">
+                          <p className="text-[13px] font-medium text-zinc-900">{item.label}</p>
+                          <p className="text-xs text-zinc-400">
                             {item.kind === "revision"
                               ? "Needs revision — review feedback"
                               : item.dueAt
@@ -167,100 +174,98 @@ export default async function StudentDashboard() {
                 })}
               </ul>
             )}
-          </div>
+          </Card>
         </section>
 
         <section>
-          <h2 className="mb-3 flex items-center gap-2 text-base font-semibold text-slate-900">
-            <Megaphone size={16} className="text-indigo-600" /> Class Stream
+          <h2 className="mb-2 flex items-center gap-1.5 text-[13px] font-semibold text-zinc-900">
+            <Megaphone size={14} className="text-zinc-400" /> Class Stream
           </h2>
-          <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+          <Card>
             {announcements.length === 0 ? (
-              <p className="p-4 text-sm text-slate-500">No announcements yet.</p>
+              <EmptyState icon={Megaphone} title="No announcements yet" />
             ) : (
-              <ul className="divide-y divide-slate-100">
+              <ul className="divide-y divide-zinc-100">
                 {announcements.map((a) => (
-                  <li key={a.id} className="px-4 py-3">
-                    <p className="text-sm font-medium text-slate-900">{a.title}</p>
-                    <p className="mt-0.5 line-clamp-2 text-xs text-slate-500">{a.body}</p>
-                    <p className="mt-1 text-[11px] text-slate-400">{a.faculty.name}</p>
+                  <li key={a.id} className="px-4 py-2.5">
+                    <p className="text-[13px] font-medium text-zinc-900">{a.title}</p>
+                    <p className="mt-0.5 line-clamp-2 text-xs text-zinc-500">{a.body}</p>
+                    <p className="mt-1 text-[11px] text-zinc-400">{a.faculty.name}</p>
                   </li>
                 ))}
               </ul>
             )}
             <Link
               href="/student/stream"
-              className="flex items-center justify-center gap-1 border-t border-slate-100 py-2 text-xs font-medium text-indigo-600 hover:bg-slate-50"
+              className="flex items-center justify-center gap-1 border-t border-zinc-100 py-2 text-xs font-medium text-zinc-500 hover:bg-zinc-50 hover:text-zinc-900"
             >
               View all <ArrowRight size={12} />
             </Link>
-          </div>
+          </Card>
         </section>
       </div>
 
       <section>
-        <div className="mb-3 flex items-center justify-between">
-          <h2 className="text-base font-semibold text-slate-900">My Submissions</h2>
-        </div>
-        <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+        <h2 className="mb-2 text-[13px] font-semibold text-zinc-900">My Submissions</h2>
+        <Card className="overflow-hidden">
           {submissions.length === 0 ? (
-            <p className="p-4 text-sm text-slate-500">No submissions yet. Create your first one.</p>
+            <EmptyState
+              icon={Inbox}
+              title="No submissions yet"
+              description="Create your first one to get started."
+            />
           ) : (
-            <table className="w-full text-sm">
-              <thead className="bg-slate-50 text-left text-xs font-medium uppercase text-slate-500">
-                <tr>
-                  <th className="px-4 py-2">Title</th>
-                  <th className="px-4 py-2">Status</th>
-                  <th className="px-4 py-2">Submitted</th>
-                  <th className="px-4 py-2">Feedback</th>
-                </tr>
-              </thead>
+            <Table>
+              <THead>
+                <Th>Title</Th>
+                <Th>Status</Th>
+                <Th>Submitted</Th>
+                <Th>Feedback</Th>
+              </THead>
               <tbody>
                 {submissions.map((s) => (
-                  <tr key={s.id} className="border-t border-slate-100 hover:bg-slate-50">
-                    <td className="px-4 py-2">
-                      <Link href={`/student/submissions/${s.id}`} className="font-medium text-slate-900 hover:underline">
+                  <Tr key={s.id}>
+                    <Td>
+                      <Link href={`/student/submissions/${s.id}`} className="font-medium text-zinc-900 hover:underline">
                         {s.title}
                       </Link>
-                    </td>
-                    <td className="px-4 py-2"><StatusBadge status={s.status} /></td>
-                    <td className="px-4 py-2 text-slate-500">{fmtDate(s.createdAt)}</td>
-                    <td className="px-4 py-2 text-slate-500">
+                    </Td>
+                    <Td><StatusBadge status={s.status} /></Td>
+                    <Td className="text-zinc-500">{fmtDate(s.createdAt)}</Td>
+                    <Td className="text-zinc-500">
                       {s._count.feedback > 0 ? `${s._count.feedback} comment(s)` : "-"}
-                    </td>
-                  </tr>
+                    </Td>
+                  </Tr>
                 ))}
               </tbody>
-            </table>
+            </Table>
           )}
-        </div>
+        </Card>
       </section>
 
       <section>
-        <h2 className="mb-3 text-base font-semibold text-slate-900">Assigned Tests</h2>
-        <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+        <h2 className="mb-2 text-[13px] font-semibold text-zinc-900">Assigned Tests</h2>
+        <Card className="overflow-hidden">
           {tests.length === 0 ? (
-            <p className="p-4 text-sm text-slate-500">No tests assigned yet.</p>
+            <EmptyState icon={ClipboardList} title="No tests assigned yet" />
           ) : (
-            <table className="w-full text-sm">
-              <thead className="bg-slate-50 text-left text-xs font-medium uppercase text-slate-500">
-                <tr>
-                  <th className="px-4 py-2">Title</th>
-                  <th className="px-4 py-2">Due</th>
-                  <th className="px-4 py-2">Questions</th>
-                  <th className="px-4 py-2">Status</th>
-                </tr>
-              </thead>
+            <Table>
+              <THead>
+                <Th>Title</Th>
+                <Th>Due</Th>
+                <Th>Questions</Th>
+                <Th>Status</Th>
+              </THead>
               <tbody>
                 {tests.map((t) => {
                   const response = responseByTest.get(t.id);
                   const overdue = t.dueAt && t.dueAt.getTime() < now && !response;
                   return (
-                    <tr key={t.id} className="border-t border-slate-100 hover:bg-slate-50">
-                      <td className="px-4 py-2 font-medium text-slate-900">{t.title}</td>
-                      <td className="px-4 py-2 text-slate-500">{fmtDate(t.dueAt)}</td>
-                      <td className="px-4 py-2 text-slate-500">{t._count.questions}</td>
-                      <td className="px-4 py-2">
+                    <Tr key={t.id}>
+                      <Td className="font-medium text-zinc-900">{t.title}</Td>
+                      <Td className="text-zinc-500">{fmtDate(t.dueAt)}</Td>
+                      <Td className="text-zinc-500">{t._count.questions}</Td>
+                      <Td>
                         {response ? (
                           <span className="inline-flex items-center gap-1 text-emerald-700">
                             <CheckCircle2 size={14} /> {response.score ?? "-"}/{response.maxScore ?? "-"}
@@ -268,21 +273,18 @@ export default async function StudentDashboard() {
                         ) : overdue ? (
                           <span className="text-rose-600">Past due</span>
                         ) : (
-                          <Link
-                            href={`/student/tests/${t.id}`}
-                            className="rounded-md bg-indigo-600 px-2.5 py-1 text-xs font-medium text-white hover:bg-indigo-500"
-                          >
+                          <LinkButton href={`/student/tests/${t.id}`} size="sm">
                             Fill in
-                          </Link>
+                          </LinkButton>
                         )}
-                      </td>
-                    </tr>
+                      </Td>
+                    </Tr>
                   );
                 })}
               </tbody>
-            </table>
+            </Table>
           )}
-        </div>
+        </Card>
       </section>
     </div>
   );

@@ -1,7 +1,11 @@
+import { FileText } from "lucide-react";
 import { notFound } from "next/navigation";
 import { getSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { StatusBadge } from "@/components/StatusBadge";
+import { Card } from "@/components/Card";
+import { Tag } from "@/components/Tag";
+import { EmptyState } from "@/components/EmptyState";
 
 function fmtDateTime(d: Date | null): string {
   if (!d) return "-";
@@ -33,26 +37,25 @@ export default async function StudentSubmissionDetail({
     <div className="max-w-2xl space-y-6">
       <div>
         <div className="flex items-center gap-3">
-          <h1 className="text-lg font-semibold text-slate-900">{submission.title}</h1>
+          <h1 className="text-[15px] font-semibold text-zinc-900">{submission.title}</h1>
           <StatusBadge status={submission.status} />
         </div>
-        <p className="mt-1 text-sm text-slate-500">
+        <p className="mt-1 text-sm text-zinc-500">
           Submitted {fmtDateTime(submission.createdAt)}
           {submission.reviewedAt ? ` · Reviewed ${fmtDateTime(submission.reviewedAt)}` : ""}
         </p>
       </div>
 
       {submission.notes && (
-        <div className="rounded-lg border border-slate-200 bg-white p-4 text-sm text-slate-700">
-          {submission.notes}
-        </div>
+        <Card className="p-4 text-sm text-zinc-700">{submission.notes}</Card>
       )}
 
       <div>
-        <h2 className="mb-2 text-sm font-semibold text-slate-900">Files</h2>
+        <h2 className="mb-2 text-xs font-semibold uppercase tracking-wide text-zinc-400">Files</h2>
         <ul className="space-y-1">
           {submission.files.map((f) => (
-            <li key={f.id}>
+            <li key={f.id} className="flex items-center gap-1.5">
+              <FileText size={13} className="text-zinc-400" />
               <a href={f.fileUrl} target="_blank" className="text-sm text-indigo-600 hover:underline">
                 {f.fileName}
               </a>
@@ -62,18 +65,20 @@ export default async function StudentSubmissionDetail({
       </div>
 
       <div>
-        <h2 className="mb-2 text-sm font-semibold text-slate-900">Feedback</h2>
+        <h2 className="mb-2 text-xs font-semibold uppercase tracking-wide text-zinc-400">Feedback</h2>
         {submission.feedback.length === 0 ? (
-          <p className="text-sm text-slate-500">No feedback yet.</p>
+          <Card>
+            <EmptyState title="No feedback yet" />
+          </Card>
         ) : (
-          <ul className="space-y-3">
+          <ul className="space-y-2.5">
             {submission.feedback.map((f) => (
-              <li key={f.id} className="rounded-lg border border-slate-200 bg-white p-3 text-sm">
-                <p className="text-slate-700">{f.comment}</p>
-                <p className="mt-1 text-xs text-slate-400">
+              <Card key={f.id} className="p-3 text-sm">
+                <p className="text-zinc-700">{f.comment}</p>
+                <p className="mt-1 text-xs text-zinc-400">
                   {f.faculty.name} · {fmtDateTime(f.createdAt)}
                 </p>
-              </li>
+              </Card>
             ))}
           </ul>
         )}
@@ -81,15 +86,11 @@ export default async function StudentSubmissionDetail({
 
       {submission.evidence.length > 0 && (
         <div>
-          <h2 className="mb-2 text-sm font-semibold text-slate-900">Evidence tags</h2>
-          <ul className="flex flex-wrap gap-2">
+          <h2 className="mb-2 text-xs font-semibold uppercase tracking-wide text-zinc-400">Evidence tags</h2>
+          <ul className="flex flex-wrap gap-1.5">
             {submission.evidence.map((e) => (
-              <li
-                key={e.id}
-                className="rounded-full border border-slate-300 bg-slate-50 px-3 py-1 text-xs text-slate-700"
-                title={e.notes ?? undefined}
-              >
-                {e.tag}
+              <li key={e.id}>
+                <Tag label={e.tag} title={e.notes ?? undefined} />
               </li>
             ))}
           </ul>

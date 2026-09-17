@@ -2,6 +2,11 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { Card } from "@/components/Card";
+import { Select, Input, Textarea } from "@/components/Field";
+import { Button } from "@/components/Button";
+import { Tag } from "@/components/Tag";
+import { cn } from "@/lib/cn";
 
 type Question = {
   id: string;
@@ -91,126 +96,107 @@ export function GradingPanel({
   }
 
   return (
-    <div className="space-y-6">
-      <div className="space-y-3">
+    <div className="space-y-5">
+      <div className="space-y-2.5">
         {questions.map((q, idx) => (
-          <div key={q.id} className="rounded-lg border border-slate-200 bg-white p-4">
-            <p className="text-sm font-medium text-slate-900">
+          <Card key={q.id} className="p-4">
+            <p className="text-sm font-medium text-zinc-900">
               {idx + 1}. {q.text}
             </p>
-            <p className="mt-2 text-sm text-slate-600">Answer: {q.answerText || "-"}</p>
+            <p className="mt-2 text-sm text-zinc-600">Answer: {q.answerText || "-"}</p>
             {q.type === "MCQ" ? (
-              <p className="mt-1 text-xs text-slate-400">
+              <p className="mt-1 text-xs text-zinc-400">
                 Auto-graded: {q.isCorrect ? "Correct" : "Incorrect"}
               </p>
             ) : (
               <div className="mt-2 flex gap-2">
                 <button
                   onClick={() => setGrades((g) => ({ ...g, [q.answerId]: true }))}
-                  className={`rounded-md border px-3 py-1 text-xs font-medium ${
+                  className={cn(
+                    "rounded-md border px-3 py-1 text-xs font-medium",
                     grades[q.answerId] === true
-                      ? "border-emerald-400 bg-emerald-50 text-emerald-800"
-                      : "border-slate-300 text-slate-600"
-                  }`}
+                      ? "border-emerald-300 bg-emerald-50 text-emerald-800"
+                      : "border-zinc-200 text-zinc-600",
+                  )}
                 >
                   Correct
                 </button>
                 <button
                   onClick={() => setGrades((g) => ({ ...g, [q.answerId]: false }))}
-                  className={`rounded-md border px-3 py-1 text-xs font-medium ${
+                  className={cn(
+                    "rounded-md border px-3 py-1 text-xs font-medium",
                     grades[q.answerId] === false
-                      ? "border-rose-400 bg-rose-50 text-rose-800"
-                      : "border-slate-300 text-slate-600"
-                  }`}
+                      ? "border-rose-300 bg-rose-50 text-rose-800"
+                      : "border-zinc-200 text-zinc-600",
+                  )}
                 >
                   Incorrect
                 </button>
               </div>
             )}
-          </div>
+          </Card>
         ))}
-        <button
-          onClick={saveGrades}
-          disabled={busy}
-          className="rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white disabled:opacity-50"
-        >
+        <Button onClick={saveGrades} disabled={busy}>
           Save grading
-        </button>
+        </Button>
         {error && <p className="text-xs text-rose-600">{error}</p>}
       </div>
 
-      <div className="rounded-lg border border-slate-200 bg-white p-4">
-        <h2 className="mb-3 text-sm font-semibold text-slate-900">Tag evidence</h2>
+      <Card className="p-4">
+        <h2 className="mb-3 text-[13px] font-semibold text-zinc-900">Tag evidence</h2>
         <div className="flex flex-wrap items-center gap-2">
-          <select
-            value={tag}
-            onChange={(e) => setTag(e.target.value)}
-            className="rounded-md border border-slate-300 px-2 py-1.5 text-sm"
-          >
+          <Select value={tag} onChange={(e) => setTag(e.target.value)} className="w-auto">
             {EVIDENCE_TAGS.map((t) => (
               <option key={t} value={t}>
                 {t}
               </option>
             ))}
-          </select>
-          <input
+          </Select>
+          <Input
             value={evidenceNotes}
             onChange={(e) => setEvidenceNotes(e.target.value)}
             placeholder="Optional note"
-            className="min-w-[180px] flex-1 rounded-md border border-slate-300 px-2 py-1.5 text-sm"
+            className="min-w-[180px] flex-1"
           />
-          <button
-            onClick={addEvidence}
-            disabled={busy}
-            className="rounded-md bg-indigo-600 px-3 py-1.5 text-xs font-medium text-white disabled:opacity-50"
-          >
+          <Button onClick={addEvidence} disabled={busy} size="sm">
             Add tag
-          </button>
+          </Button>
         </div>
         {evidence.length > 0 && (
-          <ul className="mt-3 flex flex-wrap gap-2">
+          <ul className="mt-3 flex flex-wrap gap-1.5">
             {evidence.map((e) => (
-              <li
-                key={e.id}
-                title={e.notes ?? undefined}
-                className="rounded-full border border-slate-300 bg-slate-50 px-3 py-1 text-xs text-slate-700"
-              >
-                {e.tag} · {e.faculty}
+              <li key={e.id}>
+                <Tag label={`${e.tag} · ${e.faculty}`} title={e.notes ?? undefined} />
               </li>
             ))}
           </ul>
         )}
-      </div>
+      </Card>
 
-      <div className="rounded-lg border border-slate-200 bg-white p-4">
-        <h2 className="mb-3 text-sm font-semibold text-slate-900">Feedback</h2>
-        <textarea
+      <Card className="p-4">
+        <h2 className="mb-3 text-[13px] font-semibold text-zinc-900">Feedback</h2>
+        <Textarea
           value={comment}
           onChange={(e) => setComment(e.target.value)}
           rows={3}
           placeholder="Write feedback for the student"
-          className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
         />
-        <button
-          onClick={addFeedback}
-          disabled={busy}
-          className="mt-2 rounded-md bg-indigo-600 px-3 py-1.5 text-xs font-medium text-white disabled:opacity-50"
-        >
+        <Button onClick={addFeedback} disabled={busy} size="sm" className="mt-2">
           Post feedback
-        </button>
+        </Button>
         {feedback.length > 0 && (
-          <ul className="mt-4 space-y-3">
+          <ul className="mt-4 space-y-2.5">
             {feedback.map((f) => (
-              <li key={f.id} className="rounded-md border border-slate-100 bg-slate-50 p-3 text-sm">
-                <p className="text-slate-700">{f.comment}</p>
-                <p className="mt-1 text-xs text-slate-400">
+              <li key={f.id} className="rounded-md border border-zinc-100 bg-zinc-50 p-3 text-sm">
+                <p className="text-zinc-700">{f.comment}</p>
+                <p className="mt-1 text-xs text-zinc-400">
                   {f.faculty} · {new Date(f.createdAt).toLocaleString("en-IN")}
                 </p>
               </li>
             ))}
           </ul>
         )}
-      </div>
+      </Card>
     </div>
   );
 }

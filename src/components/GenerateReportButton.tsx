@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { FileDown } from "lucide-react";
+import { Button } from "@/components/Button";
 
 type Props =
   | { scope: "student"; studentId: string; batchId?: undefined }
@@ -35,13 +37,9 @@ export function GenerateReportButton(props: Props) {
 
   return (
     <div className="flex flex-col items-end gap-1">
-      <button
-        onClick={handleClick}
-        disabled={loading}
-        className="rounded-md bg-indigo-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-indigo-500 disabled:opacity-60"
-      >
-        {loading ? "Generating..." : "Generate PDF report"}
-      </button>
+      <Button onClick={handleClick} disabled={loading} size="sm">
+        <FileDown size={14} /> {loading ? "Generating..." : "Generate PDF report"}
+      </Button>
       {error && <p className="text-xs text-rose-600">{error}</p>}
     </div>
   );
