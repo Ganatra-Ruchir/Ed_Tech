@@ -1,0 +1,291 @@
+// Student Progress & Evaluation Platform - data model
+// Note: SQLite backend -> no native scalar lists, so multi-value relations
+// (files, questions, answers, batch memberships) are modeled as join tables.
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+enum Role {
+  STUDENT
+  FACULTY
+  ADMIN
+}
+
+enum SubmissionStatus {
+  SUBMITTED
+  IN_REVIEW
+  APPROVED
+  NEEDS_REVISION
+}
+
+enum QuestionType {
+  MCQ
+  SHORT_ANSWER
+}
+
+enum KPIScope {
+  STUDENT
+  BATCH
+  COHORT
+}
+
+enum ReportScope {
+  STUDENT
+  BATCH
+  COHORT
+}
+
+model User {
+  id           String   @id @default(cuid())
+  name         String
+  email        String   @unique
+  passwordHash String
+  role         Role
+  isCC         Boolean  @default(false)
+  createdAt    DateTime @default(now())
+
+  batchMemberships UserBatch[]
+  submissions      Submission[]      @relation("StudentSubmissions")
+  testResponses    TestResponse[]
+  testsCreated     Test[]            @relation("FacultyTests")
+  evidenceAdded    Evidence[]        @relation("FacultyEvidence")
+  feedbackGiven    Feedback[]        @relation("FacultyFeedback")
+  auditLogs        AuditLog[]
+  announcements    Announcement[]
+
+  @@index([role])
+}
+
+model Batch {
+  id         String   @id @default(cuid())
+  name       String
+  department String
+  semester   String
+  createdAt  DateTime @default(now())
+
+  members       UserBatch[]
+  submissions   Submission[]
+  tests         Test[]
+  kpis          KPI[]
+  reports       Report[]
+  announcements Announcement[]
+
+  @@unique([name, department, semester])
+}
+
+model UserBatch {
+  id      String @id @default(cuid())
+  userId  String
+  batchId String
+
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  batch Batch @relation(fields: [batchId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, batchId])
+  @@index([batchId])
+}
+
+model Announcement {
+  id        String   @id @default(cuid())
+  batchId   String
+  facultyId String
+  title     String
+  body      String
+  createdAt DateTime @default(now())
+
+  batch   Batch @relation(fields: [batchId], references: [id], onDelete: Cascade)
+  faculty User  @relation(fields: [facultyId], references: [id], onDelete: Cascade)
+
+  @@index([batchId, createdAt])
+}
+
+model Submission {
+  id        String           @id @default(cuid())
+  studentId String
+  batchId   String
+  title     String
+  notes     String?
+  status    SubmissionStatus @default(SUBMITTED)
+  createdAt DateTime         @default(now())
+  updatedAt DateTime         @updatedAt
+  reviewedAt DateTime?
+
+  student  User             @relation("StudentSubmissions", fields: [studentId], references: [id], onDelete: Cascade)
+  batch    Batch            @relation(fields: [batchId], references: [id], onDelete: Cascade)
+  files    SubmissionFile[]
+  evidence Evidence[]
+  feedback Feedback[]
+
+  @@index([studentId])
+  @@index([batchId])
+  @@index([status])
+}
+
+model SubmissionFile {
+  id           String   @id @default(cuid())
+  submissionId String
+  fileName     String
+  fileUrl      String
+  fileType     String
+  fileSize     Int      @default(0)
+  createdAt    DateTime @default(now())
+
+  submission Submission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
+
+  @@index([submissionId])
+}
+
+model Test {
+  id                  String    @id @default(cuid())
+  createdByFacultyId  String
+  batchId             String
+  title               String
+  description         String?
+  publishedAt         DateTime?
+  dueAt               DateTime?
+  createdAt           DateTime  @default(now())
+
+  createdBy User           @relation("FacultyTests", fields: [createdByFacultyId], references: [id], onDelete: Cascade)
+  batch     Batch          @relation(fields: [batchId], references: [id], onDelete: Cascade)
+  questions Question[]
+  responses TestResponse[]
+
+  @@index([batchId])
+}
+
+model Question {
+  id            String       @id @default(cuid())
+  testId        String
+  type          QuestionType
+  text          String
+  optionsJson   String? // JSON-encoded string[] for MCQ options
+  correctAnswer String?
+  order         Int          @default(0)
+
+  test    Test     @relation(fields: [testId], references: [id], onDelete: Cascade)
+  answers Answer[]
+
+  @@index([testId])
+}
+
+model TestResponse {
+  id          String    @id @default(cuid())
+  testId      String
+  studentId   String
+  score       Float?
+  maxScore    Float?
+  submittedAt DateTime?
+  createdAt   DateTime  @default(now())
+
+  test     Test       @relation(fields: [testId], references: [id], onDelete: Cascade)
+  student  User       @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  answers  Answer[]
+  evidence Evidence[]
+  feedback Feedback[]
+
+  @@unique([testId, studentId])
+  @@index([studentId])
+}
+
+model Answer {
+  id             String  @id @default(cuid())
+  testResponseId String
+  questionId     String
+  answerText     String?
+  isCorrect      Boolean?
+
+  testResponse TestResponse @relation(fields: [testResponseId], references: [id], onDelete: Cascade)
+  question     Question     @relation(fields: [questionId], references: [id], onDelete: Cascade)
+
+  @@unique([testResponseId, questionId])
+  @@index([questionId])
+}
+
+model Evidence {
+  id               String   @id @default(cuid())
+  submissionId     String?
+  testResponseId   String?
+  tag              String
+  notes            String?
+  addedByFacultyId String
+  createdAt        DateTime @default(now())
+
+  submission   Submission?   @relation(fields: [submissionId], references: [id], onDelete: Cascade)
+  testResponse TestResponse? @relation(fields: [testResponseId], references: [id], onDelete: Cascade)
+  faculty      User          @relation("FacultyEvidence", fields: [addedByFacultyId], references: [id], onDelete: Cascade)
+
+  @@index([submissionId])
+  @@index([testResponseId])
+}
+
+model Feedback {
+  id             String   @id @default(cuid())
+  submissionId   String?
+  testResponseId String?
+  facultyId      String
+  comment        String
+  createdAt      DateTime @default(now())
+
+  submission   Submission?   @relation(fields: [submissionId], references: [id], onDelete: Cascade)
+  testResponse TestResponse? @relation(fields: [testResponseId], references: [id], onDelete: Cascade)
+  faculty      User          @relation("FacultyFeedback", fields: [facultyId], references: [id], onDelete: Cascade)
+
+  @@index([submissionId])
+  @@index([testResponseId])
+}
+
+model KPI {
+  id         String   @id @default(cuid())
+  // Groups rows belonging to the same metric series ("scope:batchId:studentId:metricName")
+  // so "latest value" and "trend over time" can both be queried from one append-only table.
+  key        String
+  scope      KPIScope
+  batchId    String?
+  studentId  String?
+  metricName String
+  value      Float
+  computedAt DateTime @default(now())
+
+  batch Batch? @relation(fields: [batchId], references: [id], onDelete: Cascade)
+
+  @@index([key, computedAt])
+  @@index([batchId])
+  @@index([studentId])
+  @@index([metricName])
+}
+
+model Report {
+  id          String      @id @default(cuid())
+  scope       ReportScope
+  studentId   String?
+  batchId     String?
+  generatedAt DateTime    @default(now())
+  pdfPath     String
+
+  batch Batch? @relation(fields: [batchId], references: [id], onDelete: Cascade)
+
+  @@index([studentId])
+  @@index([batchId])
+}
+
+model AuditLog {
+  id           String   @id @default(cuid())
+  actorId      String
+  action       String
+  entityType   String
+  entityId     String
+  metadataJson String?
+  createdAt    DateTime @default(now())
+
+  actor User @relation(fields: [actorId], references: [id], onDelete: Cascade)
+
+  @@index([actorId])
+  @@index([entityType, entityId])
+  @@index([createdAt])
+}
