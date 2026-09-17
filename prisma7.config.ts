@@ -10,6 +10,9 @@ export default defineConfig({
     seed: "tsx prisma/seed.ts",
   },
   datasource: {
-    url: process.env["DATABASE_URL"],
+    // `prisma generate` only reads the schema shape, not a live connection,
+    // so this fallback keeps builds working even before DATABASE_URL is set
+    // in the deployment environment (e.g. Vercel, before Postgres is wired up).
+    url: process.env["DATABASE_URL"] ?? "file:./dev.db",
   },
 });
