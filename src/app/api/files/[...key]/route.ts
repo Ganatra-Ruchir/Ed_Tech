@@ -72,5 +72,13 @@ export async function GET(
     });
   }
 
+  if (key.startsWith("announcements/")) {
+    const file = await prisma.announcement.findFirst({ where: { attachmentUrl: url } });
+    if (!file) return NextResponse.json({ error: "Not found" }, { status: 404 });
+    if (!(await canAccessBatch(session, file.batchId))) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    const buffer = await readLocalFile(key);
+    return new NextResponse(new Uint8Array(buffer), { headers: { "Content-Type": file.attachmentType ?? "application/pdf", "Content-Disposition": `inline; filename="${file.attachmentName ?? "announcement.pdf"}"` } });
+  }
+
   return NextResponse.json({ error: "Not found" }, { status: 404 });
 }

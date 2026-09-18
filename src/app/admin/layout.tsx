@@ -36,6 +36,7 @@ export default async function AdminLayout({
           userName={session.name}
           userRole="Administrator"
           hasAlerts={pendingReviewCount > 0}
+          notifications={pendingReviewCount > 0 ? [{ title: `${pendingReviewCount} submissions need review`, detail: "Open the admin dashboard", href: "/admin" }] : []}
           searchEndpoint="/api/admin/search"
           searchPlaceholder="Search students, faculty, or batches…"
         />

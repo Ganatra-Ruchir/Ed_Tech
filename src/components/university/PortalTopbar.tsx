@@ -28,18 +28,21 @@ export function PortalTopbar({
   hasAlerts,
   searchEndpoint,
   searchPlaceholder = "Search…",
+  notifications = [],
 }: {
   userName: string;
   userRole: string;
   hasAlerts: boolean;
   searchEndpoint: string;
   searchPlaceholder?: string;
+  notifications?: { title: string; detail: string; href: string }[];
 }) {
   const router = useRouter();
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<SearchResult[]>([]);
   const [searchOpen, setSearchOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [notificationsOpen, setNotificationsOpen] = useState(false);
   const searchBoxRef = useRef<HTMLDivElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
 
@@ -71,6 +74,7 @@ export function PortalTopbar({
       if (e.key === "Escape") {
         setSearchOpen(false);
         setMenuOpen(false);
+        setNotificationsOpen(false);
       }
     }
     document.addEventListener("mousedown", onClickOutside);
@@ -96,7 +100,7 @@ export function PortalTopbar({
     .toUpperCase();
 
   return (
-    <div className="flex items-center gap-3 border-b border-zinc-200 bg-white px-4 py-3 sm:px-6 lg:px-8">
+    <div className="relative flex items-center gap-3 border-b border-zinc-200 bg-white px-4 py-3 sm:px-6 lg:px-8">
       <div ref={searchBoxRef} className="relative min-w-0 flex-1">
         <Search size={15} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400" />
         <input
@@ -161,11 +165,15 @@ export function PortalTopbar({
 
       <button
         aria-label="Notifications"
+        onClick={() => setNotificationsOpen((open) => !open)}
         className="relative flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-zinc-500 hover:bg-zinc-100 hover:text-zinc-700"
       >
         <Bell size={17} />
         {hasAlerts && <span className="absolute right-2 top-2 h-1.5 w-1.5 rounded-full bg-rose-500" />}
       </button>
+      <AnimatePresence>
+        {notificationsOpen && <motion.div initial={{ opacity: 0, y: -5 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -5 }} className="absolute right-20 top-14 z-40 w-80 overflow-hidden rounded-lg border border-zinc-200 bg-white shadow-xl"><div className="border-b border-zinc-100 px-4 py-3 text-sm font-semibold text-zinc-900">Notifications</div>{notifications.length === 0 ? <p className="px-4 py-4 text-xs text-zinc-500">You are all caught up.</p> : <ul className="divide-y divide-zinc-100">{notifications.map((notification) => <li key={`${notification.href}-${notification.title}`}><button onClick={() => { setNotificationsOpen(false); router.push(notification.href); }} className="w-full px-4 py-3 text-left hover:bg-zinc-50"><p className="text-xs font-semibold text-zinc-900">{notification.title}</p><p className="mt-0.5 text-[11px] text-zinc-500">{notification.detail}</p></button></li>)}</ul>}</motion.div>}
+      </AnimatePresence>
 
       <div ref={menuRef} className="relative shrink-0">
         <button

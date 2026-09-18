@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { canAccessBatch } from "@/lib/permissions";
 import { PageHeader } from "@/components/PageHeader";
 import { RosterManager } from "./RosterManager";
+import { AttendanceManager } from "@/components/faculty/AttendanceManager";
 
 export default async function FacultyBatchRosterPage({
   params,
@@ -35,6 +36,7 @@ export default async function FacultyBatchRosterPage({
         batchId={id}
         students={memberships.map((m) => ({ id: m.user.id, name: m.user.name, email: m.user.email }))}
       />
+      <AttendanceManager batchId={id} students={memberships.map((m) => ({ id: m.user.id, name: m.user.name, email: m.user.email }))} />
     </div>
   );
 }

@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { motion } from "motion/react";
-import { Megaphone, Search, Clock } from "lucide-react";
+import { Megaphone, Search, Clock, FileText } from "lucide-react";
 import { Card } from "@/components/Card";
 import { Avatar } from "@/components/Avatar";
 import { EmptyState } from "@/components/EmptyState";
@@ -18,6 +18,8 @@ export type StreamPost = {
    * risks a hydration mismatch. */
   postedOn: string;
   relative: string;
+  attachmentUrl: string | null;
+  attachmentName: string | null;
 };
 
 const listVariants = {
@@ -108,6 +110,7 @@ export function StreamFeed({ posts }: { posts: StreamPost[] }) {
                       </span>
                     </p>
                     <p className="mt-2 whitespace-pre-wrap text-[13px] leading-relaxed text-zinc-700">{p.body}</p>
+                    {p.attachmentUrl && <a href={p.attachmentUrl} target="_blank" rel="noreferrer" className="mt-3 inline-flex items-center gap-1.5 text-xs font-medium text-[#6b1029] hover:underline"><FileText size={13} /> {p.attachmentName ?? "View attached PDF"}</a>}
                   </div>
                 </div>
               </Card>

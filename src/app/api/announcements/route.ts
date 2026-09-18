@@ -1,9 +1,9 @@
 import { NextResponse } from "next/server";
-import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireRole } from "@/lib/api-guard";
 import { canAccessBatch, userBatchIds } from "@/lib/permissions";
 import { logAudit } from "@/lib/audit";
+import { storeFile } from "@/lib/storage";
 
 export async function GET(request: Request) {
   const guard = await requireRole();
@@ -35,29 +35,27 @@ export async function GET(request: Request) {
   return NextResponse.json({ announcements });
 }
 
-const bodySchema = z.object({
-  batchId: z.string().min(1),
-  title: z.string().min(1).max(200),
-  body: z.string().min(1).max(4000),
-});
-
 export async function POST(request: Request) {
   const guard = await requireRole("FACULTY", "ADMIN");
   if (!guard.ok) return guard.response;
   const { session } = guard;
 
-  const parsed = bodySchema.safeParse(await request.json().catch(() => null));
-  if (!parsed.success) return NextResponse.json({ error: "Invalid announcement" }, { status: 400 });
+  const formData = await request.formData().catch(() => null);
+  if (!formData) return NextResponse.json({ error: "Expected form data" }, { status: 400 });
+  const batchId = String(formData.get("batchId") ?? "").trim();
+  const title = String(formData.get("title") ?? "").trim();
+  const body = String(formData.get("body") ?? "").trim();
+  if (!batchId || !title || !body || title.length > 200 || body.length > 4000) return NextResponse.json({ error: "Batch, title, and message are required" }, { status: 400 });
 
-  const allowed = await canAccessBatch(session, parsed.data.batchId);
+  const allowed = await canAccessBatch(session, batchId);
   if (!allowed) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
   const announcement = await prisma.announcement.create({
     data: {
-      batchId: parsed.data.batchId,
+      batchId,
       facultyId: session.sub,
-      title: parsed.data.title,
-      body: parsed.data.body,
+      title,
+      body,
     },
   });
 
@@ -66,8 +64,16 @@ export async function POST(request: Request) {
     action: "announcement.create",
     entityType: "Announcement",
     entityId: announcement.id,
-    metadata: { batchId: parsed.data.batchId },
+    metadata: { batchId },
   });
+
+  const file = formData.get("file");
+  if (file instanceof File && file.size > 0) {
+    if (file.type !== "application/pdf" || file.size > 20 * 1024 * 1024) return NextResponse.json({ error: "Only PDF files up to 20 MB are allowed" }, { status: 400 });
+    const buffer = Buffer.from(await file.arrayBuffer());
+    const stored = await storeFile({ buffer, filename: file.name, contentType: "application/pdf", folder: "announcements" });
+    await prisma.announcement.update({ where: { id: announcement.id }, data: { attachmentUrl: stored.url, attachmentStorageKey: stored.storageKey, attachmentName: file.name, attachmentType: "application/pdf", attachmentSize: buffer.byteLength } });
+  }
 
   return NextResponse.json({ announcement }, { status: 201 });
 }

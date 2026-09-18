@@ -48,6 +48,8 @@ export default async function StudentStreamPage() {
     batchName: a.batch.name,
     postedOn: fmtDateTime(a.createdAt),
     relative: relativeTime(a.createdAt, now),
+    attachmentUrl: a.attachmentUrl,
+    attachmentName: a.attachmentName,
   }));
 
   return (

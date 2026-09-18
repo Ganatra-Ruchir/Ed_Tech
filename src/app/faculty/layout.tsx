@@ -45,6 +45,10 @@ export default async function FacultyLayout({
           userName={session.name}
           userRole={session.isCC ? "Faculty · Course Coordinator" : "Faculty"}
           hasAlerts={pendingReviews + ungradedResponses > 0}
+          notifications={[
+            ...(pendingReviews > 0 ? [{ title: `${pendingReviews} submissions need review`, detail: "Open the review queue", href: "/faculty/review" }] : []),
+            ...(ungradedResponses > 0 ? [{ title: `${ungradedResponses} test responses need grading`, detail: "Review student responses", href: "/faculty/tests" }] : []),
+          ]}
           searchEndpoint="/api/faculty/search"
           searchPlaceholder="Search students, submissions, or tests…"
         />

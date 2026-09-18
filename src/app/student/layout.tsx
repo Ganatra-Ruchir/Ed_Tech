@@ -35,6 +35,10 @@ export default async function StudentLayout({ children }: { children: React.Reac
           userName={session.name}
           userRole="Student"
           hasAlerts={needsRevisionCount + dueSoonCount > 0}
+          notifications={[
+            ...(needsRevisionCount > 0 ? [{ title: `${needsRevisionCount} submission(s) need revision`, detail: "Open your submissions", href: "/student/submissions" }] : []),
+            ...(dueSoonCount > 0 ? [{ title: `${dueSoonCount} test(s) due soon`, detail: "Open assigned tests", href: "/student/tests" }] : []),
+          ]}
           searchEndpoint="/api/student/search"
           searchPlaceholder="Search for tests, submissions, or announcements…"
         />

@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Megaphone } from "lucide-react";
+import { FileUp, Megaphone } from "lucide-react";
 import { Card } from "@/components/Card";
 import { Select, Input, Textarea } from "@/components/Field";
 import { Button } from "@/components/Button";
@@ -14,6 +14,8 @@ export function AnnouncementComposer({ batches }: { batches: { id: string; name:
   const [body, setBody] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [file, setFile] = useState<File | null>(null);
+  const fileRef = useRef<HTMLInputElement>(null);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -24,11 +26,10 @@ export function AnnouncementComposer({ batches }: { batches: { id: string; name:
     }
     setSubmitting(true);
     try {
-      const res = await fetch("/api/announcements", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ batchId, title, body }),
-      });
+      const formData = new FormData();
+      formData.set("batchId", batchId); formData.set("title", title); formData.set("body", body);
+      if (file) formData.set("file", file);
+      const res = await fetch("/api/announcements", { method: "POST", body: formData });
       const data = await res.json();
       if (!res.ok) {
         setError(data.error ?? "Failed to post announcement");
@@ -36,6 +37,8 @@ export function AnnouncementComposer({ batches }: { batches: { id: string; name:
       }
       setTitle("");
       setBody("");
+      setFile(null);
+      if (fileRef.current) fileRef.current.value = "";
       router.refresh();
     } finally {
       setSubmitting(false);
@@ -63,6 +66,7 @@ export function AnnouncementComposer({ batches }: { batches: { id: string; name:
           rows={3}
           placeholder="Write an update for the class..."
         />
+        <label className="flex cursor-pointer items-center gap-2 rounded-md border border-dashed border-zinc-300 px-3 py-2 text-xs text-zinc-600"><FileUp size={14} className="text-[#6b1029]" /><span className="truncate">{file?.name ?? "Attach PDF (optional, max 20 MB)"}</span><input ref={fileRef} type="file" accept="application/pdf,.pdf" className="hidden" onChange={(e) => setFile(e.target.files?.[0] ?? null)} /></label>
         {error && <p className="text-sm text-rose-600">{error}</p>}
         <Button type="submit" disabled={submitting} size="sm">
           {submitting ? "Posting..." : "Post to class stream"}

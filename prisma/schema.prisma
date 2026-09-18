@@ -70,6 +70,7 @@ model User {
   auditLogs        AuditLog[]
   announcements    Announcement[]
   assignmentsCreated Assignment[] @relation("FacultyAssignments")
+  attendanceRecords Attendance[]
 
   @@index([role])
 }
@@ -88,6 +89,7 @@ model Batch {
   reports       Report[]
   announcements Announcement[]
   assignments   Assignment[]
+  attendance    Attendance[]
 
   @@unique([name, department, semester])
 }
@@ -126,12 +128,35 @@ model Assignment {
   @@index([createdByFacultyId])
 }
 
+model Attendance {
+  id        String   @id @default(cuid())
+  batchId   String
+  studentId String
+  date      DateTime
+  status    String   @default("PRESENT")
+  checkedInAt  DateTime?
+  checkedOutAt DateTime?
+  createdAt DateTime @default(now())
+
+  batch   Batch @relation(fields: [batchId], references: [id], onDelete: Cascade)
+  student User  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@unique([batchId, studentId, date])
+  @@index([batchId, date])
+  @@index([studentId, date])
+}
+
 model Announcement {
   id        String   @id @default(cuid())
   batchId   String
   facultyId String
   title     String
   body      String
+  attachmentUrl String?
+  attachmentStorageKey String?
+  attachmentName String?
+  attachmentType String?
+  attachmentSize Int?
   createdAt DateTime @default(now())
 
   batch   Batch @relation(fields: [batchId], references: [id], onDelete: Cascade)
