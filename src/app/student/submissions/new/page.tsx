@@ -1,8 +1,8 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { motion, AnimatePresence } from "motion/react";
 import { ArrowLeft, UploadCloud, X, FileText, Info, AlertCircle, Plus } from "lucide-react";
 import { PageHeader } from "@/components/PageHeader";
@@ -19,14 +19,40 @@ function fmtSize(bytes: number): string {
 }
 
 export default function NewSubmissionPage() {
+  const searchParams = useSearchParams();
+  const assignmentId = searchParams.get("assignmentId");
+  const [assignment, setAssignment] = useState<{ id: string; title: string; description: string | null; dueAt: string | null; batchName: string; attachmentUrl: string | null } | null>(null);
+  const [loadingAssignment, setLoadingAssignment] = useState(Boolean(assignmentId));
+
+  useEffect(() => {
+    if (!assignmentId) return;
+    fetch(`/api/assignments?assignmentId=${encodeURIComponent(assignmentId)}`)
+      .then((response) => response.json())
+      .then((data) => {
+        const item = data.assignments?.[0];
+        if (item) {
+          setAssignment({ id: item.id, title: item.title, description: item.description, dueAt: item.dueAt, batchName: item.batch.name, attachmentUrl: item.attachmentUrl });
+        }
+      })
+      .finally(() => setLoadingAssignment(false));
+  }, [assignmentId]);
+
+  return <NewSubmissionForm assignment={assignment} loadingAssignment={loadingAssignment} />;
+}
+
+function NewSubmissionForm({ assignment, loadingAssignment }: { assignment: { id: string; title: string; description: string | null; dueAt: string | null; batchName: string; attachmentUrl: string | null } | null; loadingAssignment: boolean }) {
   const router = useRouter();
   const inputRef = useRef<HTMLInputElement>(null);
-  const [title, setTitle] = useState("");
+  const [title, setTitle] = useState(assignment?.title ?? "");
   const [notes, setNotes] = useState("");
   const [files, setFiles] = useState<File[]>([]);
   const [dragging, setDragging] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+
+  useEffect(() => {
+    if (assignment) setTitle(assignment.title);
+  }, [assignment]);
 
   function addFiles(incoming: FileList | null) {
     if (!incoming || incoming.length === 0) return;
@@ -63,6 +89,7 @@ export default function NewSubmissionPage() {
     const formData = new FormData();
     formData.set("title", title.trim());
     formData.set("notes", notes);
+    if (assignment) formData.set("assignmentId", assignment.id);
     files.forEach((f) => formData.append("files", f));
 
     setSubmitting(true);
@@ -93,7 +120,9 @@ export default function NewSubmissionPage() {
         <ArrowLeft size={13} /> Back to submissions
       </Link>
 
-      <PageHeader title="New Submission" description="Upload your milestone work for faculty review." />
+      <PageHeader title={assignment ? `Submit: ${assignment.title}` : "New Submission"} description={loadingAssignment ? "Loading assignment details..." : assignment ? `${assignment.batchName} · Upload your work for this assigned task.` : "Upload your milestone work for faculty review."} />
+
+      {assignment && <Card className="p-4"><p className="text-sm text-zinc-700">{assignment.description || "Follow the faculty instructions and attach your completed work."}</p>{assignment.attachmentUrl && <a href={assignment.attachmentUrl} target="_blank" rel="noreferrer" className="mt-2 inline-block text-xs font-medium text-[#6b1029] hover:underline">View assignment PDF</a>}</Card>}
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <Card className="p-5">

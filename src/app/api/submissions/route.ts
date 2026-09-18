@@ -55,6 +55,7 @@ export async function POST(request: Request) {
 
   const title = String(formData.get("title") ?? "").trim();
   const notes = formData.get("notes") ? String(formData.get("notes")) : null;
+  const assignmentId = formData.get("assignmentId") ? String(formData.get("assignmentId")) : null;
   if (!title) {
     return NextResponse.json({ error: "Title is required" }, { status: 400 });
   }
@@ -63,7 +64,14 @@ export async function POST(request: Request) {
   if (batchIds.length === 0) {
     return NextResponse.json({ error: "You are not assigned to a batch" }, { status: 400 });
   }
-  const batchId = batchIds[0];
+  let batchId = batchIds[0];
+  if (assignmentId) {
+    const assignment = await prisma.assignment.findFirst({ where: { id: assignmentId, batchId: { in: batchIds } } });
+    if (!assignment) return NextResponse.json({ error: "Assignment not found for your batch" }, { status: 404 });
+    const existing = await prisma.submission.findFirst({ where: { assignmentId, studentId: session.sub } });
+    if (existing) return NextResponse.json({ error: "You have already submitted this assignment" }, { status: 409 });
+    batchId = assignment.batchId;
+  }
 
   const fileEntries = formData.getAll("files").filter((f): f is File => f instanceof File);
   if (fileEntries.length === 0) {
@@ -74,6 +82,7 @@ export async function POST(request: Request) {
     data: {
       studentId: session.sub,
       batchId,
+      assignmentId,
       title,
       notes,
       status: "SUBMITTED",

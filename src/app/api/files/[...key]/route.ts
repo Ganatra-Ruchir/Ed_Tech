@@ -55,5 +55,22 @@ export async function GET(
     });
   }
 
+  if (key.startsWith("assignments/")) {
+    const file = await prisma.assignment.findFirst({
+      where: { attachmentUrl: url },
+    });
+    if (!file) return NextResponse.json({ error: "Not found" }, { status: 404 });
+    const allowed = await canAccessBatch(session, file.batchId);
+    if (!allowed) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+
+    const buffer = await readLocalFile(key);
+    return new NextResponse(new Uint8Array(buffer), {
+      headers: {
+        "Content-Type": file.attachmentType ?? "application/pdf",
+        "Content-Disposition": `inline; filename="${file.attachmentName ?? "assignment.pdf"}"`,
+      },
+    });
+  }
+
   return NextResponse.json({ error: "Not found" }, { status: 404 });
 }

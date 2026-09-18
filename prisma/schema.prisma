@@ -69,6 +69,7 @@ model User {
   feedbackGiven    Feedback[]        @relation("FacultyFeedback")
   auditLogs        AuditLog[]
   announcements    Announcement[]
+  assignmentsCreated Assignment[] @relation("FacultyAssignments")
 
   @@index([role])
 }
@@ -86,6 +87,7 @@ model Batch {
   kpis          KPI[]
   reports       Report[]
   announcements Announcement[]
+  assignments   Assignment[]
 
   @@unique([name, department, semester])
 }
@@ -100,6 +102,28 @@ model UserBatch {
 
   @@unique([userId, batchId])
   @@index([batchId])
+}
+
+model Assignment {
+  id                  String   @id @default(cuid())
+  batchId             String
+  createdByFacultyId  String
+  title               String
+  description         String?
+  dueAt               DateTime?
+  attachmentUrl       String?
+  attachmentStorageKey String?
+  attachmentName      String?
+  attachmentType      String?
+  attachmentSize      Int?
+  createdAt           DateTime @default(now())
+
+  batch              Batch       @relation(fields: [batchId], references: [id], onDelete: Cascade)
+  createdBy          User        @relation("FacultyAssignments", fields: [createdByFacultyId], references: [id], onDelete: Cascade)
+  submissions        Submission[]
+
+  @@index([batchId, createdAt])
+  @@index([createdByFacultyId])
 }
 
 model Announcement {
@@ -120,6 +144,7 @@ model Submission {
   id        String           @id @default(cuid())
   studentId String
   batchId   String
+  assignmentId String?
   title     String
   notes     String?
   status    SubmissionStatus @default(SUBMITTED)
@@ -129,6 +154,7 @@ model Submission {
 
   student  User             @relation("StudentSubmissions", fields: [studentId], references: [id], onDelete: Cascade)
   batch    Batch            @relation(fields: [batchId], references: [id], onDelete: Cascade)
+  assignment Assignment?    @relation(fields: [assignmentId], references: [id], onDelete: SetNull)
   files    SubmissionFile[]
   evidence Evidence[]
   feedback Feedback[]
@@ -136,6 +162,7 @@ model Submission {
   @@index([studentId])
   @@index([batchId])
   @@index([status])
+  @@index([assignmentId])
 }
 
 model SubmissionFile {

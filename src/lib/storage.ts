@@ -28,7 +28,7 @@ export async function storeFile(params: {
   buffer: Buffer;
   filename: string;
   contentType: string;
-  folder: "uploads" | "reports";
+  folder: "uploads" | "reports" | "assignments";
 }): Promise<StoredFile> {
   const key = `${params.folder}/${Date.now()}-${crypto.randomUUID().slice(0, 8)}-${sanitizeFilename(params.filename)}`;
 
