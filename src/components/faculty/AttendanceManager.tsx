@@ -20,7 +20,12 @@ export function AttendanceManager({ batchId, students }: { batchId: string; stud
     else setError(data.error ?? "Could not load attendance");
   }
 
-  useEffect(() => { void load(); }, [batchId, date]);
+  useEffect(() => {
+    const handle = window.setTimeout(() => void load(), 0);
+    return () => window.clearTimeout(handle);
+  // load closes over the current batch and date; the effect reruns for either value.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [batchId, date]);
 
   async function update(studentId: string, action: "check_in" | "check_out" | "absent" | "present") {
     const response = await fetch("/api/attendance", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ batchId, studentId, action, date }) });

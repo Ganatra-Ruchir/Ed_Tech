@@ -27,7 +27,7 @@ const SIZES: Record<Size, string> = {
 };
 
 const base =
-  "inline-flex items-center justify-center rounded-md font-medium transition-colors disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500/40";
+  "inline-flex items-center justify-center rounded-md font-medium transition-colors disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#6b1029]/40";
 
 const MotionLink = motion.create(Link);
 

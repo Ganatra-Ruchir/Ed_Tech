@@ -2,16 +2,42 @@
 
 import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { FileUp, Megaphone } from "lucide-react";
+import { FileUp, Megaphone, Pin, CheckSquare, MessageSquare } from "lucide-react";
 import { Card } from "@/components/Card";
 import { Select, Input, Textarea } from "@/components/Field";
 import { Button } from "@/components/Button";
+import { cn } from "@/lib/cn";
+import { ANNOUNCEMENT_CATEGORIES } from "@/lib/announcement-types";
+import { validateDocumentUpload, DOCUMENT_ACCEPT } from "@/lib/uploads";
+
+function Toggle({
+  on, onClick, icon: Icon, label,
+}: {
+  on: boolean; onClick: () => void; icon: typeof Pin; label: string;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={cn(
+        "inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium transition-colors",
+        on ? "border-[#6b1029]/30 bg-[#6b1029]/[0.06] text-[#6b1029]" : "border-zinc-200 text-zinc-500 hover:bg-zinc-50",
+      )}
+    >
+      <Icon size={13} /> {label}
+    </button>
+  );
+}
 
 export function AnnouncementComposer({ batches }: { batches: { id: string; name: string }[] }) {
   const router = useRouter();
   const [batchId, setBatchId] = useState(batches[0]?.id ?? "");
+  const [category, setCategory] = useState<string>("GENERAL");
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
+  const [pinned, setPinned] = useState(false);
+  const [requireAck, setRequireAck] = useState(false);
+  const [allowComments, setAllowComments] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [file, setFile] = useState<File | null>(null);
@@ -24,20 +50,25 @@ export function AnnouncementComposer({ batches }: { batches: { id: string; name:
       setError("Batch, title, and message are all required.");
       return;
     }
+    if (file) {
+      const err = validateDocumentUpload({ name: file.name, size: file.size });
+      if (err) { setError(err); return; }
+    }
     setSubmitting(true);
     try {
-      const formData = new FormData();
-      formData.set("batchId", batchId); formData.set("title", title); formData.set("body", body);
-      if (file) formData.set("file", file);
-      const res = await fetch("/api/announcements", { method: "POST", body: formData });
+      const fd = new FormData();
+      fd.set("batchId", batchId);
+      fd.set("category", category);
+      fd.set("title", title);
+      fd.set("body", body);
+      fd.set("pinned", String(pinned));
+      fd.set("requireAck", String(requireAck));
+      fd.set("allowComments", String(allowComments));
+      if (file) fd.set("file", file);
+      const res = await fetch("/api/announcements", { method: "POST", body: fd });
       const data = await res.json();
-      if (!res.ok) {
-        setError(data.error ?? "Failed to post announcement");
-        return;
-      }
-      setTitle("");
-      setBody("");
-      setFile(null);
+      if (!res.ok) { setError(data.error ?? "Failed to post announcement"); return; }
+      setTitle(""); setBody(""); setFile(null); setPinned(false); setRequireAck(false);
       if (fileRef.current) fileRef.current.value = "";
       router.refresh();
     } finally {
@@ -49,27 +80,38 @@ export function AnnouncementComposer({ batches }: { batches: { id: string; name:
     <Card className="p-4">
       <form onSubmit={handleSubmit} className="space-y-3">
         <div className="flex items-center gap-2 text-[13px] font-semibold text-zinc-900">
-          <Megaphone size={15} className="text-zinc-400" />
-          New announcement
+          <Megaphone size={15} className="text-[#6b1029]" /> New announcement
         </div>
-        <Select value={batchId} onChange={(e) => setBatchId(e.target.value)}>
-          {batches.map((b) => (
-            <option key={b.id} value={b.id}>
-              {b.name}
-            </option>
-          ))}
-        </Select>
+        <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+          <Select value={batchId} onChange={(e) => setBatchId(e.target.value)}>
+            {batches.map((b) => (
+              <option key={b.id} value={b.id}>{b.name}</option>
+            ))}
+          </Select>
+          <Select value={category} onChange={(e) => setCategory(e.target.value)}>
+            {ANNOUNCEMENT_CATEGORIES.map((c) => (
+              <option key={c.value} value={c.value}>{c.label}</option>
+            ))}
+          </Select>
+        </div>
         <Input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Title" />
-        <Textarea
-          value={body}
-          onChange={(e) => setBody(e.target.value)}
-          rows={3}
-          placeholder="Write an update for the class..."
-        />
-        <label className="flex cursor-pointer items-center gap-2 rounded-md border border-dashed border-zinc-300 px-3 py-2 text-xs text-zinc-600"><FileUp size={14} className="text-[#6b1029]" /><span className="truncate">{file?.name ?? "Attach PDF (optional, max 20 MB)"}</span><input ref={fileRef} type="file" accept="application/pdf,.pdf" className="hidden" onChange={(e) => setFile(e.target.files?.[0] ?? null)} /></label>
+        <Textarea value={body} onChange={(e) => setBody(e.target.value)} rows={3} placeholder="Write an update for the class…" />
+
+        <label className="flex cursor-pointer items-center gap-2 rounded-md border border-dashed border-zinc-300 px-3 py-2 text-xs text-zinc-600 hover:border-[#6b1029]/40">
+          <FileUp size={14} className="text-[#6b1029]" />
+          <span className="truncate">{file?.name ?? "Attach a file (PDF, DOC, image, zip… up to 25 MB)"}</span>
+          <input ref={fileRef} type="file" accept={DOCUMENT_ACCEPT} className="hidden" onChange={(e) => setFile(e.target.files?.[0] ?? null)} />
+        </label>
+
+        <div className="flex flex-wrap items-center gap-2">
+          <Toggle on={pinned} onClick={() => setPinned((v) => !v)} icon={Pin} label="Pin to top" />
+          <Toggle on={requireAck} onClick={() => setRequireAck((v) => !v)} icon={CheckSquare} label="Require acknowledgment" />
+          <Toggle on={allowComments} onClick={() => setAllowComments((v) => !v)} icon={MessageSquare} label="Allow replies" />
+        </div>
+
         {error && <p className="text-sm text-rose-600">{error}</p>}
-        <Button type="submit" disabled={submitting} size="sm">
-          {submitting ? "Posting..." : "Post to class stream"}
+        <Button type="submit" disabled={submitting} size="sm" className="!bg-[#6b1029] hover:!bg-[#7c1638]">
+          {submitting ? "Posting…" : "Post to class stream"}
         </Button>
       </form>
     </Card>

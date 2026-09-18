@@ -49,9 +49,11 @@ next-env.d.ts
 /prisma/dev.db
 /prisma/dev.db-journal
 
-# uploaded submission files
+# uploaded submission files (local-disk storage fallback; see src/lib/storage.ts)
 /public/uploads
 /data/uploads
+/data/assignments
+/data/announcements
 
 # generated pdf reports
 /data/reports

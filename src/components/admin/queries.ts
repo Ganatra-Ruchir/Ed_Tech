@@ -274,7 +274,11 @@ export async function getAdminDashboardData(semester?: string) {
   ]
     .sort((a, b) => b.sortAt - a.sortAt)
     .slice(0, 6)
-    .map(({ sortAt: _sortAt, ...item }) => item);
+    .map((item) => {
+      const { sortAt: ignoredSortAt, ...withoutSortAt } = item;
+      void ignoredSortAt;
+      return withoutSortAt;
+    });
 
   const hour = new Date(now).getHours();
   const greeting = hour < 12 ? "Good morning" : hour < 17 ? "Good afternoon" : "Good evening";

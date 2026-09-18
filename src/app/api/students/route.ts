@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireRole } from "@/lib/api-guard";
-import { canAccessBatch } from "@/lib/permissions";
+import { canAccessBatch, userBatchIds } from "@/lib/permissions";
 
 export async function GET(request: Request) {
   const guard = await requireRole("FACULTY", "ADMIN");
@@ -16,10 +16,20 @@ export async function GET(request: Request) {
     if (!allowed) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
+  // Scope the default (no batchId) listing: a non-CC faculty only sees students
+  // in their own batches, never the whole institution. CC faculty and admins
+  // see all. Mirrors the fallback used in assignments/tests routes.
+  const scopeFilter =
+    batchId
+      ? { batchId }
+      : session.role === "FACULTY" && !session.isCC
+        ? { batchId: { in: await userBatchIds(session.sub) } }
+        : {};
+
   const memberships = await prisma.userBatch.findMany({
     where: {
       user: { role: "STUDENT" },
-      ...(batchId ? { batchId } : {}),
+      ...scopeFilter,
     },
     include: {
       user: { select: { id: true, name: true, email: true } },

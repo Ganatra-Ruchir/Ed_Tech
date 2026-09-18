@@ -5,6 +5,7 @@ import { PageHeader } from "@/components/PageHeader";
 import { AssignmentForm } from "@/components/faculty/AssignmentForm";
 import { Card } from "@/components/Card";
 import { FileText } from "lucide-react";
+import { EmptyState } from "@/components/EmptyState";
 
 export default async function FacultyAssignmentsPage() {
   const session = await getSession();
@@ -17,7 +18,7 @@ export default async function FacultyAssignmentsPage() {
   return (
     <div className="space-y-5">
       <PageHeader title="Assignments" description="Create batch tasks, attach instructions, and track student submissions." actions={<AssignmentForm batches={batches} />} />
-      {assignments.length === 0 ? <Card className="p-5"><p className="text-sm text-zinc-500">No assignments created yet.</p></Card> : <div className="space-y-2">{assignments.map((assignment) => <Card key={assignment.id} className="flex items-start gap-3 p-4"><span className="flex h-9 w-9 items-center justify-center rounded-md bg-[#6b1029]/[0.08] text-[#6b1029]"><FileText size={16} /></span><div className="min-w-0 flex-1"><p className="font-semibold text-zinc-900">{assignment.title}</p><p className="text-xs text-zinc-500">{assignment.batch.name} · {assignment._count.submissions} submission(s){assignment.dueAt ? ` · Due ${new Date(assignment.dueAt).toLocaleDateString("en-IN")}` : ""}</p>{assignment.description && <p className="mt-1 text-sm text-zinc-600">{assignment.description}</p>}</div>{assignment.attachmentUrl && <a href={assignment.attachmentUrl} target="_blank" rel="noreferrer" className="text-xs font-medium text-[#6b1029] hover:underline">View PDF</a>}</Card>)}</div>}
+      {assignments.length === 0 ? <Card><EmptyState icon={FileText} title="No assignments yet" description="Create your first assignment with the button above." /></Card> : <div className="space-y-2">{assignments.map((assignment) => <Card key={assignment.id} className="flex items-start gap-3 p-4"><span className="flex h-9 w-9 items-center justify-center rounded-md bg-[#6b1029]/[0.08] text-[#6b1029]"><FileText size={16} /></span><div className="min-w-0 flex-1"><p className="font-semibold text-zinc-900">{assignment.title}</p><p className="text-xs text-zinc-500">{assignment.batch.name} · {assignment._count.submissions} submission(s){assignment.dueAt ? ` · Due ${new Date(assignment.dueAt).toLocaleDateString("en-IN")}` : ""}</p>{assignment.description && <p className="mt-1 text-sm text-zinc-600">{assignment.description}</p>}</div>{assignment.attachmentUrl && <a href={assignment.attachmentUrl} target="_blank" rel="noreferrer" className="text-xs font-medium text-[#6b1029] hover:underline">View attachment</a>}</Card>)}</div>}
     </div>
   );
 }

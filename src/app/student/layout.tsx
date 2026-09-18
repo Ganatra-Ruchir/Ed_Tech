@@ -14,13 +14,15 @@ export default async function StudentLayout({ children }: { children: React.Reac
 
   // Lightweight, indexed lookups only — enough to light up the notification
   // bell without duplicating the full dashboard query on every page.
+  const now = new Date();
+  const dueSoonEnd = new Date(now.getTime() + 3 * 24 * 60 * 60 * 1000);
   const [needsRevisionCount, dueSoonCount] = await Promise.all([
     prisma.submission.count({ where: { studentId: session.sub, status: "NEEDS_REVISION" } }),
     prisma.test.count({
       where: {
         publishedAt: { not: null },
         batch: { members: { some: { userId: session.sub } } },
-        dueAt: { gte: new Date(), lte: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000) },
+        dueAt: { gte: now, lte: dueSoonEnd },
         responses: { none: { studentId: session.sub } },
       },
     }),

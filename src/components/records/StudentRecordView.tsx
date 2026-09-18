@@ -6,6 +6,8 @@ import { Card } from "@/components/Card";
 import { Table, THead, Th, Tr, Td, TBody } from "@/components/Table";
 import { EmptyState } from "@/components/EmptyState";
 import { FileText } from "lucide-react";
+import { RiskPanel } from "@/components/RiskPanel";
+import type { RiskAssessment } from "@/lib/risk";
 
 function fmtDate(d: Date | null): string {
   if (!d) return "-";
@@ -20,6 +22,7 @@ export type StudentRecordData = {
   kpiByName: Record<string, number>;
   submissions: { id: string; title: string; status: string; createdAt: Date }[];
   testResponses: { id: string; test: { title: string }; score: number | null; maxScore: number | null; submittedAt: Date | null }[];
+  risk?: RiskAssessment;
 };
 
 /**
@@ -60,6 +63,8 @@ export function StudentRecordView({ data, compact }: { data: StudentRecordData; 
           tone={(kpiByName["at_risk"] ?? 0) === 1 ? "danger" : "success"}
         />
       </section>
+
+      {data.risk && <RiskPanel risk={data.risk} />}
 
       <section>
         <h2 className="mb-2 text-xs font-semibold uppercase tracking-wide text-zinc-400">Submissions</h2>

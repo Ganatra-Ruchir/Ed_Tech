@@ -56,6 +56,7 @@ model User {
   ccName       String?
   scName       String?
   profileImageUrl String?
+  profileImageStorageKey String?
   dateOfBirth  DateTime?
   joiningDate  DateTime?
   salary       Float?
@@ -69,8 +70,14 @@ model User {
   feedbackGiven    Feedback[]        @relation("FacultyFeedback")
   auditLogs        AuditLog[]
   announcements    Announcement[]
+  announcementReceipts AnnouncementReceipt[]
+  announcementComments AnnouncementComment[]
   assignmentsCreated Assignment[] @relation("FacultyAssignments")
   attendanceRecords Attendance[]
+  interventions      Intervention[] @relation("StudentInterventions")
+  interventionsRaised Intervention[] @relation("RaisedInterventions")
+  privateNotes       PrivateNote[]  @relation("StudentPrivateNotes")
+  privateNotesAuthored PrivateNote[] @relation("AuthorPrivateNotes")
 
   @@index([role])
 }
@@ -157,12 +164,54 @@ model Announcement {
   attachmentName String?
   attachmentType String?
   attachmentSize Int?
+  category  String   @default("GENERAL")
+  pinned    Boolean  @default(false)
+  requireAck Boolean @default(false)
+  allowComments Boolean @default(true)
+  scheduledAt DateTime?
   createdAt DateTime @default(now())
 
-  batch   Batch @relation(fields: [batchId], references: [id], onDelete: Cascade)
-  faculty User  @relation(fields: [facultyId], references: [id], onDelete: Cascade)
+  batch    Batch @relation(fields: [batchId], references: [id], onDelete: Cascade)
+  faculty  User  @relation(fields: [facultyId], references: [id], onDelete: Cascade)
+  receipts AnnouncementReceipt[]
+  comments AnnouncementComment[]
 
   @@index([batchId, createdAt])
+  @@index([pinned])
+}
+
+/// One row per (announcement, recipient). `seenAt` is set the first time the
+/// recipient loads the stream; `acknowledgedAt` only when they click the
+/// Acknowledge button on an announcement whose requireAck is true. This is how
+/// "86/92 seen · 72 acknowledged" is computed — from real receipts, not guesses.
+model AnnouncementReceipt {
+  id             String    @id @default(cuid())
+  announcementId String
+  userId         String
+  seenAt         DateTime  @default(now())
+  acknowledgedAt DateTime?
+
+  announcement Announcement @relation(fields: [announcementId], references: [id], onDelete: Cascade)
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([announcementId, userId])
+  @@index([announcementId])
+  @@index([userId])
+}
+
+/// A reply on an announcement's discussion thread. Visible to everyone who can
+/// see the announcement; gated by the announcement's allowComments flag.
+model AnnouncementComment {
+  id             String   @id @default(cuid())
+  announcementId String
+  authorId       String
+  body           String
+  createdAt      DateTime @default(now())
+
+  announcement Announcement @relation(fields: [announcementId], references: [id], onDelete: Cascade)
+  author       User         @relation(fields: [authorId], references: [id], onDelete: Cascade)
+
+  @@index([announcementId, createdAt])
 }
 
 model Submission {
@@ -350,4 +399,73 @@ model AuditLog {
   @@index([actorId])
   @@index([entityType, entityId])
   @@index([createdAt])
+}
+
+enum RiskLevel {
+  NORMAL
+  WATCH
+  AT_RISK
+  CRITICAL
+}
+
+enum InterventionType {
+  WARNING
+  FACULTY_MENTORING
+  CC_MEETING
+  PARENT_COMMUNICATION
+  REMEDIAL_ASSIGNMENT
+  REVISION
+  ATTENDANCE_COUNSELLING
+  ACADEMIC_SUPPORT
+}
+
+enum InterventionStatus {
+  OPEN
+  IN_PROGRESS
+  FOLLOW_UP
+  RESOLVED
+}
+
+/// An action taken when a student needs academic attention. Created by
+/// faculty/CC/admin off the back of a risk assessment; `riskLevelAtCreation`
+/// and `reasonsJson` snapshot *why* it was raised so outcomes stay auditable
+/// even after the student's live risk changes.
+model Intervention {
+  id                  String             @id @default(cuid())
+  studentId           String
+  raisedById          String
+  type                InterventionType
+  status              InterventionStatus @default(OPEN)
+  reason              String
+  action              String?
+  notes               String?
+  riskLevelAtCreation RiskLevel?
+  reasonsJson         String?
+  followUpAt          DateTime?
+  outcome             String?
+  resolvedAt          DateTime?
+  createdAt           DateTime           @default(now())
+  updatedAt           DateTime           @updatedAt
+
+  student  User @relation("StudentInterventions", fields: [studentId], references: [id], onDelete: Cascade)
+  raisedBy User @relation("RaisedInterventions", fields: [raisedById], references: [id], onDelete: Cascade)
+
+  @@index([studentId, createdAt])
+  @@index([status])
+  @@index([raisedById])
+}
+
+/// Faculty/CC-only observations about a student. Never exposed to students —
+/// every read path must filter by the viewer's role server-side.
+model PrivateNote {
+  id        String   @id @default(cuid())
+  studentId String
+  authorId  String
+  body      String
+  createdAt DateTime @default(now())
+
+  student User @relation("StudentPrivateNotes", fields: [studentId], references: [id], onDelete: Cascade)
+  author  User @relation("AuthorPrivateNotes", fields: [authorId], references: [id], onDelete: Cascade)
+
+  @@index([studentId, createdAt])
 }

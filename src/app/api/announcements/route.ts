@@ -4,6 +4,7 @@ import { requireRole } from "@/lib/api-guard";
 import { canAccessBatch, userBatchIds } from "@/lib/permissions";
 import { logAudit } from "@/lib/audit";
 import { storeFile } from "@/lib/storage";
+import { validateDocumentUpload, contentTypeFor } from "@/lib/uploads";
 
 export async function GET(request: Request) {
   const guard = await requireRole();
@@ -47,6 +48,13 @@ export async function POST(request: Request) {
   const body = String(formData.get("body") ?? "").trim();
   if (!batchId || !title || !body || title.length > 200 || body.length > 4000) return NextResponse.json({ error: "Batch, title, and message are required" }, { status: 400 });
 
+  const ALLOWED_CATEGORIES = ["IMPORTANT", "ACADEMIC", "ASSIGNMENT", "EVENT", "GENERAL"];
+  const rawCategory = String(formData.get("category") ?? "GENERAL").toUpperCase();
+  const category = ALLOWED_CATEGORIES.includes(rawCategory) ? rawCategory : "GENERAL";
+  const pinned = String(formData.get("pinned") ?? "") === "true";
+  const requireAck = String(formData.get("requireAck") ?? "") === "true";
+  const allowComments = String(formData.get("allowComments") ?? "true") !== "false";
+
   const allowed = await canAccessBatch(session, batchId);
   if (!allowed) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
@@ -56,6 +64,10 @@ export async function POST(request: Request) {
       facultyId: session.sub,
       title,
       body,
+      category,
+      pinned,
+      requireAck,
+      allowComments,
     },
   });
 
@@ -69,10 +81,12 @@ export async function POST(request: Request) {
 
   const file = formData.get("file");
   if (file instanceof File && file.size > 0) {
-    if (file.type !== "application/pdf" || file.size > 20 * 1024 * 1024) return NextResponse.json({ error: "Only PDF files up to 20 MB are allowed" }, { status: 400 });
+    const err = validateDocumentUpload({ name: file.name, size: file.size });
+    if (err) return NextResponse.json({ error: err }, { status: 400 });
     const buffer = Buffer.from(await file.arrayBuffer());
-    const stored = await storeFile({ buffer, filename: file.name, contentType: "application/pdf", folder: "announcements" });
-    await prisma.announcement.update({ where: { id: announcement.id }, data: { attachmentUrl: stored.url, attachmentStorageKey: stored.storageKey, attachmentName: file.name, attachmentType: "application/pdf", attachmentSize: buffer.byteLength } });
+    const contentType = file.type || contentTypeFor(file.name);
+    const stored = await storeFile({ buffer, filename: file.name, contentType, folder: "announcements" });
+    await prisma.announcement.update({ where: { id: announcement.id }, data: { attachmentUrl: stored.url, attachmentStorageKey: stored.storageKey, attachmentName: file.name, attachmentType: contentType, attachmentSize: buffer.byteLength } });
   }
 
   return NextResponse.json({ announcement }, { status: 201 });

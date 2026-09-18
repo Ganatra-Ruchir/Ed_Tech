@@ -6,6 +6,7 @@ import { FileUp, Plus } from "lucide-react";
 import { Card } from "@/components/Card";
 import { Label, Input, Textarea, Select } from "@/components/Field";
 import { Button } from "@/components/Button";
+import { validateDocumentUpload, DOCUMENT_ACCEPT } from "@/lib/uploads";
 
 type BatchOption = { id: string; name: string };
 
@@ -28,9 +29,9 @@ export function AssignmentForm({ batches, defaultBatchId }: { batches: BatchOpti
       setError("Choose a batch and enter a task title.");
       return;
     }
-    if (file && (file.type !== "application/pdf" || file.size > 20 * 1024 * 1024)) {
-      setError("Only PDF files up to 20 MB are allowed.");
-      return;
+    if (file) {
+      const err = validateDocumentUpload({ name: file.name, size: file.size });
+      if (err) { setError(err); return; }
     }
 
     const formData = new FormData();
@@ -89,11 +90,11 @@ export function AssignmentForm({ batches, defaultBatchId }: { batches: BatchOpti
           <Textarea rows={4} value={description} onChange={(event) => setDescription(event.target.value)} placeholder="Explain what students need to submit." />
         </div>
         <div className="sm:col-span-2">
-          <Label>PDF instructions (optional)</Label>
+          <Label>Attachment (optional)</Label>
           <label className="flex cursor-pointer items-center gap-2 rounded-md border border-dashed border-zinc-300 bg-zinc-50 px-3 py-3 text-xs text-zinc-600 hover:border-[#6b1029]/40">
             <FileUp size={16} className="text-[#6b1029]" />
-            <span className="min-w-0 flex-1 truncate">{file ? file.name : "Choose one PDF, up to 20 MB"}</span>
-            <input ref={fileRef} type="file" accept="application/pdf,.pdf" className="hidden" onChange={(event) => setFile(event.target.files?.[0] ?? null)} />
+            <span className="min-w-0 flex-1 truncate">{file ? file.name : "PDF, DOC, PPT, image, zip, code… up to 25 MB"}</span>
+            <input ref={fileRef} type="file" accept={DOCUMENT_ACCEPT} className="hidden" onChange={(event) => setFile(event.target.files?.[0] ?? null)} />
           </label>
         </div>
         {error && <p className="text-sm text-rose-600 sm:col-span-2">{error}</p>}

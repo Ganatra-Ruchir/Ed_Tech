@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 import { cn } from "@/lib/cn";
 
 const COLORS = [
@@ -22,8 +23,26 @@ function initials(name: string): string {
   return (first + last).toUpperCase();
 }
 
-export function Avatar({ name, size = "md" }: { name: string; size?: "sm" | "md" | "lg" }) {
+export function Avatar({
+  name,
+  size = "md",
+  imageUrl,
+}: {
+  name: string;
+  size?: "sm" | "md" | "lg";
+  imageUrl?: string | null;
+}) {
   const dims = size === "sm" ? "h-6 w-6 text-[10px]" : size === "lg" ? "h-11 w-11 text-sm" : "h-8 w-8 text-xs";
+  const dimClass = size === "sm" ? "h-6 w-6" : size === "lg" ? "h-11 w-11" : "h-8 w-8";
+  if (imageUrl) {
+    return (
+      <img
+        src={imageUrl}
+        alt={name}
+        className={cn("shrink-0 rounded-full object-cover", dimClass)}
+      />
+    );
+  }
   return (
     <span
       className={cn(

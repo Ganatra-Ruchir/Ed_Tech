@@ -25,7 +25,7 @@ export function ProgressBar({
       <div
         className={cn(
           "h-full rounded-full transition-[width]",
-          resolvedTone === "brand" && "bg-indigo-600",
+          resolvedTone === "brand" && "bg-[#6b1029]",
           resolvedTone === "success" && "bg-emerald-500",
           resolvedTone === "warning" && "bg-amber-500",
           resolvedTone === "danger" && "bg-rose-500",

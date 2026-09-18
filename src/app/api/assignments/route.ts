@@ -4,9 +4,9 @@ import { prisma } from "@/lib/prisma";
 import { requireRole } from "@/lib/api-guard";
 import { canAccessBatch, userBatchIds } from "@/lib/permissions";
 import { storeFile } from "@/lib/storage";
+import { validateDocumentUpload, contentTypeFor } from "@/lib/uploads";
 import { logAudit } from "@/lib/audit";
 
-const MAX_PDF_BYTES = 20 * 1024 * 1024;
 
 export async function GET(request: Request) {
   const guard = await requireRole("FACULTY", "STUDENT", "ADMIN");
@@ -65,8 +65,9 @@ export async function POST(request: Request) {
   }
 
   const file = formData.get("file");
-  if (file instanceof File && file.size > 0 && (file.type !== "application/pdf" || file.size > MAX_PDF_BYTES)) {
-    return NextResponse.json({ error: "Only PDF files up to 20 MB are allowed" }, { status: 400 });
+  if (file instanceof File && file.size > 0) {
+    const err = validateDocumentUpload({ name: file.name, size: file.size });
+    if (err) return NextResponse.json({ error: err }, { status: 400 });
   }
 
   const assignment = await prisma.assignment.create({
@@ -81,10 +82,11 @@ export async function POST(request: Request) {
 
   if (file instanceof File && file.size > 0) {
     const buffer = Buffer.from(await file.arrayBuffer());
+    const contentType = file.type || contentTypeFor(file.name);
     const stored = await storeFile({
       buffer,
       filename: file.name,
-      contentType: "application/pdf",
+      contentType,
       folder: "assignments",
     });
     await prisma.assignment.update({
@@ -93,7 +95,7 @@ export async function POST(request: Request) {
         attachmentUrl: stored.url,
         attachmentStorageKey: stored.storageKey,
         attachmentName: file.name,
-        attachmentType: "application/pdf",
+        attachmentType: file.type || contentTypeFor(file.name),
         attachmentSize: buffer.byteLength,
       },
     });

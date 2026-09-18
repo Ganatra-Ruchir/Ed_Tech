@@ -113,7 +113,8 @@ export function Sidebar({
 
   useEffect(() => {
     try {
-      setCollapsed(window.localStorage.getItem(COLLAPSE_KEY) === "1");
+      const saved = window.localStorage.getItem(COLLAPSE_KEY) === "1";
+      window.setTimeout(() => setCollapsed(saved), 0);
     } catch {
       // ignore — per-viewer convenience only
     }

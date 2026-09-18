@@ -35,7 +35,10 @@ export async function GET(request: Request) {
   if (batchId) where.batchId = batchId;
   if (studentId) where.studentId = studentId;
 
-  if (scope === "BATCH" && !batchId && session.role === "FACULTY" && !session.isCC) {
+  // A regular (non-CC) faculty must never see platform-wide rows. When no
+  // explicit batch/student filter is given for STUDENT or BATCH scope, restrict
+  // to their own batches. (CC faculty and admins are intentionally unrestricted.)
+  if ((scope === "BATCH" || scope === "STUDENT") && !batchId && !studentId && session.role === "FACULTY" && !session.isCC) {
     where.batchId = { in: await userBatchIds(session.sub) };
   }
 

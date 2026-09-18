@@ -2,6 +2,7 @@ import { prisma } from "@/lib/prisma";
 import { getSession } from "@/lib/auth";
 import { canAccessStudent } from "@/lib/permissions";
 import { getLatestKpis } from "@/lib/kpi";
+import { assessStudentRisk } from "@/lib/risk";
 
 /** Shared loader for a student's "record" view. Lives here rather than in a
  * page file because Next.js route files may only export their own route
@@ -24,6 +25,8 @@ async function loadRecord(id: string) {
     getLatestKpis({ scope: "STUDENT", studentId: id }),
   ]);
 
+  const risk = await assessStudentRisk(id);
+
   return {
     id: student.id,
     name: student.name,
@@ -32,6 +35,7 @@ async function loadRecord(id: string) {
     kpiByName: Object.fromEntries(kpis.map((k) => [k.metricName, k.value])),
     submissions,
     testResponses,
+    risk,
   };
 }
 

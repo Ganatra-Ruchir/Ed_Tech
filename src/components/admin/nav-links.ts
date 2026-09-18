@@ -23,4 +23,8 @@ export const ADMIN_LINKS: PortalNavGroup[] = [
       { href: "/admin/audit", label: "Audit Logs", icon: "ScrollText" },
     ],
   },
+  {
+    label: "Account",
+    links: [{ href: "/admin/profile", label: "My Profile", icon: "UserCircle" }],
+  },
 ];

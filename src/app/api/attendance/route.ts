@@ -42,6 +42,14 @@ export async function POST(request: Request) {
   const parsed = bodySchema.safeParse(await request.json().catch(() => null));
   if (!parsed.success) return NextResponse.json({ error: "Invalid attendance request" }, { status: 400 });
   if (!(session.isCC || (await canAccessBatch(session, parsed.data.batchId)))) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  // The target student must actually belong to the batch attendance is being
+  // written for — otherwise a faculty member could write rows for a student in
+  // a batch they don't teach by passing a mismatched studentId.
+  const isMember = await prisma.userBatch.findUnique({
+    where: { userId_batchId: { userId: parsed.data.studentId, batchId: parsed.data.batchId } },
+    select: { id: true },
+  });
+  if (!isMember) return NextResponse.json({ error: "Student is not in this batch" }, { status: 400 });
   const date = dayStart(parsed.data.date);
   const current = await prisma.attendance.findUnique({ where: { batchId_studentId_date: { batchId: parsed.data.batchId, studentId: parsed.data.studentId, date } } });
   const now = new Date();

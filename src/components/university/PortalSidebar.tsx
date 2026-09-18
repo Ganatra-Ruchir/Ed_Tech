@@ -5,12 +5,15 @@ import { usePathname } from "next/navigation";
 import { motion } from "motion/react";
 import type { LucideIcon } from "lucide-react";
 import {
+  AlertTriangle,
+  UserCircle,
   BarChart3,
   Building2,
   ClipboardCheck,
   ClipboardList,
   FileText,
   GraduationCap,
+  Inbox,
   LayoutDashboard,
   Megaphone,
   ScrollText,
@@ -21,6 +24,9 @@ import { Crest, BuildingSilhouette } from "./nav-primitives";
 
 const ICONS: Record<string, LucideIcon> = {
   LayoutDashboard,
+  UserCircle,
+  Inbox,
+  AlertTriangle,
   Megaphone,
   FileText,
   ClipboardCheck,

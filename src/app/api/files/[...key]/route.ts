@@ -4,6 +4,17 @@ import { prisma } from "@/lib/prisma";
 import { readLocalFile } from "@/lib/storage";
 import { canAccessSubmission, canAccessStudent, canAccessBatch } from "@/lib/permissions";
 
+// Force a download for anything that isn't a safe inline type. Serving an
+// uploaded HTML/SVG file inline same-origin would let it run scripts in the
+// viewer's authenticated session, so only images and PDFs are shown inline.
+function inlineSafe(contentType: string): boolean {
+  return contentType.startsWith("image/") || contentType === "application/pdf";
+}
+function dispositionFor(contentType: string, filename: string): string {
+  const mode = inlineSafe(contentType) ? "inline" : "attachment";
+  return `${mode}; filename="${filename.replace(/"/g, "")}"`;
+}
+
 // Only used in local-disk fallback mode (no BLOB_READ_WRITE_TOKEN). Vercel
 // Blob URLs are served directly and bypass this route entirely.
 export async function GET(
@@ -24,17 +35,32 @@ export async function GET(
       where: { fileUrl: url },
       include: { submission: true },
     });
-    if (!file) return NextResponse.json({ error: "Not found" }, { status: 404 });
-    const allowed = await canAccessSubmission(session, file.submission);
-    if (!allowed) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-
-    const buffer = await readLocalFile(key);
-    return new NextResponse(new Uint8Array(buffer), {
-      headers: {
-        "Content-Type": file.fileType,
-        "Content-Disposition": `inline; filename="${file.fileName}"`,
-      },
-    });
+    if (file) {
+      const allowed = await canAccessSubmission(session, file.submission);
+      if (!allowed) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+      const buffer = await readLocalFile(key);
+      return new NextResponse(new Uint8Array(buffer), {
+        headers: {
+          "Content-Type": file.fileType,
+          "Content-Disposition": dispositionFor(file.fileType, file.fileName),
+        },
+      });
+    }
+    // Profile avatars also live under uploads/. They are viewable by any
+    // authenticated user (avatars render across the app). Matched by the
+    // existing profileImageUrl column so this compiles without the new client.
+    const avatarUser = await prisma.user.findFirst({ where: { profileImageUrl: url }, select: { id: true } });
+    if (avatarUser) {
+      const buffer = await readLocalFile(key);
+      return new NextResponse(new Uint8Array(buffer), {
+        headers: {
+          "Content-Type": "image/*",
+          "Content-Disposition": `inline; filename="avatar"`,
+          "Cache-Control": "private, max-age=300",
+        },
+      });
+    }
+    return NextResponse.json({ error: "Not found" }, { status: 404 });
   }
 
   if (key.startsWith("reports/")) {
@@ -67,7 +93,7 @@ export async function GET(
     return new NextResponse(new Uint8Array(buffer), {
       headers: {
         "Content-Type": file.attachmentType ?? "application/pdf",
-        "Content-Disposition": `inline; filename="${file.attachmentName ?? "assignment.pdf"}"`,
+        "Content-Disposition": dispositionFor(file.attachmentType ?? "application/pdf", file.attachmentName ?? "assignment.pdf"),
       },
     });
   }
@@ -77,7 +103,7 @@ export async function GET(
     if (!file) return NextResponse.json({ error: "Not found" }, { status: 404 });
     if (!(await canAccessBatch(session, file.batchId))) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     const buffer = await readLocalFile(key);
-    return new NextResponse(new Uint8Array(buffer), { headers: { "Content-Type": file.attachmentType ?? "application/pdf", "Content-Disposition": `inline; filename="${file.attachmentName ?? "announcement.pdf"}"` } });
+    return new NextResponse(new Uint8Array(buffer), { headers: { "Content-Type": file.attachmentType ?? "application/pdf", "Content-Disposition": dispositionFor(file.attachmentType ?? "application/pdf", file.attachmentName ?? "announcement.pdf") } });
   }
 
   return NextResponse.json({ error: "Not found" }, { status: 404 });

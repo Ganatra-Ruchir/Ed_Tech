@@ -45,12 +45,13 @@ export function PortalTopbar({
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const searchBoxRef = useRef<HTMLDivElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
+  const notifRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const q = query.trim();
     if (q.length < 2) {
-      setResults([]);
-      return;
+      const handle = window.setTimeout(() => setResults([]), 0);
+      return () => window.clearTimeout(handle);
     }
     const handle = setTimeout(async () => {
       try {
@@ -69,6 +70,7 @@ export function PortalTopbar({
     function onClickOutside(e: MouseEvent) {
       if (searchBoxRef.current && !searchBoxRef.current.contains(e.target as Node)) setSearchOpen(false);
       if (menuRef.current && !menuRef.current.contains(e.target as Node)) setMenuOpen(false);
+      if (notifRef.current && !notifRef.current.contains(e.target as Node)) setNotificationsOpen(false);
     }
     function onKeyDown(e: KeyboardEvent) {
       if (e.key === "Escape") {

@@ -50,10 +50,6 @@ function NewSubmissionForm({ assignment, loadingAssignment }: { assignment: { id
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
-  useEffect(() => {
-    if (assignment) setTitle(assignment.title);
-  }, [assignment]);
-
   function addFiles(incoming: FileList | null) {
     if (!incoming || incoming.length === 0) return;
     const next = Array.from(incoming);
@@ -87,7 +83,7 @@ function NewSubmissionForm({ assignment, loadingAssignment }: { assignment: { id
     }
 
     const formData = new FormData();
-    formData.set("title", title.trim());
+    formData.set("title", (assignment?.title ?? title).trim());
     formData.set("notes", notes);
     if (assignment) formData.set("assignmentId", assignment.id);
     files.forEach((f) => formData.append("files", f));
@@ -131,8 +127,9 @@ function NewSubmissionForm({ assignment, loadingAssignment }: { assignment: { id
               <Label>Title</Label>
               <Input
                 required
-                value={title}
+                value={assignment?.title ?? title}
                 onChange={(e) => setTitle(e.target.value)}
+                readOnly={Boolean(assignment)}
                 placeholder="e.g. Milestone 2 — Prototype Development"
                 className="focus:!border-[#6b1029]/40 focus:!ring-[#6b1029]/10"
               />

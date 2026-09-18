@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireRole } from "@/lib/api-guard";
 import { storeFile } from "@/lib/storage";
+import { validateDocumentUpload, contentTypeFor } from "@/lib/uploads";
 import { userBatchIds } from "@/lib/permissions";
 import { logAudit } from "@/lib/audit";
 
@@ -90,11 +91,17 @@ export async function POST(request: Request) {
   });
 
   for (const file of fileEntries) {
+    // Validate every submitted file against the shared allow-list (extension +
+    // size). Never trust the browser-supplied MIME type — derive it from the
+    // filename so a "text/html" upload can't be served back inline as script.
+    const err = validateDocumentUpload({ name: file.name, size: file.size });
+    if (err) return NextResponse.json({ error: err }, { status: 400 });
     const buffer = Buffer.from(await file.arrayBuffer());
+    const safeType = contentTypeFor(file.name);
     const stored = await storeFile({
       buffer,
       filename: file.name,
-      contentType: file.type || "application/octet-stream",
+      contentType: safeType,
       folder: "uploads",
     });
     await prisma.submissionFile.create({
@@ -102,7 +109,7 @@ export async function POST(request: Request) {
         submissionId: submission.id,
         fileName: file.name,
         fileUrl: stored.url,
-        fileType: file.type || "application/octet-stream",
+        fileType: safeType,
         fileSize: buffer.byteLength,
       },
     });

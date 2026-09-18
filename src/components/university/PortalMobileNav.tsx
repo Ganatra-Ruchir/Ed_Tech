@@ -5,12 +5,15 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "motion/react";
 import {
+  AlertTriangle,
+  UserCircle,
   BarChart3,
   Building2,
   ClipboardCheck,
   ClipboardList,
   FileText,
   GraduationCap,
+  Inbox,
   LayoutDashboard,
   Megaphone,
   Menu,
@@ -25,6 +28,9 @@ import type { PortalNavLink, PortalNavGroup } from "./PortalSidebar";
 
 const ICONS: Record<string, LucideIcon> = {
   LayoutDashboard,
+  UserCircle,
+  Inbox,
+  AlertTriangle,
   Megaphone,
   FileText,
   ClipboardCheck,

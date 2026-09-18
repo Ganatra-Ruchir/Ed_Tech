@@ -7,6 +7,8 @@
 }
 
 @theme inline {
+  --color-brand: #6b1029;
+  --color-brand-hover: #7c1638;
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
@@ -22,7 +24,7 @@ body {
 }
 
 ::selection {
-  background-color: rgba(79, 70, 229, 0.22);
+  background-color: rgba(107, 16, 41, 0.18);
 }
 
 /* Thin, unobtrusive scrollbars — matches the dense, quiet tables/sidebars used everywhere */

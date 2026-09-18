@@ -11,7 +11,6 @@ import {
   Plus,
   ArrowRight,
   Inbox,
-  MoreVertical,
   Quote,
 } from "lucide-react";
 import { getSession } from "@/lib/auth";
@@ -78,9 +77,7 @@ export default async function StudentDashboard() {
   const kpiByName = Object.fromEntries(kpis.map((k) => [k.metricName, k.value]));
   // This page is already fully dynamic (reads the session cookie), so
   // capturing the current time for a due-date comparison is safe here.
-  // eslint-disable-next-line react-hooks/purity
-  const now = Date.now();
-  // eslint-disable-next-line react-hooks/purity
+  const now = new Date().getTime();
   const quote = QUOTES[new Date().getDate() % QUOTES.length];
 
   type UpcomingItem = {
@@ -280,7 +277,6 @@ export default async function StudentDashboard() {
                       </p>
                       <p className="mt-1.5 line-clamp-2 text-xs text-zinc-600">{a.body}</p>
                     </div>
-                    <MoreVertical size={14} className="mt-0.5 shrink-0 text-zinc-300" />
                   </li>
                 ))}
               </ul>
@@ -320,7 +316,6 @@ export default async function StudentDashboard() {
                     <Td className="text-zinc-500">{fmtDate(s.createdAt)}</Td>
                     <Td className="text-zinc-500">{s._count.feedback > 0 ? `${s._count.feedback} comment(s)` : "-"}</Td>
                     <Td>
-                      <MoreVertical size={14} className="text-zinc-300" />
                     </Td>
                   </Tr>
                 ))}

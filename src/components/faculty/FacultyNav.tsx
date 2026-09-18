@@ -21,9 +21,11 @@ function buildLinks(isCC: boolean, pendingReviews: number): PortalNavLink[] {
     { href: "/faculty/batches", label: "My Batches", icon: "Users" },
     { href: "/faculty/assignments", label: "Assignments", icon: "ClipboardList" },
     { href: "/faculty/students", label: "Students", icon: "GraduationCap" },
+    { href: "/faculty/at-risk", label: "Needs Attention", icon: "AlertTriangle" },
     { href: "/faculty/tests", label: "Tests", icon: "ClipboardList" },
     { href: "/faculty/announcements", label: "Announcements", icon: "Megaphone" },
     { href: "/faculty/reports", label: "Reports", icon: "FileText" },
+    { href: "/faculty/profile", label: "My Profile", icon: "UserCircle" },
   ];
   if (isCC) {
     links.push({ href: "/faculty/cohort", label: "Cohort Analytics", icon: "BarChart3" });
