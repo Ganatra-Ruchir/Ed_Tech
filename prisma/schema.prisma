@@ -48,6 +48,17 @@ model User {
   passwordHash String
   role         Role
   isCC         Boolean  @default(false)
+  branch       String?
+  college      String?
+  facultyType  String?
+  studentNumber String?
+  enrollmentNumber String?
+  ccName       String?
+  scName       String?
+  profileImageUrl String?
+  dateOfBirth  DateTime?
+  joiningDate  DateTime?
+  salary       Float?
   createdAt    DateTime @default(now())
 
   batchMemberships UserBatch[]
@@ -192,7 +203,6 @@ model TestResponse {
   @@unique([testId, studentId])
   @@index([studentId])
 }
-
 model Answer {
   id             String  @id @default(cuid())
   testResponseId String

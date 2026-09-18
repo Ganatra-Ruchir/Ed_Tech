@@ -1,0 +1,12 @@
+-- AlterTable
+ALTER TABLE "User" ADD COLUMN "branch" TEXT;
+ALTER TABLE "User" ADD COLUMN "ccName" TEXT;
+ALTER TABLE "User" ADD COLUMN "college" TEXT;
+ALTER TABLE "User" ADD COLUMN "dateOfBirth" DATETIME;
+ALTER TABLE "User" ADD COLUMN "enrollmentNumber" TEXT;
+ALTER TABLE "User" ADD COLUMN "facultyType" TEXT;
+ALTER TABLE "User" ADD COLUMN "joiningDate" DATETIME;
+ALTER TABLE "User" ADD COLUMN "profileImageUrl" TEXT;
+ALTER TABLE "User" ADD COLUMN "salary" REAL;
+ALTER TABLE "User" ADD COLUMN "scName" TEXT;
+ALTER TABLE "User" ADD COLUMN "studentNumber" TEXT;

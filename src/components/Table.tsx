@@ -1,31 +1,71 @@
+"use client";
+
 import type { ReactNode } from "react";
+import { motion } from "motion/react";
 import { cn } from "@/lib/cn";
 
 export function Table({ children }: { children: ReactNode }) {
   return (
     <div className="overflow-x-auto">
-      <table className="w-full text-sm">{children}</table>
+      <table className="w-full border-collapse text-sm">{children}</table>
     </div>
   );
 }
 
 export function THead({ children }: { children: ReactNode }) {
   return (
-    <thead className="border-b border-zinc-200 bg-zinc-50/60 text-left text-[11px] font-medium uppercase tracking-wide text-zinc-400">
+    <thead className="sticky top-0 z-10 border-b border-zinc-200 bg-zinc-50/95 text-left text-[11px] font-medium uppercase tracking-wide text-zinc-400 backdrop-blur">
       <tr>{children}</tr>
     </thead>
   );
 }
 
 export function Th({ children, className }: { children?: ReactNode; className?: string }) {
-  return <th className={cn("px-4 py-2 font-medium", className)}>{children}</th>;
+  return <th className={cn("whitespace-nowrap px-4 py-2.5 font-medium", className)}>{children}</th>;
 }
 
-export function Tr({ children, className }: { children: ReactNode; className?: string }) {
+const listVariants = {
+  hidden: {},
+  show: { transition: { staggerChildren: 0.028, delayChildren: 0.02 } },
+};
+
+/**
+ * Drop-in replacement for a plain <tbody> that staggers its <Tr> rows in on
+ * mount/update. Rows read the parent's animate state automatically — no
+ * per-row index bookkeeping needed.
+ */
+export function TBody({ children }: { children: ReactNode }) {
   return (
-    <tr className={cn("border-t border-zinc-100 transition-colors hover:bg-zinc-50", className)}>
+    <motion.tbody variants={listVariants} initial="hidden" animate="show">
       {children}
-    </tr>
+    </motion.tbody>
+  );
+}
+
+const rowVariants = {
+  hidden: { opacity: 0, y: 6 },
+  show: { opacity: 1, y: 0, transition: { duration: 0.22, ease: [0.16, 1, 0.3, 1] as const } },
+};
+
+export function Tr({
+  children,
+  className,
+  onClick,
+}: {
+  children: ReactNode;
+  className?: string;
+  onClick?: () => void;
+}) {
+  return (
+    <motion.tr
+      variants={rowVariants}
+      onClick={onClick}
+      whileHover={{ backgroundColor: "rgba(24,24,27,0.035)" }}
+      transition={{ backgroundColor: { duration: 0.12 } }}
+      className={cn("border-t border-zinc-100", onClick && "cursor-pointer", className)}
+    >
+      {children}
+    </motion.tr>
   );
 }
 

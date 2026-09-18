@@ -1,16 +1,14 @@
-import { FileText } from "lucide-react";
+import Link from "next/link";
 import { notFound } from "next/navigation";
+import { ArrowLeft, FileText, ExternalLink } from "lucide-react";
 import { getSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { canAccessSubmission } from "@/lib/permissions";
 import { StatusBadge } from "@/components/StatusBadge";
 import { Card } from "@/components/Card";
+import { Avatar } from "@/components/Avatar";
+import { fmtDateTime } from "@/components/faculty/faculty-format";
 import { ReviewPanel } from "./ReviewPanel";
-
-function fmtDateTime(d: Date | null): string {
-  if (!d) return "-";
-  return new Date(d).toLocaleString("en-IN", { dateStyle: "medium", timeStyle: "short" });
-}
 
 export default async function FacultySubmissionDetail({
   params,
@@ -24,7 +22,7 @@ export default async function FacultySubmissionDetail({
     where: { id },
     include: {
       student: { select: { id: true, name: true, email: true } },
-      batch: { select: { id: true, name: true } },
+      batch: { select: { id: true, name: true, department: true, semester: true } },
       files: true,
       evidence: { include: { faculty: { select: { name: true } } }, orderBy: { createdAt: "desc" } },
       feedback: { include: { faculty: { select: { name: true } } }, orderBy: { createdAt: "desc" } },
@@ -42,69 +40,83 @@ export default async function FacultySubmissionDetail({
   });
 
   return (
-    <div className="grid max-w-4xl grid-cols-1 gap-6 md:grid-cols-3">
-      <div className="space-y-5 md:col-span-2">
-        <div>
-          <div className="flex items-center gap-3">
-            <h1 className="text-[15px] font-semibold text-zinc-900">{submission.title}</h1>
-            <StatusBadge status={submission.status} />
-          </div>
-          <p className="mt-1 text-sm text-zinc-500">
-            {submission.student.name} · {submission.batch.name} · Submitted {fmtDateTime(submission.createdAt)}
-          </p>
-        </div>
+    <div className="space-y-4">
+      <Link
+        href="/faculty/review"
+        className="inline-flex items-center gap-1.5 text-[12.5px] font-medium text-zinc-500 hover:text-zinc-900"
+      >
+        <ArrowLeft size={13} /> Back to queue
+      </Link>
 
-        {submission.notes && (
-          <Card className="p-4 text-sm text-zinc-700">{submission.notes}</Card>
-        )}
-
-        <div>
-          <h2 className="mb-2 text-xs font-semibold uppercase tracking-wide text-zinc-400">Files</h2>
-          <ul className="space-y-1">
-            {submission.files.map((f) => (
-              <li key={f.id} className="flex items-center gap-1.5">
-                <FileText size={13} className="text-zinc-400" />
-                <a href={f.fileUrl} target="_blank" className="text-sm text-indigo-600 hover:underline">
-                  {f.fileName}
-                </a>
-              </li>
-            ))}
-          </ul>
-        </div>
-
-        <ReviewPanel
-          submissionId={submission.id}
-          currentStatus={submission.status}
-          existingEvidence={submission.evidence.map((e) => ({
-            id: e.id,
-            tag: e.tag,
-            notes: e.notes,
-            faculty: e.faculty.name,
-            createdAt: e.createdAt.toISOString(),
-          }))}
-          existingFeedback={submission.feedback.map((f) => ({
-            id: f.id,
-            comment: f.comment,
-            faculty: f.faculty.name,
-            createdAt: f.createdAt.toISOString(),
-          }))}
-        />
-      </div>
-
-      <div>
-        <h2 className="mb-2 text-xs font-semibold uppercase tracking-wide text-zinc-400">Audit trail</h2>
-        <ul className="space-y-2">
-          {auditLogs.length === 0 && <p className="text-sm text-zinc-500">No actions logged yet.</p>}
-          {auditLogs.map((log) => (
-            <Card key={log.id} className="p-2.5 text-xs">
-              <p className="font-medium text-zinc-800">{log.action}</p>
-              <p className="text-zinc-500">
-                {log.actor.name} · {fmtDateTime(log.createdAt)}
+      <Card className="p-4">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div className="flex min-w-0 items-center gap-3">
+            <Avatar name={submission.student.name} size="lg" />
+            <div className="min-w-0">
+              <p className="truncate text-[15px] font-semibold text-zinc-900">{submission.student.name}</p>
+              <p className="truncate text-[12px] text-zinc-500">
+                {submission.batch.department} · {submission.batch.name} · {submission.student.email}
               </p>
-            </Card>
-          ))}
-        </ul>
-      </div>
+            </div>
+          </div>
+          <Link
+            href={`/faculty/students/${submission.student.id}`}
+            className="inline-flex shrink-0 items-center gap-1.5 rounded-md border border-[#6b1029]/20 bg-[#6b1029]/[0.06] px-3 py-2 text-[12.5px] font-medium text-[#6b1029] transition-colors hover:bg-[#6b1029] hover:text-white"
+          >
+            View Student Profile <ExternalLink size={12} />
+          </Link>
+        </div>
+      </Card>
+
+      <Card className="p-4">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div className="flex min-w-0 items-center gap-3">
+            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-[#6b1029]/[0.07] text-[#6b1029]">
+              <FileText size={16} />
+            </span>
+            <div className="min-w-0">
+              <h1 className="truncate text-[15px] font-semibold text-zinc-900">{submission.title}</h1>
+              <p className="truncate text-[12px] text-zinc-500">
+                Submitted on {fmtDateTime(submission.createdAt)}
+                {submission.reviewedAt ? ` · Reviewed ${fmtDateTime(submission.reviewedAt)}` : ""}
+              </p>
+            </div>
+          </div>
+          <StatusBadge status={submission.status} />
+        </div>
+      </Card>
+
+      <ReviewPanel
+        submissionId={submission.id}
+        currentStatus={submission.status}
+        notes={submission.notes}
+        files={submission.files.map((f) => ({
+          id: f.id,
+          fileName: f.fileName,
+          fileUrl: f.fileUrl,
+          fileType: f.fileType,
+          fileSize: f.fileSize,
+        }))}
+        existingEvidence={submission.evidence.map((e) => ({
+          id: e.id,
+          tag: e.tag,
+          notes: e.notes,
+          faculty: e.faculty.name,
+          createdAt: e.createdAt.toISOString(),
+        }))}
+        existingFeedback={submission.feedback.map((f) => ({
+          id: f.id,
+          comment: f.comment,
+          faculty: f.faculty.name,
+          createdAt: f.createdAt.toISOString(),
+        }))}
+        activity={auditLogs.map((log) => ({
+          id: log.id,
+          action: log.action,
+          actor: log.actor.name,
+          createdAt: log.createdAt.toISOString(),
+        }))}
+      />
     </div>
   );
 }

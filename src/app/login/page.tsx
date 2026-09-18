@@ -4,15 +4,6 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { GraduationCap, Lock, Mail } from "lucide-react";
 
-const DEMO_ACCOUNTS = [
-  { role: "Admin", email: "admin@sou.edu" },
-  { role: "Faculty (CC, both batches)", email: "priya.sharma@sou.edu" },
-  { role: "Faculty (Batch A)", email: "anil.mehta@sou.edu" },
-  { role: "Faculty (Batch B)", email: "neha.verma@sou.edu" },
-  { role: "Student (Batch A)", email: "student01@sou.edu" },
-  { role: "Student (Batch B)", email: "student11@sou.edu" },
-];
-
 export default function LoginPage() {
   const router = useRouter();
   const [email, setEmail] = useState("");
@@ -49,10 +40,8 @@ export default function LoginPage() {
           <span className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-2xl bg-indigo-600 text-white shadow-sm shadow-indigo-200">
             <GraduationCap size={24} />
           </span>
-          <h1 className="text-xl font-semibold text-zinc-900">
-            Student Progress &amp; Evaluation Platform
-          </h1>
-          <p className="mt-1 text-sm text-zinc-500">Silver Oak University — Pilot</p>
+          <h1 className="text-xl font-semibold text-zinc-900">Admin Access</h1>
+          <p className="mt-1 text-sm text-zinc-500">Silver Oak University — Secure sign in</p>
         </div>
 
         <form
@@ -99,23 +88,6 @@ export default function LoginPage() {
           </button>
         </form>
 
-        <div className="mt-6 rounded-xl border border-dashed border-zinc-300 bg-white/60 p-4 text-xs text-zinc-600">
-          <p className="mb-2 font-semibold text-zinc-700">Demo accounts (password: password123)</p>
-          <ul className="space-y-1">
-            {DEMO_ACCOUNTS.map((a) => (
-              <li key={a.email} className="flex justify-between gap-2">
-                <span>{a.role}</span>
-                <button
-                  type="button"
-                  onClick={() => setEmail(a.email)}
-                  className="font-mono text-zinc-500 underline decoration-dotted hover:text-indigo-600"
-                >
-                  {a.email}
-                </button>
-              </li>
-            ))}
-          </ul>
-        </div>
       </div>
     </div>
   );

@@ -10,7 +10,7 @@ import { TrendChart } from "@/components/TrendChart";
 import { PageHeader } from "@/components/PageHeader";
 import { Card } from "@/components/Card";
 import { EmptyState } from "@/components/EmptyState";
-import { Table, THead, Th, Tr, Td } from "@/components/Table";
+import { Table, THead, Th, Tr, Td, TBody } from "@/components/Table";
 import { Avatar } from "@/components/Avatar";
 
 export default async function CohortAnalyticsPage() {
@@ -62,7 +62,7 @@ export default async function CohortAnalyticsPage() {
               <Th>Avg score</Th>
               <Th></Th>
             </THead>
-            <tbody>
+            <TBody>
               {overview.batches.map((b) => (
                 <Tr key={b.id}>
                   <Td className="font-medium text-zinc-900">{b.name}</Td>
@@ -82,7 +82,7 @@ export default async function CohortAnalyticsPage() {
                   </Td>
                 </Tr>
               ))}
-            </tbody>
+            </TBody>
           </Table>
         </Card>
       </section>

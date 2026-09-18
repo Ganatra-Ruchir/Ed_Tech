@@ -8,7 +8,7 @@ import { TrendChart } from "@/components/TrendChart";
 import { GenerateReportButton } from "@/components/GenerateReportButton";
 import { PageHeader } from "@/components/PageHeader";
 import { Card } from "@/components/Card";
-import { Table, THead, Th, Tr, Td } from "@/components/Table";
+import { Table, THead, Th, Tr, Td, TBody } from "@/components/Table";
 
 export default async function CohortBatchDrilldown({
   params,
@@ -60,7 +60,7 @@ export default async function CohortBatchDrilldown({
               <Th>Status</Th>
               <Th></Th>
             </THead>
-            <tbody>
+            <TBody>
               {overview.students.map((s) => (
                 <Tr key={s.id}>
                   <Td className="font-medium text-zinc-900">{s.name}</Td>
@@ -76,7 +76,7 @@ export default async function CohortBatchDrilldown({
                   </Td>
                 </Tr>
               ))}
-            </tbody>
+            </TBody>
           </Table>
         </Card>
       </section>

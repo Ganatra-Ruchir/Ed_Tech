@@ -1,6 +1,14 @@
+"use client";
+
 import Link from "next/link";
+import { motion } from "motion/react";
 import type { ButtonHTMLAttributes, ReactNode } from "react";
 import { cn } from "@/lib/cn";
+
+type SafeButtonProps = Omit<
+  ButtonHTMLAttributes<HTMLButtonElement>,
+  "onAnimationStart" | "onAnimationEnd" | "onAnimationIteration" | "onDrag" | "onDragStart" | "onDragEnd"
+>;
 
 type Variant = "primary" | "secondary" | "ghost" | "danger";
 type Size = "sm" | "md";
@@ -21,14 +29,24 @@ const SIZES: Record<Size, string> = {
 const base =
   "inline-flex items-center justify-center rounded-md font-medium transition-colors disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500/40";
 
+const MotionLink = motion.create(Link);
+
 export function Button({
   variant = "primary",
   size = "md",
   className,
+  disabled,
   ...props
-}: ButtonHTMLAttributes<HTMLButtonElement> & { variant?: Variant; size?: Size }) {
+}: SafeButtonProps & { variant?: Variant; size?: Size }) {
   return (
-    <button className={cn(base, VARIANTS[variant], SIZES[size], className)} {...props} />
+    <motion.button
+      whileHover={disabled ? undefined : { scale: 1.015 }}
+      whileTap={disabled ? undefined : { scale: 0.97 }}
+      transition={{ duration: 0.12 }}
+      disabled={disabled}
+      className={cn(base, VARIANTS[variant], SIZES[size], className)}
+      {...props}
+    />
   );
 }
 
@@ -46,8 +64,14 @@ export function LinkButton({
   children: ReactNode;
 }) {
   return (
-    <Link href={href} className={cn(base, VARIANTS[variant], SIZES[size], className)}>
+    <MotionLink
+      href={href}
+      whileHover={{ scale: 1.015 }}
+      whileTap={{ scale: 0.97 }}
+      transition={{ duration: 0.12 }}
+      className={cn(base, VARIANTS[variant], SIZES[size], className)}
+    >
       {children}
-    </Link>
+    </MotionLink>
   );
 }
