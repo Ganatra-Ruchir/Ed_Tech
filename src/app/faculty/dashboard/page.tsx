@@ -14,6 +14,8 @@ import {
 import { getSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { userBatchIds } from "@/lib/permissions";
+import { getFacultyAttendanceStatus } from "@/lib/staff-attendance";
+import { OfficeAttendanceCard } from "@/components/faculty/OfficeAttendanceCard";
 import { Card } from "@/components/Card";
 import { Avatar } from "@/components/Avatar";
 import { EmptyState } from "@/components/EmptyState";
@@ -82,6 +84,7 @@ export default async function FacultyDashboard({
 }) {
   const session = await getSession();
   const { semester } = await searchParams;
+  const attendanceStatus = await getFacultyAttendanceStatus(session!.sub);
 
   const myBatches = await prisma.batch.findMany({
     where: session!.isCC ? {} : { id: { in: await userBatchIds(session!.sub) } },
@@ -246,6 +249,8 @@ export default async function FacultyDashboard({
         </div>
         <SemesterSelect semesters={semesters} value={activeSemester} />
       </div>
+
+      <OfficeAttendanceCard initial={attendanceStatus} />
 
       <section className="grid grid-cols-2 gap-3 lg:grid-cols-4">
         <StatCard

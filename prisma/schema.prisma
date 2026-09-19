@@ -74,6 +74,7 @@ model User {
   announcementComments AnnouncementComment[]
   assignmentsCreated Assignment[] @relation("FacultyAssignments")
   attendanceRecords Attendance[]
+  staffAttendance   StaffAttendance[]
   interventions      Intervention[] @relation("StudentInterventions")
   interventionsRaised Intervention[] @relation("RaisedInterventions")
   privateNotes       PrivateNote[]  @relation("StudentPrivateNotes")
@@ -151,6 +152,29 @@ model Attendance {
   @@unique([batchId, studentId, date])
   @@index([batchId, date])
   @@index([studentId, date])
+}
+
+model StaffAttendance {
+  id         String    @id @default(cuid())
+  facultyId  String
+  date       DateTime
+  checkInAt  DateTime?
+  checkOutAt DateTime?
+  isLate     Boolean   @default(false)
+  createdAt  DateTime  @default(now())
+
+  faculty User @relation(fields: [facultyId], references: [id], onDelete: Cascade)
+
+  @@unique([facultyId, date])
+  @@index([date])
+}
+
+/** Singleton row (fixed id) holding office-hours config used to flag late
+ * faculty check-ins. Read/written only from src/lib/staff-attendance.ts. */
+model AttendanceSettings {
+  id              String   @id @default("singleton")
+  officeStartTime String   @default("09:30")
+  updatedAt       DateTime @updatedAt
 }
 
 model Announcement {

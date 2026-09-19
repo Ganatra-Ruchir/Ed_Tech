@@ -12,6 +12,7 @@ export const ADMIN_LINKS: PortalNavGroup[] = [
     links: [
       { href: "/admin/students", label: "Students", icon: "Users" },
       { href: "/admin/faculty", label: "Faculty", icon: "GraduationCap" },
+      { href: "/admin/staff-attendance", label: "Staff Attendance", icon: "Clock" },
       { href: "/admin/batches", label: "Batches", icon: "Building2" },
     ],
   },
