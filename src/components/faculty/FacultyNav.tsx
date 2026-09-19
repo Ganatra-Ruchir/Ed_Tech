@@ -12,6 +12,7 @@ const TITLE = "Faculty Portal";
 function buildLinks(isCC: boolean, pendingReviews: number): PortalNavLink[] {
   const links: PortalNavLink[] = [
     { href: "/faculty/dashboard", label: "Dashboard", icon: "LayoutDashboard" },
+    { href: "/messages", label: "Messages", icon: "MessageSquare" },
     {
       href: "/faculty/review",
       label: "Review Queue",

@@ -5,6 +5,7 @@ import type { PortalNavLink } from "@/components/university/PortalSidebar";
  * boundary without creating a React component object in the server payload. */
 export const STUDENT_LINKS: PortalNavLink[] = [
   { href: "/student", label: "Dashboard", icon: "LayoutDashboard" },
+  { href: "/messages", label: "Messages", icon: "MessageSquare" },
   { href: "/student/stream", label: "Class Stream", icon: "Megaphone" },
   { href: "/student/reports", label: "My Report", icon: "FileText" },
   { href: "/student/submissions", label: "Submissions", icon: "ClipboardCheck" },

@@ -82,7 +82,7 @@ export async function POST(request: Request) {
 
   if (file instanceof File && file.size > 0) {
     const buffer = Buffer.from(await file.arrayBuffer());
-    const contentType = file.type || contentTypeFor(file.name);
+    const contentType = contentTypeFor(file.name);
     const stored = await storeFile({
       buffer,
       filename: file.name,
@@ -95,7 +95,7 @@ export async function POST(request: Request) {
         attachmentUrl: stored.url,
         attachmentStorageKey: stored.storageKey,
         attachmentName: file.name,
-        attachmentType: file.type || contentTypeFor(file.name),
+        attachmentType: contentTypeFor(file.name),
         attachmentSize: buffer.byteLength,
       },
     });

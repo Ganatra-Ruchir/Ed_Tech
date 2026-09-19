@@ -79,6 +79,9 @@ model User {
   interventionsRaised Intervention[] @relation("RaisedInterventions")
   privateNotes       PrivateNote[]  @relation("StudentPrivateNotes")
   privateNotesAuthored PrivateNote[] @relation("AuthorPrivateNotes")
+  conversationMemberships ConversationMember[]
+  messagesSent Message[] @relation("SentMessages")
+  conversationsCreated Conversation[] @relation("CreatedConversations")
 
   @@index([role])
 }
@@ -112,6 +115,63 @@ model UserBatch {
 
   @@unique([userId, batchId])
   @@index([batchId])
+}
+
+model Conversation {
+  id          String   @id @default(cuid())
+  title       String?
+  isGroup     Boolean  @default(false)
+  createdById String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  createdBy User @relation("CreatedConversations", fields: [createdById], references: [id], onDelete: Cascade)
+  members ConversationMember[]
+  messages Message[]
+
+  @@index([updatedAt])
+}
+
+model ConversationMember {
+  id             String   @id @default(cuid())
+  conversationId String
+  userId         String
+  joinedAt       DateTime @default(now())
+  lastReadAt     DateTime?
+
+  conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  user         User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([conversationId, userId])
+  @@index([userId])
+}
+
+model Message {
+  id             String   @id @default(cuid())
+  conversationId String
+  senderId       String
+  body           String
+  createdAt      DateTime @default(now())
+
+  conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  sender       User @relation("SentMessages", fields: [senderId], references: [id], onDelete: Cascade)
+  attachments  MessageAttachment[]
+
+  @@index([conversationId, createdAt])
+}
+
+model MessageAttachment {
+  id         String @id @default(cuid())
+  messageId  String
+  fileName   String
+  fileUrl    String
+  storageKey String
+  fileType   String
+  fileSize   Int
+
+  message Message @relation(fields: [messageId], references: [id], onDelete: Cascade)
+
+  @@index([messageId])
 }
 
 model Assignment {

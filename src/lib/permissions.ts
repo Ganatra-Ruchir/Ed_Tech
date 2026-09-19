@@ -14,6 +14,11 @@ export async function canAccessBatch(
   batchId: string,
 ): Promise<boolean> {
   if (session.role === "ADMIN") return true;
+  // Course coordinators are intentionally unrestricted across all batches --
+  // every call site used to have to remember to OR in session.isCC itself,
+  // which several routes forgot (denying legitimate CC access). Centralizing
+  // it here means every caller gets it right automatically.
+  if (session.role === "FACULTY" && session.isCC) return true;
   if (session.role === "FACULTY" || session.role === "STUDENT") {
     const ids = await userBatchIds(session.sub);
     return ids.includes(batchId);
@@ -38,6 +43,7 @@ export async function canAccessStudent(
   if (session.role === "ADMIN") return true;
   if (session.role === "STUDENT") return session.sub === studentId;
   if (session.role === "FACULTY") {
+    if (session.isCC) return true;
     const [facultyBatches, studentBatches] = await Promise.all([
       userBatchIds(session.sub),
       userBatchIds(studentId),

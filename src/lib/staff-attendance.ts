@@ -46,6 +46,19 @@ function dayStart(d: Date = new Date()): Date {
   return copy;
 }
 
+/** Parses a "YYYY-MM-DD" input (from an <input type="date">) as a LOCAL
+ * calendar date. new Date("2026-09-19") would parse that as UTC midnight,
+ * which dayStart()'s local setHours(0,0,0,0) can then snap to the *previous*
+ * local day on any timezone with a negative UTC offset -- picking "Sept 19"
+ * in the admin roster date filter must always mean Sept 19 in this server's
+ * local time, never a day off depending on where it's deployed. */
+function parseDateInput(value: string): Date {
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value);
+  if (!match) return dayStart(new Date(value));
+  const [, y, m, d] = match;
+  return new Date(Number(y), Number(m) - 1, Number(d));
+}
+
 function toDTO(record: RawStaffAttendanceRow): StaffAttendanceRecordDTO {
   return {
     id: record.id,
@@ -145,7 +158,7 @@ export async function checkOut(
 }
 
 export async function getAdminAttendanceRoster(dateInput?: string): Promise<AdminAttendanceRosterDTO> {
-  const date = dayStart(dateInput ? new Date(dateInput) : new Date());
+  const date = dateInput ? parseDateInput(dateInput) : dayStart();
   const officeStartTime = await getOfficeStartTime();
 
   const [faculty, records]: [RawFacultyRow[], RawStaffAttendanceRow[]] = await Promise.all([

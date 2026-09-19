@@ -84,7 +84,7 @@ export async function POST(request: Request) {
     const err = validateDocumentUpload({ name: file.name, size: file.size });
     if (err) return NextResponse.json({ error: err }, { status: 400 });
     const buffer = Buffer.from(await file.arrayBuffer());
-    const contentType = file.type || contentTypeFor(file.name);
+    const contentType = contentTypeFor(file.name);
     const stored = await storeFile({ buffer, filename: file.name, contentType, folder: "announcements" });
     await prisma.announcement.update({ where: { id: announcement.id }, data: { attachmentUrl: stored.url, attachmentStorageKey: stored.storageKey, attachmentName: file.name, attachmentType: contentType, attachmentSize: buffer.byteLength } });
   }

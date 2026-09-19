@@ -6,14 +6,22 @@ import { canAccessSubmission, canAccessStudent, canAccessBatch } from "@/lib/per
 
 // Force a download for anything that isn't a safe inline type. Serving an
 // uploaded HTML/SVG file inline same-origin would let it run scripts in the
-// viewer's authenticated session, so only images and PDFs are shown inline.
+// viewer's authenticated session, so only raster images and PDFs are shown
+// inline. image/svg+xml is EXCLUDED even though it starts with "image/" --
+// an SVG can carry a <script> tag and Content-Disposition: inline would
+// execute it same-origin with the viewer's session cookie.
+const INLINE_SAFE_EXACT = new Set(["application/pdf"]);
 function inlineSafe(contentType: string): boolean {
-  return contentType.startsWith("image/") || contentType === "application/pdf";
+  if (contentType === "image/svg+xml") return false;
+  return contentType.startsWith("image/") || INLINE_SAFE_EXACT.has(contentType);
 }
 function dispositionFor(contentType: string, filename: string): string {
   const mode = inlineSafe(contentType) ? "inline" : "attachment";
   return `${mode}; filename="${filename.replace(/"/g, "")}"`;
 }
+// Belt-and-braces: even for the types we do serve inline, tell the browser
+// not to sniff the body into a different, more dangerous content type.
+const NOSNIFF = { "X-Content-Type-Options": "nosniff" } as const;
 
 // Only used in local-disk fallback mode (no BLOB_READ_WRITE_TOKEN). Vercel
 // Blob URLs are served directly and bypass this route entirely.
@@ -41,6 +49,7 @@ export async function GET(
       const buffer = await readLocalFile(key);
       return new NextResponse(new Uint8Array(buffer), {
         headers: {
+          ...NOSNIFF,
           "Content-Type": file.fileType,
           "Content-Disposition": dispositionFor(file.fileType, file.fileName),
         },
@@ -54,6 +63,7 @@ export async function GET(
       const buffer = await readLocalFile(key);
       return new NextResponse(new Uint8Array(buffer), {
         headers: {
+          ...NOSNIFF,
           "Content-Type": "image/*",
           "Content-Disposition": `inline; filename="avatar"`,
           "Cache-Control": "private, max-age=300",
@@ -75,6 +85,7 @@ export async function GET(
     const buffer = await readLocalFile(key);
     return new NextResponse(new Uint8Array(buffer), {
       headers: {
+        ...NOSNIFF,
         "Content-Type": "application/pdf",
         "Content-Disposition": `inline; filename="report.pdf"`,
       },
@@ -92,6 +103,7 @@ export async function GET(
     const buffer = await readLocalFile(key);
     return new NextResponse(new Uint8Array(buffer), {
       headers: {
+        ...NOSNIFF,
         "Content-Type": file.attachmentType ?? "application/pdf",
         "Content-Disposition": dispositionFor(file.attachmentType ?? "application/pdf", file.attachmentName ?? "assignment.pdf"),
       },
@@ -103,7 +115,15 @@ export async function GET(
     if (!file) return NextResponse.json({ error: "Not found" }, { status: 404 });
     if (!(await canAccessBatch(session, file.batchId))) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     const buffer = await readLocalFile(key);
-    return new NextResponse(new Uint8Array(buffer), { headers: { "Content-Type": file.attachmentType ?? "application/pdf", "Content-Disposition": dispositionFor(file.attachmentType ?? "application/pdf", file.attachmentName ?? "announcement.pdf") } });
+    return new NextResponse(new Uint8Array(buffer), { headers: { ...NOSNIFF, "Content-Type": file.attachmentType ?? "application/pdf", "Content-Disposition": dispositionFor(file.attachmentType ?? "application/pdf", file.attachmentName ?? "announcement.pdf") } });
+  }
+
+  if (key.startsWith("messages/")) {
+    const file = await prisma.messageAttachment.findFirst({ where: { fileUrl: url }, include: { message: { include: { conversation: { include: { members: true } } } } } });
+    if (!file) return NextResponse.json({ error: "Not found" }, { status: 404 });
+    if (!file.message.conversation.members.some((member) => member.userId === session.sub)) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    const buffer = await readLocalFile(key);
+    return new NextResponse(new Uint8Array(buffer), { headers: { ...NOSNIFF, "Content-Type": file.fileType, "Content-Disposition": dispositionFor(file.fileType, file.fileName) } });
   }
 
   return NextResponse.json({ error: "Not found" }, { status: 404 });

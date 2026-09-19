@@ -61,6 +61,15 @@ export async function proxy(request: NextRequest) {
     );
   }
 
+  if (pathname === "/messages" || pathname.startsWith("/messages/")) {
+    if (!role) {
+      const url = new URL("/login", request.url);
+      url.searchParams.set("next", pathname);
+      return NextResponse.redirect(url);
+    }
+    return NextResponse.next();
+  }
+
   const matchedPrefix = Object.keys(ROLE_PREFIXES).find((prefix) =>
     pathname.startsWith(prefix),
   );

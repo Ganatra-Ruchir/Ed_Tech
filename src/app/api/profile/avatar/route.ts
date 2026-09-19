@@ -33,7 +33,7 @@ export async function POST(request: Request) {
   const stored = await storeFile({
     buffer,
     filename: file.name,
-    contentType: file.type || contentTypeFor(file.name),
+    contentType: contentTypeFor(file.name),
     folder: "uploads",
   });
 

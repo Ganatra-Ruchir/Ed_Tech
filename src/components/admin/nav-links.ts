@@ -5,7 +5,7 @@ import type { PortalNavGroup } from "@/components/university/PortalSidebar";
  * React component functions across the server/client boundary. */
 export const ADMIN_LINKS: PortalNavGroup[] = [
   {
-    links: [{ href: "/admin", label: "Dashboard", icon: "LayoutDashboard" }],
+    links: [{ href: "/admin", label: "Dashboard", icon: "LayoutDashboard" }, { href: "/messages", label: "Messages", icon: "MessageSquare" }],
   },
   {
     label: "Directory",

@@ -17,6 +17,7 @@ import {
   Inbox,
   LayoutDashboard,
   Megaphone,
+  MessageSquare,
   ScrollText,
   Users,
 } from "lucide-react";
@@ -29,6 +30,7 @@ const ICONS: Record<string, LucideIcon> = {
   Inbox,
   AlertTriangle,
   Megaphone,
+  MessageSquare,
   FileText,
   ClipboardCheck,
   ClipboardList,

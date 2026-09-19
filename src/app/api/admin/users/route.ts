@@ -14,7 +14,9 @@ const createUserSchema = z.object({
   college: z.string().min(1).max(200).nullable().optional(),
   facultyType: z.string().max(50).nullable().optional(),
   isCC: z.boolean().optional(),
-  salary: z.number().nullable().optional(),
+  // Bounded to catch fat-finger and malicious values alike; ceiling is
+  // generously above any plausible salary figure for this institution.
+  salary: z.number().min(0).max(100_000_000).nullable().optional(),
   dateOfBirth: z.string().nullable().optional(),
   joiningDate: z.string().nullable().optional(),
   studentNumber: z.string().max(80).nullable().optional(),
