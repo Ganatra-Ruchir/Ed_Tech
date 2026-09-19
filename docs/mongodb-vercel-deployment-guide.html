@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>MongoDB and Vercel Deployment Guide</title>
+<style>
+@page { size: A4; margin: 18mm 16mm; }
+* { box-sizing: border-box; }
+body { font-family: "Segoe UI", Arial, sans-serif; color: #202124; font-size: 10.5pt; line-height: 1.45; margin: 0; }
+.cover { min-height: 245mm; padding: 28mm 12mm; background: #f5f7fb; page-break-after: always; }
+.eyebrow { color: #5267a8; font-size: 10pt; font-weight: 700; letter-spacing: 1.2px; text-transform: uppercase; }
+h1 { color: #17213b; font-size: 21pt; margin: 0 0 10px; }
+h2 { color: #17213b; font-size: 16pt; margin: 0 0 10px; }
+h3 { color: #344267; font-size: 12pt; margin: 16px 0 6px; }
+p { margin: 0 0 8px; }
+.lead { color: #596273; font-size: 13pt; max-width: 145mm; }
+.rule { width: 22mm; height: 3px; background: #5267a8; margin: 22px 0; }
+section { page-break-inside: avoid; margin-bottom: 16px; }
+ul { margin-top: 4px; padding-left: 22px; }
+li { margin-bottom: 5px; }
+pre { white-space: pre-wrap; background: #eef1f7; color: #26344f; border-left: 3px solid #5267a8; padding: 9px; font: 8.5pt/1.45 Consolas, monospace; page-break-inside: avoid; }
+.callout { border-left: 4px solid #d18b3d; background: #fff7e9; padding: 10px; margin: 10px 0; page-break-inside: avoid; }
+.check { margin: 5px 0; }
+.footer { color: #8790a3; font-size: 8pt; border-top: 1px solid #e4e7ee; margin-top: 18px; padding-top: 5px; }
+.page-break { page-break-before: always; }
+</style>
+</head>
+<body>
+<div class="cover">
+  <div class="eyebrow">Ed Tech Platform</div>
+  <h1>MongoDB and Vercel Deployment Guide</h1>
+  <p class="lead">A step-by-step roadmap for moving the Student Progress &amp; Evaluation Platform from local SQLite to MongoDB Atlas and deploying it on Vercel.</p>
+  <div class="rule"></div>
+  <p>Prepared for the admin-only application baseline.</p>
+  <div class="callout"><b>Key decision:</b> Prisma 7 does not support MongoDB. This guide uses Prisma 6 for MongoDB. PostgreSQL remains the lower-risk option for this relational application.</div>
+</div>
+
+<section><h2>1. Roadmap and Architecture Decision</h2>
+<p>Complete the migration in this order:</p>
+<ul><li>Create a MongoDB Atlas cluster and database user.</li><li>Downgrade Prisma from version 7 to the latest Prisma 6 release.</li><li>Convert the schema provider from SQLite to MongoDB.</li><li>Convert IDs and relation fields to MongoDB ObjectIds.</li><li>Replace the SQLite Prisma adapter with the classic Prisma client.</li><li>Use <code>prisma db push</code> instead of SQL migrations.</li><li>Seed only the admin account.</li><li>Add production environment variables in Vercel.</li><li>Deploy, test login, and verify database persistence.</li></ul>
+<div class="callout">MongoDB is document-oriented, but this application has many relational models: users, batches, submissions, tests, feedback, evidence, reports, and audit logs. Expect a schema conversion, not a one-line provider change.</div>
+</section>
+<section><h2>2. Create MongoDB Atlas Database</h2>
+<ul><li>Open <b>mongodb.com/atlas</b> and create a free cluster.</li><li>Create a database user with a strong password.</li><li>Under Network Access, allow Vercel connections. For a first deployment, <code>0.0.0.0/0</code> works, but restrict access where possible.</li><li>Choose Connect, Drivers, and copy the MongoDB connection string.</li></ul>
+<pre>mongodb+srv://edtech_admin:PASSWORD@cluster.mongodb.net/edtech?retryWrites=true&amp;w=majority</pre></section>
+
+<section class="page-break"><h2>3. Install Prisma MongoDB Dependencies</h2>
+<pre>cd C:\Users\thakk\Downloads\webbb
+npm uninstall @prisma/client prisma @prisma/adapter-better-sqlite3 better-sqlite3
+npm install @prisma/client@6 prisma@6
+npm install -D tsx</pre>
+<p>MongoDB projects should remain on Prisma 6. Do not use Prisma 7 SQL driver adapters for MongoDB.</p></section>
+<section><h2>4. Update Prisma Schema Header</h2>
+<p>In <code>prisma/schema.prisma</code>, use:</p>
+<pre>generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}</pre></section>
+<section><h2>5. Convert IDs to ObjectIds</h2>
+<p>MongoDB model IDs should use:</p>
+<pre>id String @id @default(auto()) @map("_id") @db.ObjectId</pre>
+<p>Every relation scalar must use <code>@db.ObjectId</code> too:</p>
+<pre>userId  String @db.ObjectId
+batchId String @db.ObjectId
+someId  String? @db.ObjectId</pre>
+<p>Apply this to User, Batch, UserBatch, Announcement, Submission, SubmissionFile, Test, Question, TestResponse, Answer, Evidence, Feedback, KPI, Report, and AuditLog.</p>
+
+<section class="page-break"><h2>6. Replace the Prisma Client Setup</h2>
+<p>Replace the SQLite adapter in <code>src/lib/prisma.ts</code> with:</p>
+<pre>import { PrismaClient } from "@prisma/client";
+
+const globalForPrisma = globalThis as unknown as {
+  prisma: PrismaClient | undefined;
+};
+
+export const prisma = globalForPrisma.prisma ?? new PrismaClient({
+  log: process.env.NODE_ENV === "development"
+    ? ["error", "warn"]
+    : ["error"],
+});
+
+if (process.env.NODE_ENV !== "production") {
+  globalForPrisma.prisma = prisma;
+}</pre></section>
+<section><h2>7. Configure Local Environment</h2>
+<pre>DATABASE_URL="mongodb+srv://edtech_admin:YOUR_PASSWORD@cluster.mongodb.net/edtech?retryWrites=true&amp;w=majority"
+AUTH_SECRET="replace-with-a-long-random-secret"</pre>
+<p>Do not commit <code>.env</code> or database credentials.</p></section>
+<section><h2>8. Generate, Push, and Seed</h2>
+<pre>npx prisma generate
+npx prisma db push
+npx tsx prisma/seed.ts
+npx prisma studio</pre>
+<div class="callout">MongoDB does not use the existing SQL migration workflow. Use <code>prisma db push</code>. The current seed script resets demo records and creates only <code>admin@sou.edu</code>.</div></section>
+
+<section class="page-break"><h2>9. Configure Vercel</h2>
+<p>In Vercel, open Project Settings, Environment Variables, and add these for Production, Preview, and Development:</p>
+<pre>DATABASE_URL=mongodb+srv://edtech_admin:YOUR_PASSWORD@cluster.mongodb.net/edtech?retryWrites=true&amp;w=majority
+AUTH_SECRET=your-production-secret</pre>
+<p>Redeploy after saving:</p>
+<pre>git add -A
+git commit -m "Migrate database from SQLite to MongoDB"
+git push origin main</pre></section>
+<section><h2>10. Test the Deployment</h2>
+<p class="check">□ Open <code>/login</code>.</p><p class="check">□ Sign in with <code>admin@sou.edu</code>.</p><p class="check">□ Confirm the redirect to <code>/admin</code>.</p><p class="check">□ Create a real faculty or student from the admin panel.</p><p class="check">□ Refresh and confirm the record persists.</p><p class="check">□ Check Vercel Function Logs if login returns HTTP 500.</p></section>
+<section><h2>11. File Storage Requirement</h2>
+<p>MongoDB only handles database records. Vercel local disk is not persistent for uploads and generated PDFs. Attach Vercel Blob and set:</p>
+<pre>BLOB_READ_WRITE_TOKEN=your-vercel-blob-token</pre></section>
+<section><h2>12. Troubleshooting</h2>
+<ul><li>HTTP 500 on login: check <code>DATABASE_URL</code> and <code>AUTH_SECRET</code> in Vercel.</li><li>Prisma client error: run <code>npm install</code> and <code>npx prisma generate</code>.</li><li>Connection timeout: check MongoDB Atlas Network Access.</li><li>Authentication fails: run the admin-only seed against the same production <code>DATABASE_URL</code>.</li><li>Data disappears: confirm the app is using MongoDB, not a local SQLite fallback.</li></ul></section>
+<div class="footer">Ed Tech Platform | MongoDB and Vercel deployment guide</div>
+</body>
+</html>
