@@ -2,6 +2,7 @@ import { getSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { userBatchIds } from "@/lib/permissions";
 import { PageHeader } from "@/components/PageHeader";
+import { LibraryBig } from "lucide-react";
 import { MaterialLibrary } from "@/components/materials/MaterialLibrary";
 import type { LearningMaterialDTO } from "@/lib/materials";
 import { MaterialUploadForm } from "./MaterialUploadForm";
@@ -27,7 +28,7 @@ export default async function FacultyMaterialsPage() {
   }));
 
   return <div className="space-y-6">
-    <PageHeader title="Study materials" description="Upload notes, slides, reference files, and other subject resources for your batches." />
+    <PageHeader icon={LibraryBig} title="Study Materials" description="Upload notes, slides, reference files, and other subject resources for your courses." />
     {batches.length > 0 ? <div className="flex justify-end"><MaterialUploadForm batches={batches} /></div> : <p className="rounded-md border border-dashed border-[#cbd1c8] bg-white p-8 text-center text-sm text-[#667085]">No batches are assigned to your account.</p>}
     <MaterialLibrary materials={materials} />
   </div>;

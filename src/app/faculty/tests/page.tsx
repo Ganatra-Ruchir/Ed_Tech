@@ -1,4 +1,4 @@
-import { Plus } from "lucide-react";
+import { ClipboardList, Plus } from "lucide-react";
 import { getSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { userBatchIds } from "@/lib/permissions";
@@ -39,8 +39,9 @@ export default async function FacultyTestsPage() {
   return (
     <div className="space-y-5">
       <PageHeader
-        title="My Tests"
-        description="Create, manage and view test performance."
+        icon={ClipboardList}
+        title="Tests & Exams"
+        description="Create, manage and review tests for your courses."
         actions={
           <LinkButton href="/faculty/tests/new" size="sm" className="!bg-[#ef5b3f] hover:!bg-[#d9472e]">
             <Plus size={14} /> Create Test

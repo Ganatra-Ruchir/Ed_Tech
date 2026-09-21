@@ -4,6 +4,7 @@ import { userBatchIds } from "@/lib/permissions";
 import { PageHeader } from "@/components/PageHeader";
 import { ReviewQueueBoard, type QueueItem } from "@/components/faculty/ReviewQueueBoard";
 import { timeWindows } from "@/components/faculty/faculty-format";
+import { Inbox } from "lucide-react";
 
 export default async function FacultyReviewQueue() {
   const session = await getSession();
@@ -72,7 +73,8 @@ export default async function FacultyReviewQueue() {
   return (
     <div className="space-y-5">
       <PageHeader
-        title="Review Queue"
+        icon={Inbox}
+        title="Submissions"
         description="Review and provide feedback on student submissions."
       />
 

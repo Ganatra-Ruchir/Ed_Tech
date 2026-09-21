@@ -3,7 +3,7 @@
 import { PortalSidebar, type PortalNavLink } from "@/components/university/PortalSidebar";
 import { PortalMobileNav } from "@/components/university/PortalMobileNav";
 
-const TITLE = "Faculty Portal";
+const TITLE = "Silver Oak";
 
 /**
  * The sidebar data must stay serializable across the server/client boundary.
@@ -12,23 +12,24 @@ const TITLE = "Faculty Portal";
 function buildLinks(isCC: boolean, pendingReviews: number): PortalNavLink[] {
   const links: PortalNavLink[] = [
     { href: "/faculty/dashboard", label: "Dashboard", icon: "LayoutDashboard" },
-    { href: "/messages", label: "Messages", icon: "MessageSquare" },
+    {
+      href: "/faculty/batches",
+      label: "My Courses",
+      icon: "Users",
+    },
+    { href: "/faculty/students", label: "Students", icon: "GraduationCap" },
+    { href: "/faculty/materials", label: "Study Materials", icon: "LibraryBig" },
+    { href: "/faculty/tests", label: "Tests & Exams", icon: "ClipboardList" },
     {
       href: "/faculty/review",
-      label: "Review Queue",
+      label: "Submissions",
       icon: "Inbox",
       ...(pendingReviews > 0 ? { badge: pendingReviews } : {}),
     },
-    { href: "/faculty/batches", label: "My Batches", icon: "Users" },
-    { href: "/faculty/attendance", label: "Attendance", icon: "CalendarCheck" },
-    { href: "/faculty/leave", label: "Leave Requests", icon: "CalendarClock" },
-    { href: "/faculty/calendar", label: "Calendar", icon: "CalendarDays" },
-    { href: "/faculty/assignments", label: "Assignments", icon: "ClipboardList" },
-    { href: "/faculty/materials", label: "Materials", icon: "LibraryBig" },
-    { href: "/faculty/students", label: "Students", icon: "GraduationCap" },
-    { href: "/faculty/at-risk", label: "Needs Attention", icon: "AlertTriangle" },
-    { href: "/faculty/tests", label: "Tests", icon: "ClipboardList" },
     { href: "/faculty/announcements", label: "Announcements", icon: "Megaphone" },
+    { href: "/faculty/attendance", label: "Attendance", icon: "CalendarCheck" },
+    { href: "/messages", label: "Messages", icon: "MessageSquare" },
+    { href: "/faculty/calendar", label: "Calendar", icon: "CalendarDays" },
     { href: "/faculty/reports", label: "Reports", icon: "FileText" },
     { href: "/faculty/profile", label: "My Profile", icon: "UserCircle" },
   ];

@@ -4,6 +4,7 @@ import { userBatchIds } from "@/lib/permissions";
 import { getLatestKpis } from "@/lib/kpi";
 import { PageHeader } from "@/components/PageHeader";
 import { StudentsBoard, type StudentRow } from "@/components/faculty/StudentsBoard";
+import { GraduationCap } from "lucide-react";
 
 export default async function FacultyStudentsPage() {
   const session = await getSession();
@@ -70,7 +71,7 @@ export default async function FacultyStudentsPage() {
 
   return (
     <div className="space-y-5">
-      <PageHeader title="Students" description="View and manage students in your batches." />
+      <PageHeader icon={GraduationCap} title="Students" description="View and manage students in your courses." />
       <StudentsBoard students={students} batches={myBatches} />
     </div>
   );

@@ -1,8 +1,8 @@
-import { FileText } from "lucide-react";
 import { getSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { userBatchIds } from "@/lib/permissions";
 import { PageHeader } from "@/components/PageHeader";
+import { FileText } from "lucide-react";
 import { Card } from "@/components/Card";
 import { EmptyState } from "@/components/EmptyState";
 import { ReportGenerator } from "@/components/faculty/ReportGenerator";
@@ -50,7 +50,7 @@ export default async function FacultyReportsPage() {
 
   return (
     <div className="space-y-5">
-      <PageHeader title="Reports" description="Create PDF reports for students or batches." />
+      <PageHeader icon={FileText} title="Reports" description="Create PDF reports for students or batches." />
 
       <ReportGenerator students={students} batches={myBatches} />
 

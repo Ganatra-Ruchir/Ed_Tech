@@ -9,6 +9,7 @@ import { Card } from "@/components/Card";
 import { EmptyState } from "@/components/EmptyState";
 import { SemesterSelect } from "@/components/faculty/SemesterSelect";
 import { CreateBatchForm } from "./CreateBatchForm";
+import { Layers3 } from "lucide-react";
 
 export default async function FacultyBatchesPage({
   searchParams,
@@ -57,6 +58,7 @@ export default async function FacultyBatchesPage({
     <div className="space-y-5">
       <PageHeader
         title="My Batches"
+        icon={Layers3}
         description="Manage your assigned batches and view their progress."
         actions={<SemesterSelect semesters={semesters} value={activeSemester} />}
       />

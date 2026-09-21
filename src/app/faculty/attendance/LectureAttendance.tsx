@@ -114,12 +114,12 @@ export function LectureAttendance({ batches, initialBatchId }: { batches: Batch[
   }
 
   if (batches.length === 0) {
-    return <div className="space-y-5"><PageHeader title="Lecture attendance" description="Mark daily student attendance and review attendance percentages." /><div className="rounded-md border border-[#dfe3dc] bg-white p-8 text-center text-sm text-[#667085]">No batches are assigned to your account.</div></div>;
+    return <div className="space-y-5"><PageHeader icon={CalendarDays} title="Attendance" description="Mark and view student attendance for your courses." /><div className="rounded-md border border-[#dfe3dc] bg-white p-8 text-center text-sm text-[#667085]">No batches are assigned to your account.</div></div>;
   }
 
   return (
     <div className="space-y-6">
-      <PageHeader title="Lecture attendance" description="Mark the full class roster, revisit earlier dates, and monitor attendance percentages." />
+      <PageHeader icon={CalendarDays} title="Attendance" description="Mark the full class roster, revisit earlier dates, and monitor attendance percentages." />
 
       <section className="rounded-md border border-[#dfe3dc] bg-white p-4 shadow-sm sm:p-5">
         <div className="grid gap-4 sm:grid-cols-2">
