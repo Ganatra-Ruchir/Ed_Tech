@@ -10,6 +10,7 @@ import {
   FileText,
   MessageSquare,
   Activity,
+  CalendarClock,
 } from "lucide-react";
 import { getSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
@@ -17,6 +18,7 @@ import { userBatchIds } from "@/lib/permissions";
 import { getFacultyAttendanceStatus } from "@/lib/staff-attendance";
 import { OfficeAttendanceCard } from "@/components/faculty/OfficeAttendanceCard";
 import { Card } from "@/components/Card";
+import { LinkButton } from "@/components/Button";
 import { Avatar } from "@/components/Avatar";
 import { EmptyState } from "@/components/EmptyState";
 import { StatCard } from "@/components/faculty/StatCard";
@@ -42,6 +44,7 @@ import {
 const QUICK_ACTIONS = [
   { href: "/faculty/review", label: "Review Queue", icon: Inbox, primary: true },
   { href: "/faculty/tests/new", label: "Create Test", icon: Plus, primary: true },
+  { href: "/faculty/leave", label: "Request Leave", icon: CalendarClock, primary: false },
   { href: "/faculty/students", label: "View Students", icon: Users, primary: false },
   { href: "/faculty/reports", label: "Generate Report", icon: FileText, primary: false },
 ];
@@ -240,15 +243,23 @@ export default async function FacultyDashboard({
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap items-start justify-between gap-4">
+      <section className="relative overflow-hidden rounded-lg border border-[#e7ddd8] bg-[linear-gradient(105deg,#fffaf7_0%,#f8efeb_62%,#f3e2dd_100%)] px-5 py-5 sm:px-7">
+        <div className="relative z-10 flex flex-wrap items-start justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-zinc-900">
+          <p className="mb-2 text-[10px] font-semibold uppercase tracking-[0.18em] text-[#8f3032]">Faculty workspace</p>
+          <h1 className="text-2xl font-bold text-zinc-900 sm:text-[28px]">
             {greetingFor(currentHour())}, Prof. {session!.name.split(" ")[0]} <span aria-hidden="true">👋</span>
           </h1>
-          <p className="mt-1 text-sm text-zinc-500">Here&apos;s your teaching and evaluation overview.</p>
+          <p className="mt-1 text-sm text-zinc-500">Plan your teaching day, review student work, and stay on top of your courses.</p>
         </div>
-        <SemesterSelect semesters={semesters} value={activeSemester} />
-      </div>
+        <div className="flex flex-wrap items-center gap-2">
+          <LinkButton href="/faculty/leave" size="sm" variant="secondary"><CalendarClock size={14} /> Request Leave</LinkButton>
+          <SemesterSelect semesters={semesters} value={activeSemester} />
+        </div>
+        </div>
+        <p className="relative z-10 mt-5 border-t border-[#8f3032]/10 pt-3 text-xs italic text-[#8f3032]/75">“Teaching is learning twice.”</p>
+        <span className="pointer-events-none absolute -right-10 -top-12 text-[10rem] font-semibold leading-none text-[#8f3032]/[0.06]">SO</span>
+      </section>
 
       <OfficeAttendanceCard initial={attendanceStatus} />
 
@@ -315,7 +326,7 @@ export default async function FacultyDashboard({
         <section className="lg:col-span-2">
           <h2 className="mb-2 text-[13px] font-semibold text-zinc-900">Quick Actions</h2>
           <Card className="p-3">
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
               {QUICK_ACTIONS.map((a) => (
                 <Link
                   key={a.href}
