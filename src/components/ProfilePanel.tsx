@@ -3,6 +3,7 @@ import type { SessionPayload } from "@/lib/auth";
 import { PageHeader } from "@/components/PageHeader";
 import { Card } from "@/components/Card";
 import { AvatarUploader } from "@/components/AvatarUploader";
+import { UserCircle } from "lucide-react";
 
 /** Shared profile page body for every role. Reads the signed-in user's live
  * record so the avatar reflects the latest upload. */
@@ -20,7 +21,7 @@ export async function ProfilePanel({ session }: { session: SessionPayload }) {
 
   return (
     <div className="max-w-2xl space-y-5">
-      <PageHeader title="My Profile" description="Manage your account details and profile picture." />
+      <PageHeader icon={UserCircle} title="My Profile" description="Manage your personal information and academic details." />
       <Card className="p-5">
         <h2 className="mb-4 text-[13px] font-semibold text-zinc-900">Profile picture</h2>
         <AvatarUploader name={user.name} imageUrl={user.profileImageUrl} />

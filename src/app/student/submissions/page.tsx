@@ -4,6 +4,7 @@ import { PageHeader } from "@/components/PageHeader";
 import { SubmissionsBoard } from "@/components/student/SubmissionsBoard";
 import { AssignmentsBoard } from "@/components/student/AssignmentsBoard";
 import { userBatchIds } from "@/lib/permissions";
+import { ClipboardCheck } from "lucide-react";
 
 export default async function StudentSubmissionsPage() {
   const session = await getSession();
@@ -16,7 +17,7 @@ export default async function StudentSubmissionsPage() {
 
   return (
     <div className="space-y-5">
-      <PageHeader title="My Submissions" description="Upload and track your project work." />
+      <PageHeader icon={ClipboardCheck} title="My Submissions" description="Track and manage your assignments, projects, and other submissions." />
       <section className="space-y-2"><h2 className="text-sm font-semibold text-zinc-900">Assigned work</h2><AssignmentsBoard assignments={assignments.map((assignment) => ({ id: assignment.id, title: assignment.title, description: assignment.description, dueAt: assignment.dueAt, batchName: assignment.batch.name, attachmentUrl: assignment.attachmentUrl, submitted: assignment.submissions.length > 0 }))} /></section>
       <SubmissionsBoard
         submissions={submissions.map((s) => ({

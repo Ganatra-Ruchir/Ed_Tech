@@ -2,6 +2,7 @@ import { getSession } from "@/lib/auth";
 import { listAnnouncements } from "@/lib/announcements";
 import { PageHeader } from "@/components/PageHeader";
 import { AnnouncementFeed } from "@/components/announcements/AnnouncementFeed";
+import { Megaphone } from "lucide-react";
 
 export default async function StudentStreamPage() {
   const session = await getSession();
@@ -11,7 +12,7 @@ export default async function StudentStreamPage() {
 
   return (
     <div className="max-w-2xl space-y-5">
-      <PageHeader title="Class Stream" description="Announcements and updates from your faculty." />
+      <PageHeader icon={Megaphone} title="Messages & Announcements" description="Stay updated with important information from your faculty and institution." />
       <AnnouncementFeed announcements={announcements} canSeeInsights={false} />
     </div>
   );

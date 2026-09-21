@@ -12,6 +12,7 @@ import {
   ArrowRight,
   Inbox,
   Quote,
+  LibraryBig,
 } from "lucide-react";
 import { getSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
@@ -327,6 +328,15 @@ export default async function StudentDashboard() {
           )}
         </Card>
       </section>
+
+      <Link href="/student/materials" className="group relative block overflow-hidden rounded-lg border border-[#e5e0d7] bg-[linear-gradient(105deg,#26191b_0%,#3d1b22_55%,#692d35_100%)] px-6 py-6 text-white shadow-sm transition-transform hover:-translate-y-0.5 sm:px-8">
+        <div className="relative z-10 max-w-md">
+          <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#f6b0a4]">Keep learning</p>
+          <h2 className="mt-1 text-2xl font-bold">Learn. Build. Grow.</h2>
+          <p className="mt-1 text-sm text-white/70">Explore your latest study materials and keep your progress moving forward.</p>
+        </div>
+        <LibraryBig className="absolute -right-2 -bottom-8 h-36 w-36 rotate-[-12deg] text-white/10 transition-transform group-hover:rotate-[-6deg]" strokeWidth={1} />
+      </Link>
 
       <section>
         <div className="mb-2 flex items-center justify-between">

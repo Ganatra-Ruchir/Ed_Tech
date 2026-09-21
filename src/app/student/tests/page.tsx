@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { userBatchIds } from "@/lib/permissions";
 import { PageHeader } from "@/components/PageHeader";
 import { TestsBoard } from "@/components/student/TestsBoard";
+import { ClipboardList } from "lucide-react";
 
 export default async function StudentTestsPage() {
   const session = await getSession();
@@ -22,7 +23,7 @@ export default async function StudentTestsPage() {
 
   return (
     <div className="space-y-5">
-      <PageHeader title="Assigned Tests" description="Complete your tests before the due date." />
+      <PageHeader icon={ClipboardList} title="Tests & Exams" description="Check your upcoming tests, past results, and performance." />
       <TestsBoard
         tests={tests.map((t) => {
           const response = responseByTest.get(t.id);

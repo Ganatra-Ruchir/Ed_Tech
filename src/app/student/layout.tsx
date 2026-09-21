@@ -75,7 +75,7 @@ export default async function StudentLayout({ children }: { children: React.Reac
 
   return (
     <div className="flex min-h-screen bg-[#f4f5f0]">
-      <PortalSidebar title="Student Portal" layoutId="student" links={STUDENT_LINKS} />
+      <PortalSidebar title="Silver Oak" layoutId="student" links={STUDENT_LINKS} />
       <div className="flex min-h-screen w-full flex-1 flex-col">
         <PortalMobileNav title="Student Portal" links={STUDENT_LINKS} />
         <PortalTopbar
