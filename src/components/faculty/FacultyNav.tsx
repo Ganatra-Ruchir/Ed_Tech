@@ -28,6 +28,7 @@ function buildLinks(isCC: boolean, pendingReviews: number): PortalNavLink[] {
     },
     { href: "/faculty/announcements", label: "Announcements", icon: "Megaphone" },
     { href: "/faculty/attendance", label: "Attendance", icon: "CalendarCheck" },
+    { href: "/faculty/leave", label: "Request Leave", icon: "CalendarClock" },
     { href: "/messages", label: "Messages", icon: "MessageSquare" },
     { href: "/faculty/calendar", label: "Calendar", icon: "CalendarDays" },
     { href: "/faculty/reports", label: "Reports", icon: "FileText" },
