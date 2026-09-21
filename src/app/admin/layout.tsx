@@ -8,6 +8,8 @@ import { PortalPageTransition } from "@/components/university/PortalPageTransiti
 import { ADMIN_LINKS } from "@/components/admin/nav-links";
 import { getMessageNotifications } from "@/lib/message-notifications";
 
+export const dynamic = "force-dynamic";
+
 export default async function AdminLayout({
   children,
   modal,
@@ -25,24 +27,33 @@ export default async function AdminLayout({
 
   // One indexed count — enough to light the notification bell without
   // repeating the dashboard's queries on every admin page.
-  const [pendingReviewCount, currentUser, recentSubmissions, messageNotifications] = await Promise.all([
+  const [pendingReviewCount, currentUser, recentSubmissions, messageNotifications, pendingLeaveCount, recentPendingLeaves] = await Promise.all([
     prisma.submission.count({
       where: { status: { in: ["SUBMITTED", "IN_REVIEW"] } },
     }),
     prisma.user.findUnique({ where: { id: session.sub }, select: { profileImageUrl: true } }),
     prisma.submission.findMany({
       where: { status: { in: ["SUBMITTED", "IN_REVIEW"] } },
-      select: { title: true, studentId: true, student: { select: { name: true } }, assignment: { select: { title: true } } },
+      select: { id: true, title: true, studentId: true, student: { select: { name: true } }, assignment: { select: { title: true } } },
       orderBy: { createdAt: "desc" },
       take: 5,
     }),
     getMessageNotifications(session.sub),
+    prisma.leaveRequest.count({ where: { status: "PENDING" } }),
+    prisma.leaveRequest.findMany({
+      where: { status: "PENDING" },
+      select: { id: true, startDate: true, endDate: true, faculty: { select: { name: true } } },
+      orderBy: { createdAt: "desc" },
+      take: 5,
+    }),
   ]);
 
   const notifications = [
     ...messageNotifications,
-    ...recentSubmissions.map((submission) => ({ title: `${submission.student.name} submitted ${submission.assignment?.title ?? submission.title}`, detail: "Open the student's academic record", href: `/admin/students/${submission.studentId}` })),
-    ...(pendingReviewCount > recentSubmissions.length ? [{ title: `${pendingReviewCount - recentSubmissions.length} more submissions`, detail: "Open the admin dashboard", href: "/admin" }] : []),
+    ...recentSubmissions.map((submission) => ({ id: `admin-submission:${submission.id}`, title: `${submission.student.name} submitted ${submission.assignment?.title ?? submission.title}`, detail: "Open the student's academic record", href: `/admin/students/${submission.studentId}` })),
+    ...recentPendingLeaves.map((request) => ({ id: `leave-request:${request.id}`, title: `${request.faculty.name} requested leave`, detail: `${request.startDate}${request.endDate !== request.startDate ? ` to ${request.endDate}` : ""}`, href: "/admin/leave" })),
+    ...(pendingReviewCount > recentSubmissions.length ? [{ id: "admin:more-submissions", title: `${pendingReviewCount - recentSubmissions.length} more submissions`, detail: "Open the admin dashboard", href: "/admin" }] : []),
+    ...(pendingLeaveCount > recentPendingLeaves.length ? [{ id: "admin:more-leave-requests", title: `${pendingLeaveCount - recentPendingLeaves.length} more leave requests`, detail: "Open the leave review queue", href: "/admin/leave" }] : []),
   ];
 
   return (
@@ -51,10 +62,11 @@ export default async function AdminLayout({
       <div className="flex min-h-screen w-full flex-1 flex-col">
         <PortalMobileNav title="Admin Portal" links={ADMIN_LINKS} />
         <PortalTopbar
+          userId={session.sub}
           userName={session.name}
           userRole="Administrator"
           userImageUrl={currentUser?.profileImageUrl}
-          hasAlerts={pendingReviewCount + messageNotifications.length > 0}
+          hasAlerts={pendingReviewCount + pendingLeaveCount + messageNotifications.length > 0}
           notifications={notifications}
           searchEndpoint="/api/admin/search"
           searchPlaceholder="Search students, faculty, or batches…"

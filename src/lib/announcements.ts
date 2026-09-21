@@ -69,6 +69,8 @@ export async function listAnnouncements(session: SessionPayload, recordSeen: boo
     pinned: a.pinned,
     requireAck: a.requireAck,
     allowComments: a.allowComments,
+    bannerUrl: a.bannerUrl,
+    backgroundTheme: a.backgroundTheme,
     batchId: a.batchId,
     batchName: a.batch.name,
     facultyName: a.faculty.name,

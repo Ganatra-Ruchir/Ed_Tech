@@ -15,6 +15,7 @@ import {
   AdminToolbar,
 } from "@/components/admin/TableControls";
 import type { FacultyRow } from "@/components/admin/types";
+import { EditUserDialog } from "@/components/admin/EditUserDialog";
 
 const PAGE_SIZE = 10;
 
@@ -83,6 +84,7 @@ export function FacultyTable({ faculty, departments }: { faculty: FacultyRow[]; 
               <Th>Feedback given</Th>
               <Th>Announcements</Th>
               <Th>Joined</Th>
+              <Th className="text-right">Edit</Th>
             </THead>
             <TBody>
               {visible.map((f, i) => (
@@ -90,7 +92,7 @@ export function FacultyTable({ faculty, departments }: { faculty: FacultyRow[]; 
                   <Td className="text-zinc-400">{(currentPage - 1) * PAGE_SIZE + i + 1}</Td>
                   <Td>
                     <div className="flex items-center gap-2.5">
-                      <Avatar name={f.name} size="sm" />
+                      <Avatar name={f.name} size="sm" imageUrl={f.profileImageUrl} />
                       <div className="min-w-0">
                         <p className="truncate text-[13px] font-medium text-zinc-900">{f.name}</p>
                         <p className="truncate text-[11px] text-zinc-400">{f.email}</p>
@@ -123,6 +125,7 @@ export function FacultyTable({ faculty, departments }: { faculty: FacultyRow[]; 
                   <Td>{f.feedbackGiven}</Td>
                   <Td>{f.announcements}</Td>
                   <Td className="whitespace-nowrap text-zinc-500">{fmtDate(f.joinedAt)}</Td>
+                  <Td className="text-right"><EditUserDialog user={f} role="FACULTY" /></Td>
                 </Tr>
               ))}
             </TBody>

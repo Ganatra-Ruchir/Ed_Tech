@@ -120,11 +120,37 @@ export async function GET(
   }
 
   if (key.startsWith("announcements/")) {
-    const file = await prisma.announcement.findFirst({ where: { attachmentUrl: url } });
+    const file = await prisma.announcement.findFirst({
+      where: { OR: [{ attachmentUrl: url }, { bannerUrl: url }] },
+    });
     if (!file) return NextResponse.json({ error: "Not found" }, { status: 404 });
     if (!(await canAccessBatch(session, file.batchId))) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    const isBanner = file.bannerUrl === url;
+    const fileName = key.split("/").at(-1) ?? (isBanner ? "announcement-banner" : "announcement-file");
+    const contentType = isBanner ? contentTypeFor(fileName) : (file.attachmentType ?? "application/pdf");
     const buffer = await readLocalFile(key);
-    return new NextResponse(new Uint8Array(buffer), { headers: { ...NOSNIFF, "Content-Type": file.attachmentType ?? "application/pdf", "Content-Disposition": dispositionFor(file.attachmentType ?? "application/pdf", file.attachmentName ?? "announcement.pdf") } });
+    return new NextResponse(new Uint8Array(buffer), {
+      headers: {
+        ...NOSNIFF,
+        "Content-Type": contentType,
+        "Content-Disposition": dispositionFor(contentType, isBanner ? "announcement-banner" : (file.attachmentName ?? "announcement.pdf")),
+        ...(isBanner ? { "Cache-Control": "private, max-age=300" } : {}),
+      },
+    });
+  }
+
+  if (key.startsWith("materials/")) {
+    const material = await prisma.learningMaterial.findFirst({ where: { fileUrl: url } });
+    if (!material) return NextResponse.json({ error: "Not found" }, { status: 404 });
+    if (!(await canAccessBatch(session, material.batchId))) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    const buffer = await readLocalFile(key);
+    return new NextResponse(new Uint8Array(buffer), {
+      headers: {
+        ...NOSNIFF,
+        "Content-Type": material.fileType,
+        "Content-Disposition": dispositionFor(material.fileType, material.fileName),
+      },
+    });
   }
 
   if (key.startsWith("messages/")) {

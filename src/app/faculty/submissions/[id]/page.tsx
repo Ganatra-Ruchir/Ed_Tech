@@ -107,6 +107,7 @@ export default async function FacultySubmissionDetail({
         existingFeedback={submission.feedback.map((f) => ({
           id: f.id,
           comment: f.comment,
+          rating: f.rating,
           faculty: f.faculty.name,
           createdAt: f.createdAt.toISOString(),
         }))}

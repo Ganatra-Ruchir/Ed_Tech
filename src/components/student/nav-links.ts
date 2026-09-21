@@ -7,6 +7,8 @@ export const STUDENT_LINKS: PortalNavLink[] = [
   { href: "/student", label: "Dashboard", icon: "LayoutDashboard" },
   { href: "/messages", label: "Messages", icon: "MessageSquare" },
   { href: "/student/stream", label: "Class Stream", icon: "Megaphone" },
+  { href: "/student/calendar", label: "Calendar", icon: "CalendarDays" },
+  { href: "/student/materials", label: "Study Materials", icon: "LibraryBig" },
   { href: "/student/reports", label: "My Report", icon: "FileText" },
   { href: "/student/submissions", label: "Submissions", icon: "ClipboardCheck" },
   { href: "/student/tests", label: "Tests", icon: "ClipboardList" },

@@ -23,6 +23,7 @@ import { Tag } from "@/components/Tag";
 import { LinkButton } from "@/components/Button";
 import { Avatar } from "@/components/Avatar";
 import { EmptyState } from "@/components/EmptyState";
+import { StarRating } from "@/components/StarRating";
 
 function fmtDateTime(d: Date | null): string {
   if (!d) return "-";
@@ -202,6 +203,7 @@ export default async function StudentSubmissionDetail({
                     <div className="min-w-0 flex-1">
                       <p className="text-[12.5px] font-medium text-zinc-900">{f.faculty.name}</p>
                       <p className="text-[11px] text-zinc-400">{fmtDateTime(f.createdAt)}</p>
+                      {f.rating !== null && <StarRating value={f.rating} readOnly size={14} />}
                       <p className="mt-1.5 whitespace-pre-wrap text-[13px] leading-relaxed text-zinc-700">{f.comment}</p>
                     </div>
                   </div>

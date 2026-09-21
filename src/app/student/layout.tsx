@@ -8,6 +8,8 @@ import { STUDENT_LINKS } from "@/components/student/nav-links";
 import { PortalPageTransition } from "@/components/university/PortalPageTransition";
 import { getMessageNotifications } from "@/lib/message-notifications";
 
+export const dynamic = "force-dynamic";
+
 export default async function StudentLayout({ children }: { children: React.ReactNode }) {
   const session = await getSession();
   if (!session || session.role !== "STUDENT") {
@@ -18,7 +20,7 @@ export default async function StudentLayout({ children }: { children: React.Reac
   // bell without duplicating the full dashboard query on every page.
   const now = new Date();
   const dueSoonEnd = new Date(now.getTime() + 3 * 24 * 60 * 60 * 1000);
-  const [needsRevisionCount, dueSoonCount, currentUser, revisionSubmissions, dueSoonTests, messageNotifications] = await Promise.all([
+  const [needsRevisionCount, dueSoonCount, currentUser, revisionSubmissions, dueSoonTests, recentAnnouncements, messageNotifications, recentMaterials] = await Promise.all([
     prisma.submission.count({ where: { studentId: session.sub, status: "NEEDS_REVISION" } }),
     prisma.test.count({
       where: {
@@ -46,15 +48,29 @@ export default async function StudentLayout({ children }: { children: React.Reac
       orderBy: { dueAt: "asc" },
       take: 5,
     }),
+    prisma.announcement.findMany({
+      where: { batch: { members: { some: { userId: session.sub } } } },
+      select: { id: true, title: true, faculty: { select: { name: true } } },
+      orderBy: { createdAt: "desc" },
+      take: 5,
+    }),
     getMessageNotifications(session.sub),
+    prisma.learningMaterial.findMany({
+      where: { batch: { members: { some: { userId: session.sub } } } },
+      select: { id: true, title: true, subject: true, faculty: { select: { name: true } } },
+      orderBy: { createdAt: "desc" },
+      take: 5,
+    }),
   ]);
 
   const notifications = [
     ...messageNotifications,
-    ...revisionSubmissions.map((submission) => ({ title: `${submission.assignment?.title ?? submission.title} needs revision`, detail: "Open the submission and review faculty feedback", href: `/student/submissions/${submission.id}` })),
-    ...dueSoonTests.map((test) => ({ title: `${test.title} is due soon`, detail: test.dueAt ? `Due ${test.dueAt.toLocaleDateString("en-IN", { day: "numeric", month: "short" })}` : "Open the test", href: `/student/tests/${test.id}` })),
-    ...(needsRevisionCount > revisionSubmissions.length ? [{ title: `${needsRevisionCount - revisionSubmissions.length} more revision requests`, detail: "Open all submissions", href: "/student/submissions" }] : []),
-    ...(dueSoonCount > dueSoonTests.length ? [{ title: `${dueSoonCount - dueSoonTests.length} more tests due soon`, detail: "Open all assigned tests", href: "/student/tests" }] : []),
+    ...recentAnnouncements.map((announcement) => ({ id: `announcement:${announcement.id}`, title: announcement.title, detail: `Announcement from ${announcement.faculty.name}`, href: `/student/stream#announcement-${announcement.id}` })),
+    ...recentMaterials.map((material) => ({ id: `material:${material.id}`, title: `New ${material.subject} material: ${material.title}`, detail: `Shared by ${material.faculty.name}`, href: "/student/materials" })),
+    ...revisionSubmissions.map((submission) => ({ id: `revision:${submission.id}`, title: `${submission.assignment?.title ?? submission.title} needs revision`, detail: "Open the submission and review faculty feedback", href: `/student/submissions/${submission.id}` })),
+    ...dueSoonTests.map((test) => ({ id: `test-due:${test.id}`, title: `${test.title} is due soon`, detail: test.dueAt ? `Due ${test.dueAt.toLocaleDateString("en-IN", { day: "numeric", month: "short" })}` : "Open the test", href: `/student/tests/${test.id}` })),
+    ...(needsRevisionCount > revisionSubmissions.length ? [{ id: "student:more-revisions", title: `${needsRevisionCount - revisionSubmissions.length} more revision requests`, detail: "Open all submissions", href: "/student/submissions" }] : []),
+    ...(dueSoonCount > dueSoonTests.length ? [{ id: "student:more-tests", title: `${dueSoonCount - dueSoonTests.length} more tests due soon`, detail: "Open all assigned tests", href: "/student/tests" }] : []),
   ];
 
   return (
@@ -63,10 +79,11 @@ export default async function StudentLayout({ children }: { children: React.Reac
       <div className="flex min-h-screen w-full flex-1 flex-col">
         <PortalMobileNav title="Student Portal" links={STUDENT_LINKS} />
         <PortalTopbar
+          userId={session.sub}
           userName={session.name}
           userRole="Student"
           userImageUrl={currentUser?.profileImageUrl}
-          hasAlerts={needsRevisionCount + dueSoonCount + messageNotifications.length > 0}
+          hasAlerts={needsRevisionCount + dueSoonCount + recentAnnouncements.length + recentMaterials.length + messageNotifications.length > 0}
           notifications={notifications}
           searchEndpoint="/api/student/search"
           searchPlaceholder="Search for tests, submissions, or announcements…"

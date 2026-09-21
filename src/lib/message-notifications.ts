@@ -26,6 +26,7 @@ export async function getMessageNotifications(userId: string) {
     })
     .slice(0, 5)
     .map((message) => ({
+      id: `message:${message.id}`,
       title: `${message.sender.name} sent you a message`,
       detail: message.conversation.isGroup ? `${message.conversation.title ?? "Group"} · Open conversation` : "Open your conversation",
       href: `/messages?conversationId=${encodeURIComponent(message.conversation.id)}`,

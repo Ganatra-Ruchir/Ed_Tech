@@ -71,6 +71,7 @@ export default async function TestResponseDetail({
           feedback={response.feedback.map((f) => ({
             id: f.id,
             comment: f.comment,
+            rating: f.rating,
             faculty: f.faculty.name,
             createdAt: f.createdAt.toISOString(),
           }))}

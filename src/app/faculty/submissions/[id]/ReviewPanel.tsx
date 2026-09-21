@@ -17,12 +17,13 @@ import {
 import { Card } from "@/components/Card";
 import { EmptyState } from "@/components/EmptyState";
 import { Avatar } from "@/components/Avatar";
+import { StarRating } from "@/components/StarRating";
 import { cn } from "@/lib/cn";
 import { fmtDateTime, fmtFileSize, statusLabel } from "@/components/faculty/faculty-format";
 
 type FileItem = { id: string; fileName: string; fileUrl: string; fileType: string; fileSize: number };
 type EvidenceItem = { id: string; tag: string; notes: string | null; faculty: string; createdAt: string };
-type FeedbackItem = { id: string; comment: string; faculty: string; createdAt: string };
+type FeedbackItem = { id: string; comment: string; rating: number | null; faculty: string; createdAt: string };
 type ActivityItem = { id: string; action: string; actor: string; createdAt: string };
 
 const EVIDENCE_TAGS = ["meets-criteria", "needs-revision", "risk", "strong-effort", "incomplete"];
@@ -68,6 +69,7 @@ export function ReviewPanel({
   const [tag, setTag] = useState(EVIDENCE_TAGS[0]);
   const [evidenceNotes, setEvidenceNotes] = useState("");
   const [comment, setComment] = useState("");
+  const [rating, setRating] = useState<number | null>(null);
   const [status, setStatus] = useState<string>(
     (STATUS_OPTIONS as readonly string[]).includes(currentStatus) ? currentStatus : "IN_REVIEW",
   );
@@ -106,6 +108,10 @@ export function ReviewPanel({
       setError("Write feedback or pick a different status first.");
       return;
     }
+    if (trimmed && rating === null) {
+      setError("Choose a 1 to 5 star rating for this feedback.");
+      return;
+    }
     setBusy(true);
     setError(null);
     setNotice(null);
@@ -114,7 +120,7 @@ export function ReviewPanel({
         const res = await fetch(`/api/submissions/${submissionId}/feedback`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ comment: trimmed }),
+          body: JSON.stringify({ comment: trimmed, rating }),
         });
         if (!res.ok) {
           const data = await res.json().catch(() => ({}));
@@ -135,6 +141,7 @@ export function ReviewPanel({
         }
       }
       setComment("");
+      setRating(null);
       setNotice("Review saved.");
       router.refresh();
     } finally {
@@ -249,6 +256,7 @@ export function ReviewPanel({
                       <p className="text-[11px] text-zinc-400">
                         {f.faculty} · {fmtDateTime(f.createdAt)}
                       </p>
+                      {f.rating !== null && <StarRating value={f.rating} readOnly size={14} />}
                       <p className="mt-1 whitespace-pre-wrap text-[13px] text-zinc-700">{f.comment}</p>
                     </div>
                   </li>
@@ -325,12 +333,14 @@ export function ReviewPanel({
 
         <Card className="p-4">
           <p className="mb-2.5 text-[13px] font-semibold text-zinc-900">Provide Feedback</p>
+          <label className="mb-1 block text-xs font-medium text-zinc-600">Performance rating</label>
+          <StarRating value={rating} onChange={setRating} />
           <textarea
             value={comment}
             onChange={(e) => setComment(e.target.value)}
             rows={5}
             placeholder="Write structured feedback for the student…"
-            className={fieldClass}
+            className={`${fieldClass} mt-3`}
           />
 
           <label htmlFor="review-status" className="mb-1 mt-3 block text-xs font-medium text-zinc-600">

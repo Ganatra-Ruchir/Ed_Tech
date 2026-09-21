@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { getLatestKpis } from "@/lib/kpi";
+import { calculateStudentPerformance } from "@/lib/student-performance";
 
 export async function getStudentReportData(studentId: string) {
   const student = await prisma.user.findUniqueOrThrow({
@@ -12,6 +13,7 @@ export async function getStudentReportData(studentId: string) {
   const submissions = await prisma.submission.findMany({
     where: { studentId },
     include: {
+      assignment: { select: { dueAt: true } },
       evidence: { include: { faculty: { select: { name: true } } } },
       feedback: { include: { faculty: { select: { name: true } } } },
     },
@@ -30,7 +32,23 @@ export async function getStudentReportData(studentId: string) {
   });
 
   const kpis = await getLatestKpis({ scope: "STUDENT", studentId });
+  const attendance = await prisma.attendance.findMany({
+    where: { studentId },
+    select: { status: true },
+  });
   const kpiByName = Object.fromEntries(kpis.map((k) => [k.metricName, k.value]));
+
+  const performance = calculateStudentPerformance({
+    submissions: submissions.map((submission) => ({
+      submittedAt: submission.createdAt,
+      dueAt: submission.assignment?.dueAt ?? null,
+    })),
+    ratings: [
+      ...submissions.flatMap((submission) => submission.feedback.map((item) => item.rating)),
+      ...testResponses.flatMap((response) => response.feedback.map((item) => item.rating)),
+    ],
+    attendance,
+  });
 
   const shortAnswerReflections = testResponses.flatMap((r) =>
     r.answers
@@ -64,6 +82,7 @@ export async function getStudentReportData(studentId: string) {
       s.feedback.map((f) => ({
         date: f.createdAt,
         comment: f.comment,
+        rating: f.rating,
         faculty: f.faculty.name,
         source: `Submission: ${s.title}`,
       })),
@@ -72,6 +91,7 @@ export async function getStudentReportData(studentId: string) {
       r.feedback.map((f) => ({
         date: f.createdAt,
         comment: f.comment,
+        rating: f.rating,
         faculty: f.faculty.name,
         source: `Test: ${r.test.title}`,
       })),
@@ -90,6 +110,7 @@ export async function getStudentReportData(studentId: string) {
       daysSinceLastActivity: kpiByName["days_since_last_activity"] ?? -1,
       atRisk: (kpiByName["at_risk"] ?? 0) === 1,
     },
+    performance,
     shortAnswerReflections,
     evidenceLog,
     feedbackLog,

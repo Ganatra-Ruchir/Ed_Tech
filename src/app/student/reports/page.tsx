@@ -4,7 +4,9 @@ import {
   ClipboardCheck,
   ClipboardList,
   BarChart3,
-  MessageSquare,
+  CalendarCheck,
+  Clock3,
+  Star,
   Sparkles,
   TrendingUp,
 } from "lucide-react";
@@ -20,6 +22,7 @@ import { ProgressBar } from "@/components/ProgressBar";
 import { EmptyState } from "@/components/EmptyState";
 import { DownloadReportButton } from "@/components/student/DownloadReportButton";
 import { ProgressRing, ScoreTrend, type TrendPointView } from "@/components/student/ReportCharts";
+import { calculateStudentPerformance } from "@/lib/student-performance";
 
 function fmtDateTime(d: Date): string {
   return new Date(d).toLocaleString("en-IN", { dateStyle: "medium", timeStyle: "short" });
@@ -32,13 +35,16 @@ export default async function StudentReportsPage() {
   const studentId = session!.sub;
   const batchIds = await userBatchIds(studentId);
 
-  const [student, submissions, assignedTests, responses, kpis, reports, history, feedbackCount, evidence] =
+  const [student, submissions, assignedTests, responses, kpis, reports, history, feedback, attendance, evidence] =
     await Promise.all([
       prisma.user.findUniqueOrThrow({
         where: { id: studentId },
         include: { batchMemberships: { include: { batch: true } } },
       }),
-      prisma.submission.findMany({ where: { studentId }, select: { status: true } }),
+      prisma.submission.findMany({
+        where: { studentId },
+        select: { status: true, createdAt: true, assignment: { select: { dueAt: true } } },
+      }),
       prisma.test.findMany({
         where: { publishedAt: { not: null }, batchId: { in: batchIds } },
         select: { id: true },
@@ -53,9 +59,11 @@ export default async function StudentReportsPage() {
         where: { scope: "STUDENT", studentId, metricName: { in: [...TREND_METRICS] } },
         orderBy: { computedAt: "asc" },
       }),
-      prisma.feedback.count({
+      prisma.feedback.findMany({
         where: { OR: [{ submission: { studentId } }, { testResponse: { studentId } }] },
+        select: { rating: true },
       }),
+      prisma.attendance.findMany({ where: { studentId }, select: { status: true } }),
       prisma.evidence.findMany({
         where: { OR: [{ submission: { studentId } }, { testResponse: { studentId } }] },
         select: { tag: true },
@@ -65,6 +73,14 @@ export default async function StudentReportsPage() {
   const batch = student.batchMemberships[0]?.batch ?? null;
   const kpiByName = Object.fromEntries(kpis.map((k) => [k.metricName, k.value]));
   const avgScorePct = kpiByName["avg_test_score_pct"] ?? 0;
+  const performance = calculateStudentPerformance({
+    submissions: submissions.map((submission) => ({
+      submittedAt: submission.createdAt,
+      dueAt: submission.assignment?.dueAt ?? null,
+    })),
+    ratings: feedback.map((item) => item.rating),
+    attendance,
+  });
 
   const approvedSubmissions = submissions.filter((s) => s.status === "APPROVED").length;
   const assignedTestIds = new Set(assignedTests.map((t) => t.id));
@@ -118,12 +134,28 @@ export default async function StudentReportsPage() {
       chip: "bg-amber-100 text-amber-600",
     },
     {
-      label: "Feedback Received",
-      value: String(feedbackCount),
-      hint: "Comments from your faculty",
-      icon: MessageSquare,
+      label: "On-time Delivery",
+      value: performance.onTimeDelivery.percentage === null ? "-" : `${performance.onTimeDelivery.percentage.toFixed(0)}%`,
+      hint: `${performance.onTimeDelivery.count} of ${performance.onTimeDelivery.total} dated assignments`,
+      icon: Clock3,
       wrap: "bg-sky-50/70",
       chip: "bg-sky-100 text-sky-600",
+    },
+    {
+      label: "Feedback Score",
+      value: performance.feedback.average === null ? "-" : `${performance.feedback.average.toFixed(1)} / 5`,
+      hint: `${performance.feedback.count} faculty rating${performance.feedback.count === 1 ? "" : "s"}`,
+      icon: Star,
+      wrap: "bg-rose-50/70",
+      chip: "bg-rose-100 text-rose-600",
+    },
+    {
+      label: "Attendance",
+      value: performance.attendance.percentage === null ? "-" : `${performance.attendance.percentage.toFixed(0)}%`,
+      hint: `${performance.attendance.present} present · ${performance.attendance.absent} absent`,
+      icon: CalendarCheck,
+      wrap: "bg-teal-50/70",
+      chip: "bg-teal-100 text-teal-600",
     },
   ];
 
@@ -163,7 +195,7 @@ export default async function StudentReportsPage() {
         </div>
       </Card>
 
-      <section className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+      <section className="grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-6">
         {tiles.map((t) => {
           const Icon = t.icon;
           return (

@@ -4,7 +4,7 @@ import { requireRole } from "@/lib/api-guard";
 import { canAccessBatch, userBatchIds } from "@/lib/permissions";
 import { logAudit } from "@/lib/audit";
 import { storeFile } from "@/lib/storage";
-import { validateDocumentUpload, contentTypeFor } from "@/lib/uploads";
+import { validateAvatarUpload, validateDocumentUpload, contentTypeFor } from "@/lib/uploads";
 
 export async function GET(request: Request) {
   const guard = await requireRole();
@@ -51,13 +51,42 @@ export async function POST(request: Request) {
   const ALLOWED_CATEGORIES = ["IMPORTANT", "ACADEMIC", "ASSIGNMENT", "EVENT", "GENERAL"];
   const rawCategory = String(formData.get("category") ?? "GENERAL").toUpperCase();
   const category = ALLOWED_CATEGORIES.includes(rawCategory) ? rawCategory : "GENERAL";
+  const ALLOWED_BACKGROUNDS = ["PLAIN", "CORAL", "SKY", "MINT", "LILAC", "INK"];
+  const rawBackground = String(formData.get("backgroundTheme") ?? "PLAIN").toUpperCase();
+  const backgroundTheme = ALLOWED_BACKGROUNDS.includes(rawBackground) ? rawBackground : "PLAIN";
   const pinned = String(formData.get("pinned") ?? "") === "true";
   const requireAck = String(formData.get("requireAck") ?? "") === "true";
   const allowComments = String(formData.get("allowComments") ?? "true") !== "false";
+  const file = formData.get("file");
+  const banner = formData.get("banner");
+
+  if (file instanceof File && file.size > 0) {
+    const error = validateDocumentUpload({ name: file.name, size: file.size });
+    if (error) return NextResponse.json({ error }, { status: 400 });
+  }
+  if (banner instanceof File && banner.size > 0) {
+    const error = validateAvatarUpload({ name: banner.name, size: banner.size });
+    if (error) return NextResponse.json({ error }, { status: 400 });
+  }
 
   const allowed = await canAccessBatch(session, batchId);
   if (!allowed) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
+  const attachmentUpload = file instanceof File && file.size > 0 ? (async () => {
+    const buffer = Buffer.from(await file.arrayBuffer());
+    const contentType = contentTypeFor(file.name);
+    const stored = await storeFile({ buffer, filename: file.name, contentType, folder: "announcements" });
+    return { attachmentUrl: stored.url, attachmentStorageKey: stored.storageKey, attachmentName: file.name, attachmentType: contentType, attachmentSize: buffer.byteLength };
+  })() : Promise.resolve({});
+
+  const bannerUpload = banner instanceof File && banner.size > 0 ? (async () => {
+    const buffer = Buffer.from(await banner.arrayBuffer());
+    const contentType = contentTypeFor(banner.name);
+    const stored = await storeFile({ buffer, filename: banner.name, contentType, folder: "announcements" });
+    return { bannerUrl: stored.url, bannerStorageKey: stored.storageKey };
+  })() : Promise.resolve({});
+
+  const [attachmentData, bannerData] = await Promise.all([attachmentUpload, bannerUpload]);
   const announcement = await prisma.announcement.create({
     data: {
       batchId,
@@ -65,9 +94,12 @@ export async function POST(request: Request) {
       title,
       body,
       category,
+      backgroundTheme,
       pinned,
       requireAck,
       allowComments,
+      ...attachmentData,
+      ...bannerData,
     },
   });
 
@@ -78,16 +110,6 @@ export async function POST(request: Request) {
     entityId: announcement.id,
     metadata: { batchId },
   });
-
-  const file = formData.get("file");
-  if (file instanceof File && file.size > 0) {
-    const err = validateDocumentUpload({ name: file.name, size: file.size });
-    if (err) return NextResponse.json({ error: err }, { status: 400 });
-    const buffer = Buffer.from(await file.arrayBuffer());
-    const contentType = contentTypeFor(file.name);
-    const stored = await storeFile({ buffer, filename: file.name, contentType, folder: "announcements" });
-    await prisma.announcement.update({ where: { id: announcement.id }, data: { attachmentUrl: stored.url, attachmentStorageKey: stored.storageKey, attachmentName: file.name, attachmentType: contentType, attachmentSize: buffer.byteLength } });
-  }
 
   return NextResponse.json({ announcement }, { status: 201 });
 }

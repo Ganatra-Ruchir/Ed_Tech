@@ -10,7 +10,7 @@ import { Card } from "@/components/Card";
 import { Avatar } from "@/components/Avatar";
 import { EmptyState } from "@/components/EmptyState";
 import { cn } from "@/lib/cn";
-import { categoryMeta, type AnnouncementDTO } from "@/lib/announcement-types";
+import { backgroundMeta, categoryMeta, type AnnouncementDTO } from "@/lib/announcement-types";
 
 const TONE_PILL: Record<string, string> = {
   rose: "bg-rose-50 text-rose-700 ring-rose-600/20",
@@ -64,6 +64,7 @@ export function AnnouncementFeed({
 function AnnouncementCard({ a, canSeeInsights }: { a: AnnouncementDTO; canSeeInsights: boolean }) {
   const router = useRouter();
   const cat = categoryMeta(a.category);
+  const background = backgroundMeta(a.backgroundTheme);
   const [showComments, setShowComments] = useState(false);
   const [comment, setComment] = useState("");
   const [busy, setBusy] = useState(false);
@@ -102,13 +103,23 @@ function AnnouncementCard({ a, canSeeInsights }: { a: AnnouncementDTO; canSeeIns
   }
 
   return (
-    <Card className={cn("overflow-hidden", a.pinned && "ring-1 ring-[#ef5b3f]/20")}>
+    <Card id={`announcement-${a.id}`} className={cn("scroll-mt-24 overflow-hidden", a.pinned && "ring-1 ring-[#ef5b3f]/20")}>
       {a.pinned && (
         <div className="flex items-center gap-1.5 border-b border-[#ef5b3f]/10 bg-[#ef5b3f]/[0.04] px-4 py-1.5 text-[11px] font-semibold uppercase tracking-wide text-[#ef5b3f]">
           <Pin size={11} /> Pinned
         </div>
       )}
-      <div className="p-4">
+      {a.bannerUrl && (
+        // Banner URLs may use either the local file proxy or a deployment-provided Blob host.
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={a.bannerUrl}
+          alt={`${a.title} banner`}
+          className="h-36 w-full border-b border-black/5 object-cover sm:h-48"
+          loading="lazy"
+        />
+      )}
+      <div className={cn("p-4", background.surface)}>
         <div className="flex items-start gap-3">
           <Avatar name={a.facultyName} imageUrl={a.facultyImageUrl} />
           <div className="min-w-0 flex-1">
@@ -116,16 +127,16 @@ function AnnouncementCard({ a, canSeeInsights }: { a: AnnouncementDTO; canSeeIns
               <span className={cn("rounded-full px-2 py-0.5 text-[11px] font-medium ring-1 ring-inset", TONE_PILL[cat.tone])}>
                 {cat.label}
               </span>
-              <span className="rounded-md bg-zinc-100 px-2 py-0.5 text-[11px] text-zinc-500">{a.batchName}</span>
+              <span className={cn("rounded-md px-2 py-0.5 text-[11px]", background.dark ? "bg-white/10 text-zinc-200" : "bg-zinc-100 text-zinc-500")}>{a.batchName}</span>
               {a.requireAck && (
                 <span className="rounded-full bg-amber-50 px-2 py-0.5 text-[11px] font-medium text-amber-700 ring-1 ring-inset ring-amber-600/20">
                   Acknowledgment required
                 </span>
               )}
-              <span className="ml-auto text-[11px] text-zinc-400">{fmtDateTime(a.createdAt)}</span>
+              <span className={cn("ml-auto text-[11px]", background.dark ? "text-zinc-300" : "text-zinc-400")}>{fmtDateTime(a.createdAt)}</span>
             </div>
-            <h3 className="mt-1.5 text-[15px] font-semibold text-zinc-900">{a.title}</h3>
-            <p className="mt-1 whitespace-pre-wrap text-sm text-zinc-700">{a.body}</p>
+            <h3 className={cn("mt-1.5 text-[15px] font-semibold", background.dark ? "text-white" : "text-zinc-900")}>{a.title}</h3>
+            <p className={cn("mt-1 whitespace-pre-wrap text-sm", background.dark ? "text-zinc-200" : "text-zinc-700")}>{a.body}</p>
 
             {a.attachment && (
               <a
@@ -145,7 +156,7 @@ function AnnouncementCard({ a, canSeeInsights }: { a: AnnouncementDTO; canSeeIns
               </a>
             )}
 
-            <div className="mt-3 flex flex-wrap items-center gap-3 text-[12px] text-zinc-500">
+            <div className={cn("mt-3 flex flex-wrap items-center gap-3 text-[12px]", background.dark ? "text-zinc-300" : "text-zinc-500")}>
               {canSeeInsights ? (
                 <>
                   <span className="inline-flex items-center gap-1">
@@ -189,7 +200,7 @@ function AnnouncementCard({ a, canSeeInsights }: { a: AnnouncementDTO; canSeeIns
                   initial={{ opacity: 0, height: 0 }}
                   animate={{ opacity: 1, height: "auto" }}
                   exit={{ opacity: 0, height: 0 }}
-                  className="mt-3 overflow-hidden border-t border-zinc-100 pt-3"
+                  className={cn("mt-3 overflow-hidden border-t pt-3", background.dark ? "border-white/10" : "border-zinc-100")}
                 >
                   <ul className="space-y-2.5">
                     {a.comments.map((c) => (

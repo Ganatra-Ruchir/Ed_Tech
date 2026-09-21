@@ -19,6 +19,7 @@ import { Tag } from "@/components/Tag";
 import { Avatar } from "@/components/Avatar";
 import { LinkButton } from "@/components/Button";
 import { ProgressBar } from "@/components/ProgressBar";
+import { StarRating } from "@/components/StarRating";
 import { TestForm } from "./TestForm";
 
 function fmtDate(d: Date | null): string {
@@ -189,6 +190,7 @@ export default async function StudentTestPage({
                       <div className="min-w-0 flex-1">
                         <p className="text-[12.5px] font-medium text-zinc-900">{f.faculty.name}</p>
                         <p className="text-[11px] text-zinc-400">{fmtDateTime(f.createdAt)}</p>
+                        {f.rating !== null && <StarRating value={f.rating} readOnly size={14} />}
                         <p className="mt-1.5 whitespace-pre-wrap text-[13px] leading-relaxed text-zinc-700">
                           {f.comment}
                         </p>

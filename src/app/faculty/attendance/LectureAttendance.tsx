@@ -146,12 +146,26 @@ export function LectureAttendance({ batches, initialBatchId }: { batches: Batch[
         </div>
         {loading ? <div className="flex items-center justify-center gap-2 py-16 text-sm text-[#667085]"><LoaderCircle size={16} className="animate-spin" /> Loading attendance...</div> : (
           <div className="divide-y divide-[#eceee9]">
+            <div className="hidden grid-cols-[minmax(220px,1fr)_90px_90px_90px_90px_220px] gap-3 bg-[#f7f8f5] px-5 py-2.5 text-[11px] font-semibold uppercase text-[#667085] lg:grid">
+              <span>Student</span>
+              <span className="text-center">Attendance %</span>
+              <span className="text-center">Total lectures</span>
+              <span className="text-center">Present</span>
+              <span className="text-center">Absent</span>
+              <span className="text-center">Mark for selected date</span>
+            </div>
             {filteredStudents.map((student, index) => {
               const status = marks[student.id];
-              const stat = studentStats[student.id];
-              return <motion.div key={student.id} initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: Math.min(index * 0.025, 0.25) }} className="grid items-center gap-3 px-4 py-3 sm:grid-cols-[minmax(220px,1fr)_130px_220px] sm:px-5">
+              const stat = studentStats[student.id] ?? { present: 0, absent: 0, total: 0, percentage: 0 };
+              const metrics = [
+                { label: "Attendance %", value: `${stat.percentage}%`, color: stat.percentage >= 75 ? "text-emerald-700" : stat.total === 0 ? "text-[#667085]" : "text-rose-700" },
+                { label: "Total lectures", value: stat.total, color: "text-[#17212b]" },
+                { label: "Present", value: stat.present, color: "text-emerald-700" },
+                { label: "Absent", value: stat.absent, color: "text-rose-700" },
+              ];
+              return <motion.div key={student.id} initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: Math.min(index * 0.025, 0.25) }} className="grid items-center gap-3 px-4 py-4 sm:px-5 lg:grid-cols-[minmax(220px,1fr)_90px_90px_90px_90px_220px] lg:py-3">
                 <div className="flex min-w-0 items-center gap-3"><Avatar name={student.name} /><span className="min-w-0"><span className="block truncate text-sm font-semibold text-[#17212b]">{student.name}</span><span className="block truncate text-[11px] text-[#667085]">{student.studentNumber || student.email}</span></span></div>
-                <div className="text-left sm:text-center"><span className="text-sm font-semibold text-[#17212b]">{stat ? `${stat.percentage}%` : "No history"}</span>{stat && <span className="block text-[10px] text-[#98a2b3]">{stat.present}/{stat.total} lectures</span>}</div>
+                {metrics.map((metric) => <div key={metric.label} className="flex items-center justify-between rounded-md bg-[#f7f8f5] px-3 py-2 lg:block lg:bg-transparent lg:px-0 lg:py-0 lg:text-center"><span className="text-[11px] font-medium text-[#667085] lg:hidden">{metric.label}</span><span className={`text-sm font-semibold ${metric.color}`}>{metric.value}</span></div>)}
                 <div className="grid grid-cols-2 overflow-hidden rounded-md border border-[#d6dbd3]">
                   <button type="button" onClick={() => { setMarks((current) => ({ ...current, [student.id]: "PRESENT" })); setSaved(false); }} className={`flex h-9 items-center justify-center gap-1.5 text-xs font-semibold transition-colors ${status === "PRESENT" ? "bg-emerald-600 text-white" : "bg-white text-[#667085] hover:bg-emerald-50 hover:text-emerald-700"}`}><Check size={14} /> Present</button>
                   <button type="button" onClick={() => { setMarks((current) => ({ ...current, [student.id]: "ABSENT" })); setSaved(false); }} className={`flex h-9 items-center justify-center gap-1.5 border-l border-[#d6dbd3] text-xs font-semibold transition-colors ${status === "ABSENT" ? "bg-rose-600 text-white" : "bg-white text-[#667085] hover:bg-rose-50 hover:text-rose-700"}`}><UserX size={14} /> Absent</button>

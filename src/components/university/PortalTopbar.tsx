@@ -15,6 +15,13 @@ type SearchResult = {
   href: string;
 };
 
+type PortalNotification = {
+  id: string;
+  title: string;
+  detail: string;
+  href: string;
+};
+
 const KIND_ICON = {
   submission: FileText,
   test: ClipboardList,
@@ -24,6 +31,7 @@ const KIND_ICON = {
 } as const;
 
 export function PortalTopbar({
+  userId,
   userName,
   userRole,
   userImageUrl,
@@ -32,13 +40,14 @@ export function PortalTopbar({
   searchPlaceholder = "Search…",
   notifications = [],
 }: {
+  userId: string;
   userName: string;
   userRole: string;
   userImageUrl?: string | null;
   hasAlerts: boolean;
   searchEndpoint: string;
   searchPlaceholder?: string;
-  notifications?: { title: string; detail: string; href: string }[];
+  notifications?: PortalNotification[];
 }) {
   const router = useRouter();
   const [query, setQuery] = useState("");
@@ -47,30 +56,73 @@ export function PortalTopbar({
   const [searching, setSearching] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
-  const [toast, setToast] = useState<{ title: string; detail: string; href: string } | null>(null);
-  const seenNotificationSignature = useRef("");
+  const [toast, setToast] = useState<PortalNotification | null>(null);
+  const [notificationStateReady, setNotificationStateReady] = useState(false);
+  const [readNotificationIds, setReadNotificationIds] = useState<Set<string>>(new Set());
+  const announcedNotificationIds = useRef<Set<string>>(new Set());
   const searchBoxRef = useRef<HTMLDivElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
   const notifRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const first = notifications[0];
-    const signature = first ? `${first.href}:${first.title}` : "";
-    if (signature && signature !== seenNotificationSignature.current) {
-      const handle = window.setTimeout(() => {
-        seenNotificationSignature.current = signature;
-        setToast(first);
-      }, 0);
-      const dismiss = window.setTimeout(() => setToast(null), 3000);
-      return () => {
-        window.clearTimeout(handle);
-        window.clearTimeout(dismiss);
-      };
-    }
-    if (!signature) seenNotificationSignature.current = "";
-    return undefined;
-  }, [notifications]);
+    const handle = window.setTimeout(() => {
+      try {
+        const read = JSON.parse(window.localStorage.getItem(`portal-notifications:read:${userId}`) ?? "[]");
+        const announced = JSON.parse(window.localStorage.getItem(`portal-notifications:announced:${userId}`) ?? "[]");
+        setReadNotificationIds(new Set(Array.isArray(read) ? read.filter((id): id is string => typeof id === "string") : []));
+        announcedNotificationIds.current = new Set(Array.isArray(announced) ? announced.filter((id): id is string => typeof id === "string") : []);
+      } catch {
+        setReadNotificationIds(new Set());
+        announcedNotificationIds.current = new Set();
+      }
+      setNotificationStateReady(true);
+    }, 0);
+    return () => window.clearTimeout(handle);
+  }, [userId]);
+
+  useEffect(() => {
+    if (!notificationStateReady || toast) return;
+    const first = notifications.find((notification) => !announcedNotificationIds.current.has(notification.id));
+    if (!first) return;
+    const handle = window.setTimeout(() => {
+      for (const notification of notifications) {
+        announcedNotificationIds.current.add(notification.id);
+      }
+      window.localStorage.setItem(
+        `portal-notifications:announced:${userId}`,
+        JSON.stringify([...announcedNotificationIds.current].slice(-100)),
+      );
+      setToast(first);
+    }, 0);
+    return () => window.clearTimeout(handle);
+  }, [notificationStateReady, notifications, toast, userId]);
+
+  useEffect(() => {
+    if (!toast) return;
+    const handle = window.setTimeout(() => setToast(null), 3000);
+    return () => window.clearTimeout(handle);
+  }, [toast]);
+
+  function markNotificationRead(id: string) {
+    setReadNotificationIds((current) => {
+      if (current.has(id)) return current;
+      const next = new Set(current);
+      next.add(id);
+      window.localStorage.setItem(`portal-notifications:read:${userId}`, JSON.stringify([...next].slice(-100)));
+      return next;
+    });
+  }
+
+  function markAllNotificationsRead() {
+    const next = new Set(notifications.map((notification) => notification.id));
+    setReadNotificationIds(next);
+    window.localStorage.setItem(`portal-notifications:read:${userId}`, JSON.stringify([...next].slice(-100)));
+  }
+
+  const showAlertDot = notificationStateReady
+    ? notifications.some((notification) => !readNotificationIds.has(notification.id))
+    : hasAlerts;
 
   useEffect(() => {
     const q = query.trim();
@@ -214,10 +266,10 @@ export function PortalTopbar({
         className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-md border border-transparent text-[#667085] hover:border-[#dfe3dc] hover:bg-white hover:text-[#17212b]"
       >
         <Bell size={17} />
-        {hasAlerts && <span className="animate-signal-pulse absolute right-2 top-2 h-2 w-2 rounded-full bg-[#ef5b3f] ring-2 ring-[#f4f5f0]" />}
+        {showAlertDot && <span className="animate-signal-pulse absolute right-2 top-2 h-2 w-2 rounded-full bg-[#ef5b3f] ring-2 ring-[#f4f5f0]" />}
       </button>
       <AnimatePresence>
-        {notificationsOpen && <motion.div ref={notifRef} initial={{ opacity: 0, y: -5 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -5 }} className="absolute right-4 top-16 z-40 w-[min(20rem,calc(100vw-2rem))] overflow-hidden rounded-md border border-[#dfe3dc] bg-white shadow-[0_16px_40px_rgba(23,33,43,0.12)] sm:right-20"><div className="border-b border-[#e7eae4] px-4 py-3 text-sm font-semibold text-[#17212b]">Notifications</div>{notifications.length === 0 ? <p className="px-4 py-4 text-xs text-[#667085]">You are all caught up.</p> : <ul className="max-h-[min(28rem,70vh)] divide-y divide-[#eceee9] overflow-y-auto">{notifications.map((notification) => <li key={`${notification.href}-${notification.title}`}><button onClick={() => { setNotificationsOpen(false); router.push(notification.href); }} className="w-full px-4 py-3 text-left hover:bg-[#f4f5f0]"><p className="text-xs font-semibold text-[#17212b]">{notification.title}</p><p className="mt-0.5 text-[11px] text-[#667085]">{notification.detail}</p></button></li>)}</ul>}</motion.div>}
+        {notificationsOpen && <motion.div ref={notifRef} initial={{ opacity: 0, y: -5 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -5 }} className="absolute right-4 top-16 z-40 w-[min(20rem,calc(100vw-2rem))] overflow-hidden rounded-md border border-[#dfe3dc] bg-white shadow-[0_16px_40px_rgba(23,33,43,0.12)] sm:right-20"><div className="flex items-center justify-between border-b border-[#e7eae4] px-4 py-3"><span className="text-sm font-semibold text-[#17212b]">Notifications</span>{notifications.length > 0 && <button type="button" onClick={markAllNotificationsRead} className="text-[11px] font-semibold text-[#d9472e] hover:underline">Mark all read</button>}</div>{notifications.length === 0 ? <p className="px-4 py-4 text-xs text-[#667085]">You are all caught up.</p> : <ul className="max-h-[min(28rem,70vh)] divide-y divide-[#eceee9] overflow-y-auto">{notifications.map((notification) => { const isRead = readNotificationIds.has(notification.id); return <li key={notification.id}><button onClick={() => { markNotificationRead(notification.id); setNotificationsOpen(false); router.push(notification.href); }} className={`relative w-full px-4 py-3 text-left hover:bg-[#f4f5f0] ${isRead ? "bg-white" : "bg-[#fff8f5]"}`}>{!isRead && <span className="absolute left-1.5 top-4 h-1.5 w-1.5 rounded-full bg-[#ef5b3f]" />}<p className="text-xs font-semibold text-[#17212b]">{notification.title}</p><p className="mt-0.5 text-[11px] text-[#667085]">{notification.detail}</p></button></li>; })}</ul>}</motion.div>}
       </AnimatePresence>
 
       <div ref={menuRef} className="relative shrink-0">
@@ -267,7 +319,7 @@ export function PortalTopbar({
           animate={{ opacity: 1, x: 0, y: 0 }}
           exit={{ opacity: 0, x: 24 }}
           transition={{ duration: 0.2 }}
-          onClick={() => { const href = toast.href; setToast(null); router.push(href); }}
+          onClick={() => { const { href, id } = toast; markNotificationRead(id); setToast(null); router.push(href); }}
           className="fixed right-4 top-[4.75rem] z-50 w-[min(22rem,calc(100vw-2rem))] rounded-md border border-[#dfe3dc] bg-white p-3 text-left shadow-[0_16px_40px_rgba(23,33,43,0.16)] sm:right-6"
         >
           <span className="flex items-start gap-2.5"><span className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-[#ef5b3f]/10 text-[#d9472e]"><Bell size={14} /></span><span className="min-w-0 flex-1"><span className="block text-[10px] font-semibold uppercase tracking-wide text-[#d9472e]">New notification</span><span className="mt-0.5 block truncate text-[13px] font-semibold text-[#17212b]">{toast.title}</span><span className="mt-0.5 block truncate text-[11px] text-[#667085]">{toast.detail}</span></span><ArrowUpRight size={14} className="mt-1 shrink-0 text-[#98a2b3]" /></span>

@@ -6,6 +6,7 @@ import { Card } from "@/components/Card";
 import { Select, Input, Textarea } from "@/components/Field";
 import { Button } from "@/components/Button";
 import { Tag } from "@/components/Tag";
+import { StarRating } from "@/components/StarRating";
 import { cn } from "@/lib/cn";
 
 type Question = {
@@ -19,7 +20,7 @@ type Question = {
   points: number;
 };
 type Evidence = { id: string; tag: string; notes: string | null; faculty: string };
-type FeedbackItem = { id: string; comment: string; faculty: string; createdAt: string };
+type FeedbackItem = { id: string; comment: string; rating: number | null; faculty: string; createdAt: string };
 
 const EVIDENCE_TAGS = ["meets-criteria", "needs-revision", "risk", "strong-effort", "incomplete"];
 
@@ -41,6 +42,7 @@ export function GradingPanel({
   const [tag, setTag] = useState(EVIDENCE_TAGS[0]);
   const [evidenceNotes, setEvidenceNotes] = useState("");
   const [comment, setComment] = useState("");
+  const [rating, setRating] = useState<number | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -84,15 +86,29 @@ export function GradingPanel({
   }
 
   async function addFeedback() {
-    if (!comment.trim()) return;
+    if (!comment.trim()) {
+      setError("Write feedback before posting.");
+      return;
+    }
+    if (rating === null) {
+      setError("Choose a 1 to 5 star rating for this feedback.");
+      return;
+    }
     setBusy(true);
+    setError(null);
     try {
-      await fetch(`/api/test-responses/${responseId}/feedback`, {
+      const res = await fetch(`/api/test-responses/${responseId}/feedback`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ comment }),
+        body: JSON.stringify({ comment: comment.trim(), rating }),
       });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        setError(data.error ?? "Failed to post feedback");
+        return;
+      }
       setComment("");
+      setRating(null);
       router.refresh();
     } finally {
       setBusy(false);
@@ -184,11 +200,14 @@ export function GradingPanel({
 
       <Card className="p-4">
         <h2 className="mb-3 text-[13px] font-semibold text-zinc-900">Feedback</h2>
+        <label className="mb-1 block text-xs font-medium text-zinc-600">Performance rating</label>
+        <StarRating value={rating} onChange={setRating} />
         <Textarea
           value={comment}
           onChange={(e) => setComment(e.target.value)}
           rows={3}
           placeholder="Write feedback for the student"
+          className="mt-3"
         />
         <Button onClick={addFeedback} disabled={busy} size="sm" className="mt-2">
           Post feedback
@@ -197,6 +216,7 @@ export function GradingPanel({
           <ul className="mt-4 space-y-2.5">
             {feedback.map((f) => (
               <li key={f.id} className="rounded-md border border-zinc-100 bg-zinc-50 p-3 text-sm">
+                {f.rating !== null && <StarRating value={f.rating} readOnly size={14} />}
                 <p className="text-zinc-700">{f.comment}</p>
                 <p className="mt-1 text-xs text-zinc-400">
                   {f.faculty} · {new Date(f.createdAt).toLocaleString("en-IN")}

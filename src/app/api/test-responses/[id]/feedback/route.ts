@@ -7,6 +7,7 @@ import { logAudit } from "@/lib/audit";
 
 const bodySchema = z.object({
   comment: z.string().min(1).max(4000),
+  rating: z.number().int().min(1).max(5),
 });
 
 export async function POST(
@@ -28,13 +29,16 @@ export async function POST(
   if (!allowed) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
   const parsed = bodySchema.safeParse(await request.json().catch(() => null));
-  if (!parsed.success) return NextResponse.json({ error: "Comment is required" }, { status: 400 });
+  if (!parsed.success) {
+    return NextResponse.json({ error: "Comment and a 1 to 5 star rating are required" }, { status: 400 });
+  }
 
   const feedback = await prisma.feedback.create({
     data: {
       testResponseId: id,
       facultyId: session.sub,
       comment: parsed.data.comment,
+      rating: parsed.data.rating,
     },
   });
 

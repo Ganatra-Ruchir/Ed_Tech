@@ -1,4 +1,4 @@
-import { Clock, AlertTriangle } from "lucide-react";
+import { Clock, AlertTriangle, CheckCircle2, LogOut, Timer, UserX } from "lucide-react";
 import { PageHeader } from "@/components/PageHeader";
 import { EmptyState } from "@/components/EmptyState";
 import { Avatar } from "@/components/Avatar";
@@ -16,6 +16,15 @@ function toDateInputValue(iso: string): string {
   return `${y}-${m}-${day}`;
 }
 
+function workDuration(checkInAt: string | null, checkOutAt: string | null, isToday: boolean) {
+  if (!checkInAt) return "—";
+  if (!checkOutAt) return isToday ? "In office" : "No check-out";
+  const totalMinutes = Math.max(0, Math.round((new Date(checkOutAt).getTime() - new Date(checkInAt).getTime()) / 60_000));
+  const hours = Math.floor(totalMinutes / 60);
+  const minutes = totalMinutes % 60;
+  return `${hours}h ${minutes}m`;
+}
+
 export default async function AdminStaffAttendancePage({
   searchParams,
 }: {
@@ -27,14 +36,15 @@ export default async function AdminStaffAttendancePage({
   const isToday = dateValue === toDateInputValue(new Date().toISOString());
 
   const checkedIn = roster.rows.filter((r) => r.record?.checkInAt).length;
+  const checkedOut = roster.rows.filter((r) => r.record?.checkOutAt).length;
   const late = roster.rows.filter((r) => r.record?.isLate).length;
-  const notCheckedIn = roster.rows.length - checkedIn;
+  const absent = roster.rows.length - checkedIn;
 
   return (
     <div className="space-y-5">
       <PageHeader
         title="Staff Attendance"
-        description={`${checkedIn} checked in · ${late} late · ${notCheckedIn} not checked in yet, for ${new Date(roster.date).toLocaleDateString("en-IN", { weekday: "long", day: "numeric", month: "long" })}${isToday ? " (today)" : ""}.`}
+        description={`Faculty presence and office timing for ${new Date(roster.date).toLocaleDateString("en-IN", { weekday: "long", day: "numeric", month: "long" })}${isToday ? " (today)" : ""}.`}
         actions={
           <div className="flex items-center gap-2">
             <AttendanceDateFilter value={dateValue} />
@@ -43,6 +53,15 @@ export default async function AdminStaffAttendancePage({
         }
       />
 
+      <section className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+        {[
+          { label: "Present", value: checkedIn, icon: CheckCircle2, color: "bg-emerald-50 text-emerald-700" },
+          { label: "Absent", value: absent, icon: UserX, color: "bg-rose-50 text-rose-700" },
+          { label: "Checked out", value: checkedOut, icon: LogOut, color: "bg-sky-50 text-sky-700" },
+          { label: "Late arrivals", value: late, icon: AlertTriangle, color: "bg-amber-50 text-amber-700" },
+        ].map((item) => <div key={item.label} className="rounded-md border border-[#dfe3dc] bg-white p-4 shadow-sm"><span className={`flex h-8 w-8 items-center justify-center rounded-md ${item.color}`}><item.icon size={16} /></span><p className="mt-3 text-2xl font-semibold text-[#17212b]">{item.value}</p><p className="text-xs text-[#667085]">{item.label}</p></div>)}
+      </section>
+
       {roster.rows.length === 0 ? (
         <EmptyState icon={Clock} title="No faculty yet" description="Add faculty accounts to start tracking office attendance." />
       ) : (
@@ -50,15 +69,17 @@ export default async function AdminStaffAttendancePage({
           <Table>
             <THead>
               <Th>Faculty</Th>
+              <Th>Attendance</Th>
               <Th>Check-in</Th>
               <Th>Check-out</Th>
-              <Th>Status</Th>
+              <Th>Work time</Th>
+              <Th>Punctuality</Th>
             </THead>
             <TBody>
               {roster.rows.map((row) => {
                 const record = row.record;
-                const status = !record?.checkInAt
-                  ? { label: isToday ? "Not checked in yet" : "Absent", tone: "bg-zinc-100 text-zinc-500" }
+                const punctuality = !record?.checkInAt
+                  ? { label: "Not recorded", tone: "bg-zinc-100 text-zinc-500" }
                   : record.isLate
                     ? { label: "Late", tone: "bg-amber-50 text-amber-700" }
                     : { label: "On time", tone: "bg-emerald-50 text-emerald-700" };
@@ -77,12 +98,14 @@ export default async function AdminStaffAttendancePage({
                         </span>
                       </div>
                     </Td>
+                    <Td>{record?.checkInAt ? <span className="inline-flex items-center gap-1.5 rounded-md bg-emerald-50 px-2 py-1 text-[11.5px] font-semibold text-emerald-700"><CheckCircle2 size={12} /> Present</span> : <span className="inline-flex items-center gap-1.5 rounded-md bg-rose-50 px-2 py-1 text-[11.5px] font-semibold text-rose-700"><UserX size={12} /> Absent</span>}</Td>
                     <Td>{formatClock(record?.checkInAt ?? null)}</Td>
-                    <Td>{formatClock(record?.checkOutAt ?? null)}</Td>
+                    <Td>{record?.checkInAt && !record.checkOutAt && isToday ? <span className="text-xs font-medium text-sky-700">Still in office</span> : formatClock(record?.checkOutAt ?? null)}</Td>
+                    <Td><span className="inline-flex items-center gap-1 text-xs text-zinc-600"><Timer size={12} /> {workDuration(record?.checkInAt ?? null, record?.checkOutAt ?? null, isToday)}</span></Td>
                     <Td>
-                      <span className={`inline-flex items-center gap-1 rounded-md px-2 py-1 text-[11.5px] font-medium ${status.tone}`}>
+                      <span className={`inline-flex items-center gap-1 rounded-md px-2 py-1 text-[11.5px] font-medium ${punctuality.tone}`}>
                         {record?.isLate && <AlertTriangle size={11} />}
-                        {status.label}
+                        {punctuality.label}
                       </span>
                     </Td>
                   </Tr>

@@ -16,6 +16,7 @@ import {
   RiskPill,
 } from "@/components/admin/TableControls";
 import type { StudentRow } from "@/components/admin/types";
+import { EditUserDialog } from "@/components/admin/EditUserDialog";
 
 const PAGE_SIZE = 10;
 type RiskFilter = "all" | "risk" | "ontrack";
@@ -87,7 +88,7 @@ export function StudentsTable({ students, batches }: { students: StudentRow[]; b
                   <Td className="text-zinc-400">{(currentPage - 1) * PAGE_SIZE + i + 1}</Td>
                   <Td>
                     <div className="flex items-center gap-2.5">
-                      <Avatar name={s.name} size="sm" />
+                      <Avatar name={s.name} size="sm" imageUrl={s.profileImageUrl} />
                       <div className="min-w-0">
                         <Link href={`/admin/students/${s.id}`} className="block truncate text-[13px] font-medium text-zinc-900 hover:underline">
                           {s.name}
@@ -107,12 +108,15 @@ export function StudentsTable({ students, batches }: { students: StudentRow[]; b
                   <Td className="text-zinc-500">{s.hasTestData ? `${Math.round(s.avgScorePct)}%` : "-"}</Td>
                   <Td><RiskPill atRisk={s.atRisk} /></Td>
                   <Td>
-                    <Link
-                      href={`/admin/students/${s.id}`}
-                      className="inline-flex items-center gap-1 whitespace-nowrap text-xs font-medium text-[#ef5b3f] hover:underline"
-                    >
-                      View <ArrowRight size={12} />
-                    </Link>
+                    <div className="flex items-center justify-end gap-2">
+                      <EditUserDialog user={s} role="STUDENT" />
+                      <Link
+                        href={`/admin/students/${s.id}`}
+                        className="inline-flex items-center gap-1 whitespace-nowrap text-xs font-medium text-[#ef5b3f] hover:underline"
+                      >
+                        View <ArrowRight size={12} />
+                      </Link>
+                    </div>
                   </Td>
                 </Tr>
               ))}

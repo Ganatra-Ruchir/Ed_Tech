@@ -11,8 +11,12 @@ function fmtNum(n: number): string {
   return Number.isFinite(n) ? n.toFixed(1) : "-";
 }
 
+function fmtPercent(value: number | null): string {
+  return value === null ? "-" : `${value.toFixed(1)}%`;
+}
+
 export function StudentReportDocument({ data }: { data: StudentReportData }) {
-  const { student, batch, submissions, testResponses, kpi, shortAnswerReflections, evidenceLog, feedbackLog } = data;
+  const { student, batch, submissions, testResponses, kpi, performance, shortAnswerReflections, evidenceLog, feedbackLog } = data;
 
   return (
     <Document
@@ -45,6 +49,28 @@ export function StudentReportDocument({ data }: { data: StudentReportData }) {
               {kpi.atRisk ? "At risk" : "On track"}
             </Text>
             <Text style={styles.kpiLabel}>Overall status</Text>
+          </View>
+        </View>
+
+        <Text style={styles.sectionTitle}>Student Performance</Text>
+        <View style={styles.kpiGrid}>
+          <View style={styles.kpiCard}>
+            <Text style={styles.kpiValue}>{fmtPercent(performance.onTimeDelivery.percentage)}</Text>
+            <Text style={styles.kpiLabel}>
+              On-time delivery ({performance.onTimeDelivery.count}/{performance.onTimeDelivery.total} dated assignments)
+            </Text>
+          </View>
+          <View style={styles.kpiCard}>
+            <Text style={styles.kpiValue}>
+              {performance.feedback.average === null ? "-" : `${performance.feedback.average.toFixed(1)} / 5`}
+            </Text>
+            <Text style={styles.kpiLabel}>Faculty feedback ({performance.feedback.count} ratings)</Text>
+          </View>
+          <View style={styles.kpiCard}>
+            <Text style={styles.kpiValue}>{fmtPercent(performance.attendance.percentage)}</Text>
+            <Text style={styles.kpiLabel}>
+              Lecture attendance ({performance.attendance.present} present, {performance.attendance.absent} absent)
+            </Text>
           </View>
         </View>
 
@@ -147,7 +173,8 @@ export function StudentReportDocument({ data }: { data: StudentReportData }) {
           ) : (
             feedbackLog.map((f, idx) => (
               <Text style={styles.canvasBody} key={idx}>
-                • [{fmtDate(f.date)}] {f.source} — {f.faculty}: &quot;{f.comment}&quot;
+                • [{fmtDate(f.date)}] {f.source} — {f.faculty}
+                {f.rating === null ? "" : ` (${f.rating}/5)`}: &quot;{f.comment}&quot;
               </Text>
             ))
           )}
