@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "prisma generate && next build",
     "test": "node --no-warnings --experimental-strip-types --test tests/qa-regressions.test.ts",
     "postinstall": "prisma generate",
     "start": "next start",

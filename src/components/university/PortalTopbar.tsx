@@ -62,7 +62,11 @@ export function PortalTopbar({
         seenNotificationSignature.current = signature;
         setToast(first);
       }, 0);
-      return () => window.clearTimeout(handle);
+      const dismiss = window.setTimeout(() => setToast(null), 3000);
+      return () => {
+        window.clearTimeout(handle);
+        window.clearTimeout(dismiss);
+      };
     }
     if (!signature) seenNotificationSignature.current = "";
     return undefined;
