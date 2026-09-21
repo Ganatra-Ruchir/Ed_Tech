@@ -5,6 +5,7 @@ import { Avatar } from "@/components/Avatar";
 import { Table, THead, Th, TBody, Tr, Td } from "@/components/Table";
 import { AttendanceDateFilter } from "@/components/admin/AttendanceDateFilter";
 import { StaffAttendanceSettingsControl } from "@/components/admin/StaffAttendanceSettingsControl";
+import { AdminStatCard } from "@/components/admin/AdminStatCard";
 import { getAdminAttendanceRoster } from "@/lib/staff-attendance";
 import { formatClock } from "@/lib/staff-attendance-types";
 
@@ -39,11 +40,14 @@ export default async function AdminStaffAttendancePage({
   const checkedOut = roster.rows.filter((r) => r.record?.checkOutAt).length;
   const late = roster.rows.filter((r) => r.record?.isLate).length;
   const absent = roster.rows.length - checkedIn;
+  const onTime = checkedIn - late;
+  const onTimePct = checkedIn ? Math.round((onTime / checkedIn) * 100) : 0;
 
   return (
     <div className="space-y-5">
       <PageHeader
         title="Staff Attendance"
+        icon={Clock}
         description={`Faculty presence and office timing for ${new Date(roster.date).toLocaleDateString("en-IN", { weekday: "long", day: "numeric", month: "long" })}${isToday ? " (today)" : ""}.`}
         actions={
           <div className="flex items-center gap-2">
@@ -53,13 +57,12 @@ export default async function AdminStaffAttendancePage({
         }
       />
 
-      <section className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-        {[
-          { label: "Present", value: checkedIn, icon: CheckCircle2, color: "bg-emerald-50 text-emerald-700" },
-          { label: "Absent", value: absent, icon: UserX, color: "bg-rose-50 text-rose-700" },
-          { label: "Checked out", value: checkedOut, icon: LogOut, color: "bg-sky-50 text-sky-700" },
-          { label: "Late arrivals", value: late, icon: AlertTriangle, color: "bg-amber-50 text-amber-700" },
-        ].map((item) => <div key={item.label} className="rounded-md border border-[#dfe3dc] bg-white p-4 shadow-sm"><span className={`flex h-8 w-8 items-center justify-center rounded-md ${item.color}`}><item.icon size={16} /></span><p className="mt-3 text-2xl font-semibold text-[#17212b]">{item.value}</p><p className="text-xs text-[#667085]">{item.label}</p></div>)}
+      <section className="grid grid-cols-2 gap-3 lg:grid-cols-5">
+        <AdminStatCard label="Present" value={String(checkedIn)} icon={CheckCircle2} tone="emerald" footnote={`Out of ${roster.rows.length} faculty`} />
+        <AdminStatCard label="Absent" value={String(absent)} icon={UserX} tone="maroon" footnote={`Out of ${roster.rows.length} faculty`} />
+        <AdminStatCard label="Checked out" value={String(checkedOut)} icon={LogOut} tone="sky" footnote="Left for the day" />
+        <AdminStatCard label="Late arrivals" value={String(late)} icon={AlertTriangle} tone="amber" footnote={`After ${roster.officeStartTime}`} />
+        <AdminStatCard label="On-time %" value={`${onTimePct}%`} icon={Clock} tone="violet" footnote={`${onTime} of ${checkedIn} on time`} />
       </section>
 
       {roster.rows.length === 0 ? (

@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import { motion } from "motion/react";
 import { ArrowRightLeft, CalendarClock, CheckCircle2, Clock3, LoaderCircle, Mail, UserRound, XCircle } from "lucide-react";
+import { AdminStatCard } from "@/components/admin/AdminStatCard";
 import { Button } from "@/components/Button";
 import { Textarea } from "@/components/Field";
 import { PageHeader } from "@/components/PageHeader";
@@ -52,14 +53,13 @@ export function AdminLeaveRequests({ initialRequests }: { initialRequests: Leave
 
   return (
     <div className="space-y-6">
-      <PageHeader title="Faculty leave requests" description="Review faculty leave requests and record an approval decision." />
+      <PageHeader title="Faculty Leave Requests" icon={CalendarClock} description="Review faculty leave requests and record an approval decision." />
 
-      <section className="grid grid-cols-3 gap-3">
-        {[
-          { label: "Pending", value: counts.PENDING, icon: Clock3, color: "bg-amber-50 text-amber-700" },
-          { label: "Approved", value: counts.APPROVED, icon: CheckCircle2, color: "bg-emerald-50 text-emerald-700" },
-          { label: "Rejected", value: counts.REJECTED, icon: XCircle, color: "bg-rose-50 text-rose-700" },
-        ].map((item) => <div key={item.label} className="rounded-md border border-[#dfe3dc] bg-white p-4 shadow-sm"><span className={`flex h-8 w-8 items-center justify-center rounded-md ${item.color}`}><item.icon size={16} /></span><p className="mt-3 text-2xl font-semibold text-[#17212b]">{item.value}</p><p className="text-xs text-[#667085]">{item.label}</p></div>)}
+      <section className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+        <AdminStatCard label="Pending requests" value={String(counts.PENDING)} icon={Clock3} tone="amber" footnote="Awaiting review" />
+        <AdminStatCard label="Approved requests" value={String(counts.APPROVED)} icon={CheckCircle2} tone="emerald" footnote="Processed requests" />
+        <AdminStatCard label="Rejected requests" value={String(counts.REJECTED)} icon={XCircle} tone="maroon" footnote="Declined requests" />
+        <AdminStatCard label="Total requests" value={String(requests.length)} icon={UserRound} tone="violet" footnote="All statuses" />
       </section>
 
       <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#dfe3dc] pb-3">
