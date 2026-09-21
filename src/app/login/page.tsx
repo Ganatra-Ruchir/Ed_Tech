@@ -1,9 +1,16 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { ArrowRight, BarChart3, GraduationCap, Lock, Mail, Users } from "lucide-react";
+
+const HERO_IMAGES = [
+  "/campus-gate.png",
+  "/campus-airplane.png",
+  "/campus-building.png",
+  "/campus-institute.png",
+] as const;
 
 export default function LoginPage() {
   const router = useRouter();
@@ -11,6 +18,14 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [heroImage, setHeroImage] = useState(0);
+
+  useEffect(() => {
+    const timer = window.setInterval(() => {
+      setHeroImage((current) => (current + 1) % HERO_IMAGES.length);
+    }, 2000);
+    return () => window.clearInterval(timer);
+  }, []);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -37,6 +52,21 @@ export default function LoginPage() {
   return (
     <main className="grid min-h-screen bg-[#f7f8f5] lg:grid-cols-[minmax(420px,0.88fr)_1.12fr]">
       <section className="relative hidden min-h-screen overflow-hidden bg-[linear-gradient(145deg,#241719_0%,#3b1d25_48%,#6f3039_100%)] p-10 text-white lg:flex lg:flex-col lg:justify-between xl:p-14">
+        <div className="absolute inset-0" aria-hidden="true">
+          {HERO_IMAGES.map((source, index) => (
+            <Image
+              key={source}
+              src={source}
+              alt=""
+              fill
+              sizes="58vw"
+              priority={index === 0}
+              className={`object-cover transition-opacity duration-700 ease-out ${index === heroImage ? "opacity-35" : "opacity-0"}`}
+            />
+          ))}
+          <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(36,23,25,0.98)_0%,rgba(59,29,37,0.86)_52%,rgba(59,29,37,0.58)_100%)]" />
+          <div className="absolute inset-0 bg-[linear-gradient(0deg,rgba(36,23,25,0.88)_0%,transparent_55%,rgba(36,23,25,0.38)_100%)]" />
+        </div>
         <div className="pointer-events-none absolute -right-28 top-1/4 h-[32rem] w-[32rem] rounded-full border border-[#0b7a50]/20 bg-[#0b7a50]/10 blur-3xl" />
         <div className="relative z-10 flex items-center gap-3">
           <span className="animate-brand-breathe flex h-11 w-11 items-center justify-center overflow-hidden rounded-md bg-white shadow-sm"><Image src="/silver-oak-logo.png" alt="Silver Oak University" width={44} height={44} className="h-full w-full object-contain" priority /></span>
