@@ -71,7 +71,7 @@ export function PortalMobileNav({ title, links }: { title: string; links: Portal
 
   return (
     <>
-      <div className="flex items-center justify-between border-b border-white/[0.06] bg-[#17212b] px-4 py-3 text-white md:hidden">
+      <div className="flex items-center justify-between border-b border-white/[0.06] bg-[#241719] px-4 py-3 text-white md:hidden">
         <div className="flex items-center gap-2">
           <Crest />
           <div><p className="text-[13px] font-semibold text-white">{title}</p><p className="text-[9px] uppercase tracking-[0.12em] text-white/40">Learning Hub</p></div>
@@ -100,7 +100,7 @@ export function PortalMobileNav({ title, links }: { title: string; links: Portal
               animate={{ x: 0 }}
               exit={{ x: "-100%" }}
               transition={{ type: "spring", stiffness: 420, damping: 40 }}
-              className="absolute inset-y-0 left-0 flex w-72 max-w-[85vw] flex-col bg-[#17212b] text-white shadow-2xl"
+              className="absolute inset-y-0 left-0 flex w-72 max-w-[85vw] flex-col bg-[#241719] text-white shadow-2xl"
             >
               <div className="flex items-center justify-between px-5 py-5">
                 <div className="flex items-center gap-2.5">
@@ -136,7 +136,7 @@ export function PortalMobileNav({ title, links }: { title: string; links: Portal
                           onClick={() => setOpen(false)}
                           className={cn(
                             "relative flex items-center gap-2.5 rounded-lg px-3 py-2.5 text-[13.5px] font-medium",
-                            active ? "bg-white/[0.09] text-white shadow-[inset_3px_0_0_#ef5b3f]" : "text-white/65 hover:bg-white/[0.06] hover:text-white",
+                            active ? "bg-white/[0.09] text-white shadow-[inset_3px_0_0_#0b7a50]" : "text-white/65 hover:bg-white/[0.06] hover:text-white",
                           )}
                         >
                           <Icon size={17} strokeWidth={2} />

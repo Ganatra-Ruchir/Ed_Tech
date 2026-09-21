@@ -77,7 +77,7 @@ export function PortalSidebar({
 
   return (
     <aside
-      className="sticky top-0 hidden h-screen w-[248px] shrink-0 flex-col overflow-hidden border-r border-white/5 bg-[#17212b] text-white md:flex"
+      className="sticky top-0 hidden h-screen w-[248px] shrink-0 flex-col overflow-hidden border-r border-white/5 bg-[#241719] text-white md:flex"
     >
       <div className="flex items-center gap-3 border-b border-white/[0.07] px-5 py-[18px]">
         <Crest />
@@ -110,7 +110,7 @@ export function PortalSidebar({
                   {active && (
                     <motion.span
                       layoutId={`${layoutId}-active-pill`}
-                      className="absolute inset-0 rounded-md bg-white/[0.09] shadow-[inset_3px_0_0_#ef5b3f]"
+                      className="absolute inset-0 rounded-md bg-white/[0.09] shadow-[inset_3px_0_0_#0b7a50]"
                       transition={{ type: "spring", stiffness: 500, damping: 42 }}
                     />
                   )}
@@ -123,7 +123,7 @@ export function PortalSidebar({
                     <span
                       className={cn(
                         "relative z-10 ml-auto rounded-full px-1.5 py-0.5 text-[10px] font-semibold leading-none",
-                        active ? "bg-[#ef5b3f] text-white" : "bg-white/10 text-white/75",
+                        active ? "bg-[#8f3032] text-white" : "bg-white/10 text-white/75",
                       )}
                     >
                       {link.badge}
