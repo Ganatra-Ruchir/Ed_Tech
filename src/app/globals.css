@@ -30,6 +30,10 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
 button,
 a,
 input,
@@ -91,13 +95,37 @@ a {
 @keyframes brand-breathe {
   0%, 100% {
     transform: translateY(0);
-    box-shadow: 0 4px 14px rgba(239, 91, 63, 0.12);
+    box-shadow: 0 4px 14px rgba(8, 122, 79, 0.12);
   }
   50% {
     transform: translateY(-2px);
-    box-shadow: 0 8px 22px rgba(239, 91, 63, 0.24);
+    box-shadow: 0 8px 22px rgba(143, 48, 50, 0.24);
   }
 }
+
+@keyframes logo-spark {
+  0%, 68%, 100% { opacity: 0; transform: scale(0.65) rotate(-15deg); }
+  76% { opacity: 1; transform: scale(1.15) rotate(8deg); }
+  84% { opacity: 0.35; transform: scale(0.9) rotate(0deg); }
+}
+
+@keyframes portal-stagger-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-logo-spark {
+  animation: logo-spark 5.5s ease-in-out 900ms 1 both;
+}
+
+.portal-content-stagger > * {
+  animation: portal-stagger-in 320ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.portal-content-stagger > *:nth-child(1) { animation-delay: 35ms; }
+.portal-content-stagger > *:nth-child(2) { animation-delay: 85ms; }
+.portal-content-stagger > *:nth-child(3) { animation-delay: 135ms; }
+.portal-content-stagger > *:nth-child(4) { animation-delay: 185ms; }
+.portal-content-stagger > *:nth-child(5) { animation-delay: 235ms; }
 
 @keyframes signal-pulse {
   0%, 100% {

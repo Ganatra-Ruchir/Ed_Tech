@@ -188,7 +188,7 @@ export function PortalTopbar({
     <>
     <header className="sticky top-0 z-20 flex items-center gap-3 border-b border-[#dfe3dc] bg-[#f4f5f0]/90 px-4 py-3 backdrop-blur-xl sm:px-6 lg:px-8">
       <div className="min-w-0 flex-1">
-      <div ref={searchBoxRef} className="relative w-full max-w-md">
+      <div ref={searchBoxRef} className="relative w-full max-w-md transition-[max-width] duration-300 ease-out focus-within:max-w-xl">
         <Search size={15} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[#667085]" />
         <input
           ref={searchInputRef}

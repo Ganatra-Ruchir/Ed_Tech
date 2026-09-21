@@ -14,7 +14,7 @@ export function PortalPageTransition({ children }: { children: ReactNode }) {
       initial={reduceMotion ? false : { opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
-      className="min-w-0"
+      className="portal-content-stagger min-w-0"
     >
       {children}
     </motion.div>

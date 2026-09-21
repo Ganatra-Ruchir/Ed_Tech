@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { motion } from "motion/react";
+import { motion, useReducedMotion } from "motion/react";
 import type { LucideIcon } from "lucide-react";
 import {
   AlertTriangle,
@@ -23,6 +23,7 @@ import {
   Megaphone,
   MessageSquare,
   ScrollText,
+  Sparkles,
   Users,
 } from "lucide-react";
 import { cn } from "@/lib/cn";
@@ -73,18 +74,21 @@ export function PortalSidebar({
   links: PortalNavLink[] | PortalNavGroup[];
 }) {
   const pathname = usePathname();
+  const reduceMotion = useReducedMotion();
   const groups = toGroups(links);
 
   return (
     <aside
       className="sticky top-0 hidden h-screen w-[248px] shrink-0 flex-col overflow-hidden border-r border-white/5 bg-[#241719] text-white md:flex"
     >
-      <div className="flex items-center gap-3 border-b border-white/[0.07] px-5 py-[18px]">
-        <Crest />
-        <div className="min-w-0 leading-tight">
-          <p className="truncate text-[14px] font-semibold text-white">{title}</p>
+      <div className="relative flex items-center gap-3 border-b border-white/[0.07] px-5 py-[18px]">
+        <motion.div initial={reduceMotion ? false : { opacity: 0, scale: 0.72 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.42, ease: [0.22, 1, 0.36, 1] }}>
+          <Crest />
+        </motion.div>
+        <motion.div initial={reduceMotion ? false : { opacity: 0, x: -8 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.16, duration: 0.34, ease: [0.22, 1, 0.36, 1] }} className="min-w-0 leading-tight">
+          <p className="flex items-center gap-1.5 truncate text-[14px] font-semibold text-white">{title}<Sparkles size={11} className="animate-logo-spark text-[#d9a441]" /></p>
           <p className="mt-0.5 truncate text-[10px] font-medium uppercase tracking-[0.12em] text-white/45">Learning Hub</p>
-        </div>
+        </motion.div>
       </div>
 
       <nav className="flex flex-1 flex-col gap-4 overflow-y-auto px-3 py-5">
@@ -117,7 +121,7 @@ export function PortalSidebar({
                   {!active && (
                     <span className="absolute inset-0 rounded-md bg-white/0 transition-colors group-hover:bg-white/[0.06]" />
                   )}
-                  <Icon size={17} strokeWidth={2} className="relative z-10" />
+                  <Icon size={17} strokeWidth={2} className="relative z-10 transition-transform duration-200 group-hover:translate-x-0.5" />
                   <span className="relative z-10 truncate">{link.label}</span>
                   {link.badge !== undefined && (
                     <span
