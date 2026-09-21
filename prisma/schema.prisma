@@ -87,8 +87,26 @@ model User {
   leaveRequests LeaveRequest[] @relation("FacultyLeaveRequests")
   leaveRequestsReviewed LeaveRequest[] @relation("ReviewedLeaveRequests")
   leaveHandovers LeaveRequest[] @relation("LeaveHandoverFaculty")
+  facultyTasks FacultyTask[]
 
   @@index([role])
+}
+
+model FacultyTask {
+  id          String   @id @default(cuid())
+  facultyId   String
+  title       String
+  description String?
+  status      String   @default("TODO")
+  priority    String   @default("MEDIUM")
+  dueDate     DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  faculty User @relation(fields: [facultyId], references: [id], onDelete: Cascade)
+
+  @@index([facultyId, status, dueDate])
+  @@index([facultyId, createdAt])
 }
 
 model LeaveRequest {
