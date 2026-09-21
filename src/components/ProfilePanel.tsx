@@ -20,15 +20,16 @@ export async function ProfilePanel({ session }: { session: SessionPayload }) {
   const roleLabel = user.role === "FACULTY" ? (user.isCC ? "Faculty · Course Coordinator" : "Faculty") : user.role.charAt(0) + user.role.slice(1).toLowerCase();
 
   return (
-    <div className="max-w-2xl space-y-5">
+    <div className="space-y-5">
       <PageHeader icon={UserCircle} title="My Profile" description="Manage your personal information and academic details." />
-      <Card className="p-5">
+      <div className="grid gap-5 lg:grid-cols-[minmax(300px,0.8fr)_minmax(0,1.5fr)]">
+      <Card className="p-5 sm:p-6">
         <h2 className="mb-4 text-[13px] font-semibold text-zinc-900">Profile picture</h2>
         <AvatarUploader name={user.name} imageUrl={user.profileImageUrl} />
       </Card>
-      <Card className="p-5">
+      <Card className="p-5 sm:p-6">
         <h2 className="mb-4 text-[13px] font-semibold text-zinc-900">Account details</h2>
-        <dl className="grid grid-cols-1 gap-y-3 text-sm sm:grid-cols-2">
+        <dl className="grid grid-cols-1 gap-3 text-sm sm:grid-cols-2">
           <Field label="Name" value={user.name} />
           <Field label="Email" value={user.email} />
           <Field label="Role" value={roleLabel} />
@@ -37,13 +38,14 @@ export async function ProfilePanel({ session }: { session: SessionPayload }) {
           {user.college && <Field label="College" value={user.college} />}
         </dl>
       </Card>
+      </div>
     </div>
   );
 }
 
 function Field({ label, value }: { label: string; value: string }) {
   return (
-    <div>
+    <div className="rounded-md border border-[#eee8e4] bg-[#fbfaf8] px-3.5 py-3">
       <dt className="text-[11px] uppercase tracking-wide text-zinc-400">{label}</dt>
       <dd className="mt-0.5 font-medium text-zinc-800">{value}</dd>
     </div>

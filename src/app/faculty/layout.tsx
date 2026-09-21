@@ -85,7 +85,7 @@ export default async function FacultyLayout({
   ];
 
   return (
-    <div className="flex min-h-screen bg-[#f4f5f0]">
+    <div className="portal-shell flex min-h-screen bg-[#f6f4f1]">
       <FacultySidebar isCC={session.isCC} pendingReviews={pendingReviews} />
       <div className="flex min-h-screen w-full min-w-0 flex-1 flex-col">
         <FacultyMobileNav isCC={session.isCC} pendingReviews={pendingReviews} />
@@ -99,7 +99,7 @@ export default async function FacultyLayout({
           searchEndpoint="/api/faculty/search"
           searchPlaceholder="Search students, submissions, or tests…"
         />
-        <main className="mx-auto w-full max-w-[1320px] flex-1 px-4 py-7 sm:px-6 lg:px-8 lg:py-9"><PortalPageTransition>{children}</PortalPageTransition></main>
+        <main className="mx-auto w-full max-w-[1480px] flex-1 px-4 py-6 sm:px-6 lg:px-7 lg:py-7"><PortalPageTransition>{children}</PortalPageTransition></main>
       </div>
       {modal}
     </div>

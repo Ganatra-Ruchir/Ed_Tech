@@ -74,8 +74,8 @@ export default async function StudentLayout({ children }: { children: React.Reac
   ];
 
   return (
-    <div className="flex min-h-screen bg-[#f4f5f0]">
-      <PortalSidebar title="Silver Oak University" layoutId="student" links={STUDENT_LINKS} variant="light" />
+    <div className="portal-shell flex min-h-screen bg-[#f6f4f1]">
+      <PortalSidebar title="Silver Oak University" layoutId="student" links={STUDENT_LINKS} />
       <div className="flex min-h-screen w-full flex-1 flex-col">
         <PortalMobileNav title="Student Portal" links={STUDENT_LINKS} />
         <PortalTopbar
@@ -88,7 +88,7 @@ export default async function StudentLayout({ children }: { children: React.Reac
           searchEndpoint="/api/student/search"
           searchPlaceholder="Search for tests, submissions, or announcements…"
         />
-        <main className="mx-auto w-full max-w-[1320px] flex-1 px-4 py-7 sm:px-6 lg:px-8 lg:py-9"><PortalPageTransition>{children}</PortalPageTransition></main>
+        <main className="mx-auto w-full max-w-[1480px] flex-1 px-4 py-6 sm:px-6 lg:px-7 lg:py-7"><PortalPageTransition>{children}</PortalPageTransition></main>
       </div>
     </div>
   );

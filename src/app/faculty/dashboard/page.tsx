@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import {
   Inbox,
   CheckCircle2,
@@ -264,7 +265,9 @@ export default async function FacultyDashboard({
 
   return (
     <div className="space-y-6">
-      <section className="relative overflow-hidden rounded-lg border border-[#e7ddd8] bg-[linear-gradient(105deg,#fffaf7_0%,#f8efeb_62%,#f3e2dd_100%)] px-5 py-5 sm:px-7">
+      <section className="relative min-h-[150px] overflow-hidden rounded-lg border border-[#e7ddd8] bg-[#fffaf7] px-5 py-5 shadow-[0_14px_40px_rgba(83,42,42,0.06)] sm:px-7">
+        <Image src="/campus-institute.png" alt="" fill className="pointer-events-none object-cover object-center opacity-[0.18]" aria-hidden="true" />
+        <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(90deg,rgba(255,250,247,1)_0%,rgba(255,250,247,0.96)_54%,rgba(255,250,247,0.48)_100%)]" />
         <div className="relative z-10 flex flex-wrap items-start justify-between gap-4">
         <div>
           <p className="mb-2 text-[10px] font-semibold uppercase tracking-[0.18em] text-[#8f3032]">Faculty workspace</p>
@@ -278,8 +281,7 @@ export default async function FacultyDashboard({
           <SemesterSelect semesters={semesters} value={activeSemester} />
         </div>
         </div>
-        <p className="relative z-10 mt-5 border-t border-[#8f3032]/10 pt-3 text-xs italic text-[#8f3032]/75">“Teaching is learning twice.”</p>
-        <span className="pointer-events-none absolute -right-10 -top-12 text-[10rem] font-semibold leading-none text-[#8f3032]/[0.06]">SO</span>
+        <p className="relative z-10 mt-5 max-w-xl border-t border-[#8f3032]/10 pt-3 text-xs italic text-[#8f3032]/75">“Teaching is learning twice.”</p>
       </section>
 
       <OfficeAttendanceCard initial={attendanceStatus} />

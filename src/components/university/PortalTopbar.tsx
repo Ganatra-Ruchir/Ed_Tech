@@ -186,7 +186,7 @@ export function PortalTopbar({
 
   return (
     <>
-    <header className="sticky top-0 z-20 flex items-center gap-3 border-b border-[#dfe3dc] bg-[#f4f5f0]/90 px-4 py-3 backdrop-blur-xl sm:px-6 lg:px-8">
+    <header className="sticky top-0 z-20 flex items-center gap-3 border-b border-[#ebe5e1] bg-white/88 px-4 py-3 shadow-[0_5px_24px_rgba(71,37,37,0.035)] backdrop-blur-xl sm:px-6 lg:px-7">
       <div className="min-w-0 flex-1">
       <div ref={searchBoxRef} className="relative w-full max-w-md transition-[max-width] duration-300 ease-out focus-within:max-w-xl">
         <Search size={15} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[#667085]" />
@@ -197,7 +197,7 @@ export function PortalTopbar({
           onChange={(e) => setQuery(e.target.value)}
           onFocus={() => setSearchOpen(true)}
           placeholder={searchPlaceholder}
-          className="w-full rounded-md border border-[#dfe3dc] bg-white py-2.5 pl-9 pr-9 text-[13px] text-[#17212b] shadow-sm placeholder:text-[#98a2b3] focus:border-[#ef5b3f]/60 focus:outline-none focus:ring-3 focus:ring-[#ef5b3f]/10 sm:pr-16"
+          className="w-full rounded-md border border-[#e3ddd8] bg-[#fbfaf9] py-2.5 pl-9 pr-9 text-[13px] text-[#17212b] shadow-sm placeholder:text-[#98a2b3] focus:border-[#8f3032]/45 focus:bg-white focus:outline-none focus:ring-3 focus:ring-[#8f3032]/8 sm:pr-16"
         />
         {!query && (
           <kbd className="pointer-events-none absolute right-2.5 top-1/2 hidden -translate-y-1/2 items-center rounded border border-[#dfe3dc] bg-[#f7f8f5] px-1.5 py-0.5 text-[9px] font-semibold text-[#98a2b3] sm:flex">

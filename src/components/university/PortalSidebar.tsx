@@ -81,7 +81,7 @@ export function PortalSidebar({
 
   return (
     <aside
-      className={cn("sticky top-0 hidden h-screen w-[248px] shrink-0 flex-col overflow-hidden border-r md:flex", variant === "light" ? "border-[#e5e7e1] bg-white text-[#17212b]" : "border-white/5 bg-[#241719] text-white")}
+      className={cn("sticky top-0 hidden h-screen w-[232px] shrink-0 flex-col overflow-hidden border-r md:flex", variant === "light" ? "border-[#e5e7e1] bg-white text-[#17212b]" : "border-white/[0.07] bg-[#241417] text-white shadow-[10px_0_34px_rgba(45,15,20,0.08)]")}
     >
       <div className={cn("relative flex items-center gap-3 border-b px-5 py-[18px]", variant === "light" ? "border-[#e5e7e1]" : "border-white/[0.07]")}>
         <motion.div initial={reduceMotion ? false : { opacity: 0, scale: 0.72 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.42, ease: [0.22, 1, 0.36, 1] }}>
@@ -93,7 +93,10 @@ export function PortalSidebar({
         </motion.div>
       </div>
 
-      <nav className="flex flex-1 flex-col gap-4 overflow-y-auto px-3 py-5">
+      {variant === "dark" && <div className="pointer-events-none absolute inset-x-0 bottom-0 h-60 bg-[url('/campus-building.png')] bg-cover bg-center opacity-[0.08]" aria-hidden="true" />}
+      {variant === "dark" && <div className="pointer-events-none absolute inset-x-0 bottom-0 h-60 bg-[#4f171e]/45" aria-hidden="true" />}
+
+      <nav className="relative z-10 flex flex-1 flex-col gap-4 overflow-y-auto px-3 py-4">
         {groups.map((group, gi) => (
           <div key={group.label ?? gi} className="flex flex-col gap-1">
             {group.label && (
@@ -110,13 +113,13 @@ export function PortalSidebar({
                   href={link.href}
                   className={cn(
                     "group relative flex items-center gap-3 rounded-md px-3 py-2.5 text-[13px] font-medium transition-colors",
-                    active ? "text-white" : variant === "light" ? "text-[#344054] hover:text-[#8f3032]" : "text-white/60 hover:text-white",
+                    active ? "text-white" : variant === "light" ? "text-[#344054] hover:text-[#8f3032]" : "text-white/68 hover:text-white",
                   )}
                 >
                   {active && (
                     <motion.span
                       layoutId={`${layoutId}-active-pill`}
-                      className={cn("absolute inset-0 rounded-md", variant === "light" ? "bg-[#8f3032] shadow-[0_8px_18px_rgba(143,48,50,0.16)]" : "bg-white/[0.09] shadow-[inset_3px_0_0_#0b7a50]")}
+                      className={cn("absolute inset-0 rounded-md", variant === "light" ? "bg-[#8f3032] shadow-[0_8px_18px_rgba(143,48,50,0.16)]" : "bg-[#8f1834] shadow-[inset_3px_0_0_#ff6b68,0_10px_24px_rgba(85,10,28,0.24)]")}
                       transition={{ type: "spring", stiffness: 500, damping: 42 }}
                     />
                   )}
@@ -142,7 +145,7 @@ export function PortalSidebar({
         ))}
       </nav>
 
-      <div className="relative overflow-hidden px-5 pb-5 pt-8">
+      <div className="relative z-10 overflow-hidden px-5 pb-5 pt-8">
         <BuildingSilhouette />
         <div className={cn("relative border-t pt-4", variant === "light" ? "border-[#e5e7e1]" : "border-white/[0.08]")}>
           <div className="flex items-center gap-2.5">

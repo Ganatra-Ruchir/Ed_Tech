@@ -6,7 +6,7 @@ export function Card({ children, className, ...props }: ComponentPropsWithoutRef
     <div
       {...props}
       className={cn(
-        "rounded-md border border-[#dfe3dc] bg-white shadow-[0_1px_2px_rgba(23,33,43,0.04)] transition-[border-color,box-shadow] duration-150 hover:border-[#cbd1c9] hover:shadow-[0_8px_24px_rgba(23,33,43,0.06)]",
+        "rounded-lg border border-[#e5e1dc] bg-white shadow-[0_1px_2px_rgba(65,35,35,0.035),0_10px_30px_rgba(65,35,35,0.035)] transition-[border-color,box-shadow,transform] duration-200 hover:border-[#d9cec8] hover:shadow-[0_14px_38px_rgba(65,35,35,0.075)]",
         className,
       )}
     >
@@ -17,6 +17,6 @@ export function Card({ children, className, ...props }: ComponentPropsWithoutRef
 
 export function CardHeader({ children, className }: { children: ReactNode; className?: string }) {
   return (
-    <div className={cn("border-b border-[#e7eae4] px-5 py-4", className)}>{children}</div>
+    <div className={cn("border-b border-[#eee9e5] px-5 py-4", className)}>{children}</div>
   );
 }

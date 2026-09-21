@@ -9,6 +9,7 @@ import {
   Activity,
   ArrowRight,
   Zap,
+  ShieldCheck,
 } from "lucide-react";
 import { getSession } from "@/lib/auth";
 import { Card } from "@/components/Card";
@@ -18,6 +19,7 @@ import { PerformanceDonut } from "@/components/admin/PerformanceDonut";
 import { SemesterFilter } from "@/components/admin/SemesterFilter";
 import { SubmissionTrendChart } from "@/components/admin/SubmissionTrendChart";
 import { getAdminDashboardData } from "@/components/admin/queries";
+import { PageHeader } from "@/components/PageHeader";
 
 const QUICK_ACTIONS = [
   { href: "/admin/students", label: "Manage students", icon: Users },
@@ -42,17 +44,13 @@ export default async function AdminDashboard({
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap items-start justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-zinc-900">
-            {data.greeting}, {session!.name.split(" ")[0]} <span aria-hidden="true">👋</span>
-          </h1>
-          <p className="mt-1 text-sm text-zinc-500">
-            Here&apos;s the overview of Silver Oak University&apos;s academic progress.
-          </p>
-        </div>
-        <SemesterFilter semesters={data.semesters} value={data.activeSemester} />
-      </div>
+      <PageHeader
+        icon={ShieldCheck}
+        eyebrow="Administration workspace"
+        title={`${data.greeting}, ${session!.name.split(" ")[0]}`}
+        description="Monitor Silver Oak University's people, academic progress, and operational activity from one workspace."
+        actions={<SemesterFilter semesters={data.semesters} value={data.activeSemester} />}
+      />
 
       <section className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
         <AdminStatCard
