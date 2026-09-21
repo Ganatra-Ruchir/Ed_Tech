@@ -61,11 +61,11 @@ export default function LoginPage() {
               fill
               sizes="58vw"
               priority={index === 0}
-              className={`object-cover transition-opacity duration-700 ease-out ${index === heroImage ? "opacity-35" : "opacity-0"}`}
+              className={`object-cover transition-opacity duration-700 ease-out ${index === heroImage ? "opacity-75" : "opacity-0"}`}
             />
           ))}
-          <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(36,23,25,0.98)_0%,rgba(59,29,37,0.86)_52%,rgba(59,29,37,0.58)_100%)]" />
-          <div className="absolute inset-0 bg-[linear-gradient(0deg,rgba(36,23,25,0.88)_0%,transparent_55%,rgba(36,23,25,0.38)_100%)]" />
+          <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(36,23,25,0.82)_0%,rgba(59,29,37,0.42)_43%,rgba(59,29,37,0.08)_100%)]" />
+          <div className="absolute inset-0 bg-[linear-gradient(0deg,rgba(36,23,25,0.58)_0%,transparent_58%,rgba(36,23,25,0.1)_100%)]" />
         </div>
         <div className="pointer-events-none absolute -right-28 top-1/4 h-[32rem] w-[32rem] rounded-full border border-[#0b7a50]/20 bg-[#0b7a50]/10 blur-3xl" />
         <div className="relative z-10 flex items-center gap-3">
