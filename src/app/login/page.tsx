@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-import { ArrowRight, Lock, Mail } from "lucide-react";
+import { ArrowRight, BarChart3, GraduationCap, Lock, Mail, Users } from "lucide-react";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -35,8 +35,9 @@ export default function LoginPage() {
   }
 
   return (
-    <main className="grid min-h-screen bg-[#f4f5f0] lg:grid-cols-[minmax(360px,0.82fr)_1.18fr]">
-      <section className="relative hidden min-h-screen overflow-hidden bg-[#241719] p-10 text-white lg:flex lg:flex-col lg:justify-between xl:p-14">
+    <main className="grid min-h-screen bg-[#f7f8f5] lg:grid-cols-[minmax(420px,0.88fr)_1.12fr]">
+      <section className="relative hidden min-h-screen overflow-hidden bg-[linear-gradient(145deg,#241719_0%,#3b1d25_48%,#6f3039_100%)] p-10 text-white lg:flex lg:flex-col lg:justify-between xl:p-14">
+        <div className="pointer-events-none absolute -right-28 top-1/4 h-[32rem] w-[32rem] rounded-full border border-[#0b7a50]/20 bg-[#0b7a50]/10 blur-3xl" />
         <div className="relative z-10 flex items-center gap-3">
           <span className="animate-brand-breathe flex h-11 w-11 items-center justify-center overflow-hidden rounded-md bg-white shadow-sm"><Image src="/silver-oak-logo.png" alt="Silver Oak University" width={44} height={44} className="h-full w-full object-contain" priority /></span>
           <div>
@@ -45,9 +46,21 @@ export default function LoginPage() {
           </div>
         </div>
 
-        <div className="relative z-10 flex flex-1 items-center justify-center py-10">
-          <div className="w-full max-w-[560px] overflow-hidden rounded-2xl border border-white/15 bg-white p-2 shadow-[0_24px_80px_rgba(0,0,0,0.25)]">
-            <Image src="/silver-oak-login-visual.png" alt="Silver Oak University" width={1518} height={615} className="h-auto w-full rounded-xl object-cover" priority />
+        <div className="relative z-10 flex flex-1 flex-col justify-center py-10">
+          <p className="mb-4 text-[11px] font-semibold uppercase tracking-[0.22em] text-[#d7a3a4]">Education for a brighter tomorrow</p>
+          <h1 className="max-w-xl text-5xl font-semibold leading-[1.05] tracking-[-0.04em] xl:text-6xl">
+            Learn. <span className="text-[#d8a6a7]">Grow.</span><br />Achieve.
+          </h1>
+          <p className="mt-5 max-w-md text-[15px] leading-7 text-white/70">A unified learning platform for students, faculty, and administrators at Silver Oak University.</p>
+          <div className="mt-9 grid max-w-md gap-4">
+            {[
+              [GraduationCap, "Access learning resources", "Notes, assignments, exams and more in one place."],
+              [Users, "Stay connected", "Seamless communication across your university community."],
+              [BarChart3, "Build your future", "Track progress, gain insights, and reach your goals."],
+            ].map(([Icon, title, description]) => {
+              const FeatureIcon = Icon as typeof GraduationCap;
+              return <div key={title as string} className="flex items-center gap-3"><span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#8f3032] text-white shadow-[0_8px_22px_rgba(0,0,0,0.16)]"><FeatureIcon size={18} /></span><span><strong className="block text-[13px] font-semibold text-white">{title as string}</strong><span className="mt-0.5 block text-[11px] leading-4 text-white/55">{description as string}</span></span></div>;
+            })}
           </div>
         </div>
 
@@ -59,7 +72,7 @@ export default function LoginPage() {
       </section>
 
       <section className="flex min-h-screen items-center justify-center px-5 py-12 sm:px-10">
-        <div className="w-full max-w-[430px]">
+        <div className="w-full max-w-[520px] rounded-2xl border border-[#e4e7e0] bg-white p-6 shadow-[0_22px_70px_rgba(36,23,25,0.08)] sm:p-10">
           <div className="mb-10 flex items-center gap-3 lg:hidden">
           <span className="animate-brand-breathe flex h-10 w-10 items-center justify-center overflow-hidden rounded-md bg-white shadow-sm"><Image src="/silver-oak-logo.png" alt="Silver Oak University" width={40} height={40} className="h-full w-full object-contain" /></span>
             <div><p className="text-sm font-semibold text-[#17212b]">Silver Oak University</p><p className="text-[10px] uppercase tracking-[0.14em] text-[#667085]">Learning Hub</p></div>
@@ -68,7 +81,7 @@ export default function LoginPage() {
           <div className="mb-8">
             <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-[#ef5b3f]">Welcome back</p>
             <h2 className="text-[30px] font-semibold tracking-[-0.02em] text-[#17212b]">Sign in to your portal</h2>
-            <p className="mt-2 text-sm leading-6 text-[#667085]">Use your university account to continue.</p>
+            <p className="mt-2 text-sm leading-6 text-[#667085]">Use your university account to continue to Silver Oak University Learning Hub.</p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-5">
@@ -89,7 +102,7 @@ export default function LoginPage() {
 
             {error && <p role="alert" className="rounded-md border border-rose-200 bg-rose-50 px-3 py-2.5 text-sm text-rose-700">{error}</p>}
 
-            <button type="submit" disabled={loading} className="flex w-full items-center justify-center gap-2 rounded-md bg-[#17212b] px-4 py-3 text-sm font-semibold text-white shadow-sm hover:bg-[#263441] disabled:cursor-not-allowed disabled:opacity-60">
+            <button type="submit" disabled={loading} className="flex w-full items-center justify-center gap-2 rounded-md bg-[#8f3032] px-4 py-3 text-sm font-semibold text-white shadow-[0_8px_20px_rgba(143,48,50,0.18)] hover:bg-[#74272a] disabled:cursor-not-allowed disabled:opacity-60">
               {loading ? "Signing in..." : "Sign in"}
               {!loading && <ArrowRight size={16} />}
             </button>
