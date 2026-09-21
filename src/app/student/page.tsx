@@ -47,7 +47,7 @@ export default async function StudentDashboard() {
   const studentId = session!.sub;
   const batchIds = await userBatchIds(studentId);
 
-  const [submissions, tests, kpis, announcements, materialCount] = await Promise.all([
+  const [submissions, tests, kpis, announcements, materialCount, studentBatches] = await Promise.all([
     prisma.submission.findMany({
       where: { studentId },
       include: { files: true, _count: { select: { feedback: true, evidence: true } } },
@@ -69,6 +69,18 @@ export default async function StudentDashboard() {
       take: 2,
     }),
     prisma.learningMaterial.count({ where: { batchId: { in: batchIds } } }),
+    prisma.batch.findMany({
+      where: { id: { in: batchIds } },
+      select: {
+        id: true,
+        name: true,
+        department: true,
+        semester: true,
+        _count: { select: { learningMaterials: true, tests: true } },
+      },
+      orderBy: { name: "asc" },
+      take: 6,
+    }),
   ]);
 
   const myResponses = await prisma.testResponse.findMany({
@@ -174,6 +186,52 @@ export default async function StudentDashboard() {
           </div>
           <p className="mt-3 text-[11px] text-zinc-500">{materialCount} materials available</p>
         </Link>
+      </section>
+
+      <section>
+        <div className="mb-2 flex items-center justify-between">
+          <div>
+            <h2 className="text-[15px] font-semibold text-zinc-900">My Courses</h2>
+            <p className="text-xs text-zinc-500">Your active classes and learning resources.</p>
+          </div>
+          <Link href="/student/materials" className="flex items-center gap-1 text-xs font-medium text-[#8f3032] hover:underline">
+            View materials <ArrowRight size={11} />
+          </Link>
+        </div>
+        {studentBatches.length === 0 ? (
+          <Card><EmptyState icon={BookOpen} title="No courses assigned" description="Your enrolled courses will appear here." /></Card>
+        ) : (
+          <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+            {studentBatches.map((batch, index) => {
+              const tones = [
+                "bg-emerald-50 text-emerald-700",
+                "bg-violet-50 text-violet-700",
+                "bg-sky-50 text-sky-700",
+              ];
+              return (
+                <Link
+                  key={batch.id}
+                  href="/student/materials"
+                  className="group rounded-lg border border-zinc-200 bg-white p-4 shadow-sm transition hover:-translate-y-0.5 hover:border-[#8f3032]/20 hover:shadow-md"
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <span className={`flex h-10 w-10 items-center justify-center rounded-md ${tones[index % tones.length]}`}>
+                      <LibraryBig size={18} />
+                    </span>
+                    <ChevronRight size={16} className="text-zinc-300 transition-transform group-hover:translate-x-0.5" />
+                  </div>
+                  <p className="mt-3 text-[10px] font-semibold uppercase tracking-[0.12em] text-zinc-400">Semester {batch.semester}</p>
+                  <h3 className="mt-1 text-sm font-semibold text-zinc-900">{batch.name}</h3>
+                  <p className="mt-0.5 truncate text-[11px] text-zinc-500">{batch.department}</p>
+                  <div className="mt-3 flex gap-3 border-t border-zinc-100 pt-2.5 text-[11px] text-zinc-500">
+                    <span>{batch._count.learningMaterials} materials</span>
+                    <span>{batch._count.tests} tests</span>
+                  </div>
+                </Link>
+              );
+            })}
+          </div>
+        )}
       </section>
 
       <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">

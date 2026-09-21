@@ -105,7 +105,15 @@ export default async function FacultyDashboard({
   const [submissions, scoredResponses, recentSubmissions, recentReviews, recentFeedback] = await Promise.all([
     prisma.submission.findMany({
       where: { batchId: { in: batchIds } },
-      select: { id: true, status: true, createdAt: true, reviewedAt: true },
+      select: {
+        id: true,
+        title: true,
+        status: true,
+        createdAt: true,
+        reviewedAt: true,
+        student: { select: { name: true } },
+        batch: { select: { name: true } },
+      },
     }),
     prisma.testResponse.findMany({
       where: { test: { batchId: { in: batchIds } }, score: { not: null }, maxScore: { gt: 0 } },
@@ -241,6 +249,19 @@ export default async function FacultyDashboard({
     `${submittedLastWeek} arrived last week`,
   );
 
+  const boardColumns = [
+    { status: "SUBMITTED", label: "To review", dot: "bg-rose-500", panel: "bg-rose-50/45" },
+    { status: "IN_REVIEW", label: "In progress", dot: "bg-blue-500", panel: "bg-blue-50/45" },
+    { status: "NEEDS_REVISION", label: "Revision", dot: "bg-amber-500", panel: "bg-amber-50/45" },
+    { status: "APPROVED", label: "Completed", dot: "bg-emerald-500", panel: "bg-emerald-50/45" },
+  ].map((column) => ({
+    ...column,
+    items: submissions
+      .filter((submission) => submission.status === column.status)
+      .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
+      .slice(0, 5),
+  }));
+
   return (
     <div className="space-y-6">
       <section className="relative overflow-hidden rounded-lg border border-[#e7ddd8] bg-[linear-gradient(105deg,#fffaf7_0%,#f8efeb_62%,#f3e2dd_100%)] px-5 py-5 sm:px-7">
@@ -311,6 +332,55 @@ export default async function FacultyDashboard({
           delta={submittedDelta.delta}
           hint={submittedDelta.hint}
         />
+      </section>
+
+      <section>
+        <div className="mb-2 flex items-center justify-between">
+          <div>
+            <h2 className="text-[15px] font-semibold text-zinc-900">Submission Board</h2>
+            <p className="text-xs text-zinc-500">Move through the day by reviewing the work that needs attention.</p>
+          </div>
+          <Link href="/faculty/review" className="flex items-center gap-1 text-xs font-medium text-[#8f3032] hover:underline">
+            Open review queue <ArrowRight size={12} />
+          </Link>
+        </div>
+        <div className="grid gap-3 lg:grid-cols-4">
+          {boardColumns.map((column) => (
+            <div key={column.status} className={`min-h-64 rounded-lg border border-zinc-200/80 p-3 ${column.panel}`}>
+              <div className="mb-3 flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <span className={`h-2 w-2 rounded-full ${column.dot}`} />
+                  <h3 className="text-[12.5px] font-semibold text-zinc-800">{column.label}</h3>
+                  <span className="rounded-full bg-white px-1.5 py-0.5 text-[10px] font-semibold text-zinc-500 shadow-sm">
+                    {column.items.length}
+                  </span>
+                </div>
+              </div>
+              <div className="space-y-2">
+                {column.items.length === 0 ? (
+                  <div className="flex min-h-24 items-center justify-center rounded-md border border-dashed border-zinc-200 bg-white/55 px-3 text-center text-[11px] text-zinc-400">
+                    No submissions here
+                  </div>
+                ) : (
+                  column.items.map((item) => (
+                    <Link
+                      key={item.id}
+                      href={`/faculty/submissions/${item.id}`}
+                      className="block rounded-md border border-zinc-200 bg-white p-3 shadow-sm transition hover:-translate-y-0.5 hover:border-[#8f3032]/25 hover:shadow-md"
+                    >
+                      <p className="line-clamp-2 text-[12.5px] font-semibold text-zinc-900">{item.title}</p>
+                      <p className="mt-1 truncate text-[11px] text-zinc-500">{item.student.name}</p>
+                      <div className="mt-2 flex items-center justify-between gap-2 text-[10px] text-zinc-400">
+                        <span className="truncate rounded-full bg-zinc-50 px-1.5 py-0.5">{item.batch.name}</span>
+                        <span className="shrink-0">{item.createdAt.toLocaleDateString("en-IN", { day: "2-digit", month: "short" })}</span>
+                      </div>
+                    </Link>
+                  ))
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
       </section>
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-5">
