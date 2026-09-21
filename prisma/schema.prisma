@@ -1,6 +1,6 @@
 // Student Progress & Evaluation Platform - data model
-// Note: SQLite backend -> no native scalar lists, so multi-value relations
-// (files, questions, answers, batch memberships) are modeled as join tables.
+// Multi-value relations (files, questions, answers, batch memberships) are
+// modeled as join tables.
 
 generator client {
   provider = "prisma-client"
@@ -8,7 +8,7 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
 }
 
 enum Role {

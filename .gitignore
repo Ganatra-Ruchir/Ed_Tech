@@ -48,6 +48,7 @@ next-env.d.ts
 /dev.db-journal
 /prisma/dev.db
 /prisma/dev.db-journal
+/prisma/migrations-sqlite/
 
 # uploaded submission files (local-disk storage fallback; see src/lib/storage.ts)
 /public/uploads
@@ -63,4 +64,3 @@ next-env.d.ts
 /.claude
 /.windsurf
 /skills-lock.json
-
