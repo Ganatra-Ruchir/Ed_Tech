@@ -1,18 +1,18 @@
 import Link from "next/link";
+import Image from "next/image";
 import {
-  FileText,
   ClipboardList,
   CheckCircle2,
   BarChart3,
-  Target,
   Megaphone,
   Clock,
   AlertCircle,
-  Plus,
   ArrowRight,
   Inbox,
   Quote,
   LibraryBig,
+  BookOpen,
+  ChevronRight,
 } from "lucide-react";
 import { getSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
@@ -47,7 +47,7 @@ export default async function StudentDashboard() {
   const studentId = session!.sub;
   const batchIds = await userBatchIds(studentId);
 
-  const [submissions, tests, kpis, announcements] = await Promise.all([
+  const [submissions, tests, kpis, announcements, materialCount] = await Promise.all([
     prisma.submission.findMany({
       where: { studentId },
       include: { files: true, _count: { select: { feedback: true, evidence: true } } },
@@ -68,6 +68,7 @@ export default async function StudentDashboard() {
       orderBy: { createdAt: "desc" },
       take: 2,
     }),
+    prisma.learningMaterial.count({ where: { batchId: { in: batchIds } } }),
   ]);
 
   const myResponses = await prisma.testResponse.findMany({
@@ -112,90 +113,67 @@ export default async function StudentDashboard() {
     .slice(0, 4);
 
   const completionRate = kpiByName["submission_completion_rate"] ?? 0;
-  const avgScore = kpiByName["avg_test_score_pct"] ?? 0;
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap items-start justify-between gap-4">
+      <section className="relative overflow-hidden rounded-lg border border-[#eaded9] px-5 py-7 sm:px-7">
+        <Image src="/campus-airplane.png" alt="Silver Oak University campus" fill priority className="object-cover object-center opacity-55" />
+        <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(255,248,245,0.98)_0%,rgba(255,248,245,0.86)_48%,rgba(255,248,245,0.24)_100%)]" />
+        <div className="relative z-10 flex flex-wrap items-start justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-zinc-900">
+          <h1 className="text-2xl font-bold text-zinc-900 sm:text-[28px]">
             Welcome back, {session!.name.split(" ")[0]} <span aria-hidden="true">👋</span>
           </h1>
-          <p className="mt-1 text-sm text-zinc-500">Here&apos;s where your project work and tests stand. Keep going!</p>
+          <p className="mt-1 text-sm text-zinc-600">Keep going! You&apos;re one step closer to your goals.</p>
         </div>
         <div className="flex items-center gap-4">
           <div className="hidden max-w-xs items-start gap-2 border-l-2 border-[#ef5b3f]/40 pl-3 sm:flex">
             <Quote size={14} className="mt-0.5 shrink-0 text-[#ef5b3f]/50" />
             <p className="text-xs italic text-zinc-500">&ldquo;{quote}&rdquo;</p>
           </div>
-          <LinkButton
-            href="/student/submissions/new"
-            size="sm"
-            className="!bg-[#ef5b3f] hover:!bg-[#d9472e]"
-          >
-            <Plus size={14} /> New Submission
-          </LinkButton>
         </div>
-      </div>
+        </div>
+      </section>
 
-      <section className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-        <div className="rounded-lg bg-rose-50/70 p-4">
+      <section className="grid grid-cols-2 gap-3 xl:grid-cols-4">
+        <Link href="/student/materials" className="group rounded-lg border border-[#e4e7e0] bg-white p-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
           <div className="flex items-center gap-2.5">
-            <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-rose-100 text-rose-600">
-              <Target size={16} />
-            </span>
-            <div>
-              <p className="text-xs font-medium text-zinc-500">Completion</p>
-              <p className="text-xl font-bold text-zinc-900">{completionRate.toFixed(0)}%</p>
+            <span className="flex h-10 w-10 items-center justify-center rounded-full bg-rose-50 text-[#8f3032]"><BookOpen size={18} /></span>
+            <div className="min-w-0 flex-1">
+              <p className="text-xs font-medium text-zinc-500">My Courses</p>
+              <p className="text-xl font-bold text-zinc-900">{batchIds.length}</p>
             </div>
+            <ChevronRight size={16} className="text-zinc-300 transition-transform group-hover:translate-x-0.5" />
           </div>
-          <ProgressBar value={completionRate} tone="danger" className="mt-3 !bg-rose-200/70 [&>div]:!bg-rose-500" />
-          <p className="mt-1.5 text-[11px] text-zinc-500">
-            {completionRate >= 75 ? "Great progress! Keep it up." : completionRate >= 40 ? "Good progress! Keep it up." : "Let's pick up the pace."}
-          </p>
-        </div>
+          <p className="mt-3 text-[11px] text-zinc-500">Active this semester</p>
+        </Link>
 
-        <div className="rounded-lg bg-amber-50/70 p-4">
+        <Link href="/student/submissions" className="group rounded-lg border border-[#e4e7e0] bg-white p-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
           <div className="flex items-center gap-2.5">
-            <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-amber-100 text-amber-600">
-              <BarChart3 size={16} />
-            </span>
-            <div>
-              <p className="text-xs font-medium text-zinc-500">Avg Test Score</p>
-              <p className="text-xl font-bold text-zinc-900">{avgScore.toFixed(0)}%</p>
-            </div>
+            <span className="flex h-10 w-10 items-center justify-center rounded-full bg-amber-50 text-amber-600"><ClipboardList size={18} /></span>
+            <div className="min-w-0 flex-1"><p className="text-xs font-medium text-zinc-500">Pending Work</p><p className="text-xl font-bold text-zinc-900">{upcoming.length}</p></div>
+            <ChevronRight size={16} className="text-zinc-300 transition-transform group-hover:translate-x-0.5" />
           </div>
-          <ProgressBar value={avgScore} tone="warning" className="mt-3 !bg-amber-200/70" />
-          <p className="mt-1.5 text-[11px] text-zinc-500">
-            {avgScore >= 60 ? "Above average performance." : "Room to grow — keep practicing."}
-          </p>
-        </div>
+          <p className="mt-3 text-[11px] text-zinc-500">Due soon or needs revision</p>
+        </Link>
 
-        <div className="rounded-lg bg-violet-50/70 p-4">
+        <Link href="/student/reports" className="group rounded-lg border border-[#e4e7e0] bg-white p-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
           <div className="flex items-center gap-2.5">
-            <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-violet-100 text-violet-600">
-              <FileText size={16} />
-            </span>
-            <div>
-              <p className="text-xs font-medium text-zinc-500">Submissions</p>
-              <p className="text-xl font-bold text-zinc-900">{submissions.length}</p>
-            </div>
+            <span className="flex h-10 w-10 items-center justify-center rounded-full bg-emerald-50 text-emerald-600"><BarChart3 size={18} /></span>
+            <div className="min-w-0 flex-1"><p className="text-xs font-medium text-zinc-500">Overall Progress</p><p className="text-xl font-bold text-zinc-900">{completionRate.toFixed(0)}%</p></div>
+            <ChevronRight size={16} className="text-zinc-300 transition-transform group-hover:translate-x-0.5" />
           </div>
-          <p className="mt-4 text-[11px] text-zinc-500">Out of your current work</p>
-        </div>
+          <ProgressBar value={completionRate} tone="brand" className="mt-3" />
+        </Link>
 
-        <div className="rounded-lg bg-emerald-50/70 p-4">
+        <Link href="/student/tests" className="group rounded-lg border border-[#e4e7e0] bg-white p-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
           <div className="flex items-center gap-2.5">
-            <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-emerald-100 text-emerald-600">
-              <ClipboardList size={16} />
-            </span>
-            <div>
-              <p className="text-xs font-medium text-zinc-500">Tests Assigned</p>
-              <p className="text-xl font-bold text-zinc-900">{tests.length}</p>
-            </div>
+            <span className="flex h-10 w-10 items-center justify-center rounded-full bg-violet-50 text-violet-600"><ClipboardList size={18} /></span>
+            <div className="min-w-0 flex-1"><p className="text-xs font-medium text-zinc-500">Upcoming Tests</p><p className="text-xl font-bold text-zinc-900">{tests.filter((test) => !responseByTest.has(test.id)).length}</p></div>
+            <ChevronRight size={16} className="text-zinc-300 transition-transform group-hover:translate-x-0.5" />
           </div>
-          <p className="mt-4 text-[11px] text-zinc-500">Pending or in progress</p>
-        </div>
+          <p className="mt-3 text-[11px] text-zinc-500">{materialCount} materials available</p>
+        </Link>
       </section>
 
       <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">

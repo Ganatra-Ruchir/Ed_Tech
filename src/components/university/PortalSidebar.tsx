@@ -68,10 +68,12 @@ export function PortalSidebar({
   title,
   layoutId,
   links,
+  variant = "dark",
 }: {
   title: string;
   layoutId: string;
   links: PortalNavLink[] | PortalNavGroup[];
+  variant?: "dark" | "light";
 }) {
   const pathname = usePathname();
   const reduceMotion = useReducedMotion();
@@ -79,15 +81,15 @@ export function PortalSidebar({
 
   return (
     <aside
-      className="sticky top-0 hidden h-screen w-[248px] shrink-0 flex-col overflow-hidden border-r border-white/5 bg-[#241719] text-white md:flex"
+      className={cn("sticky top-0 hidden h-screen w-[248px] shrink-0 flex-col overflow-hidden border-r md:flex", variant === "light" ? "border-[#e5e7e1] bg-white text-[#17212b]" : "border-white/5 bg-[#241719] text-white")}
     >
-      <div className="relative flex items-center gap-3 border-b border-white/[0.07] px-5 py-[18px]">
+      <div className={cn("relative flex items-center gap-3 border-b px-5 py-[18px]", variant === "light" ? "border-[#e5e7e1]" : "border-white/[0.07]")}>
         <motion.div initial={reduceMotion ? false : { opacity: 0, scale: 0.72 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.42, ease: [0.22, 1, 0.36, 1] }}>
           <Crest />
         </motion.div>
         <motion.div initial={reduceMotion ? false : { opacity: 0, x: -8 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.16, duration: 0.34, ease: [0.22, 1, 0.36, 1] }} className="min-w-0 leading-tight">
-          <p className="flex items-center gap-1.5 truncate text-[14px] font-semibold text-white">{title}<Sparkles size={11} className="animate-logo-spark text-[#d9a441]" /></p>
-          <p className="mt-0.5 truncate text-[10px] font-medium uppercase tracking-[0.12em] text-white/45">Learning Hub</p>
+          <p className={cn("flex items-center gap-1.5 truncate text-[14px] font-semibold", variant === "light" ? "text-[#8f3032]" : "text-white")}>{title}<Sparkles size={11} className="animate-logo-spark text-[#d9a441]" /></p>
+          <p className={cn("mt-0.5 truncate text-[10px] font-medium uppercase tracking-[0.12em]", variant === "light" ? "text-[#8f3032]/65" : "text-white/45")}>Learning Hub</p>
         </motion.div>
       </div>
 
@@ -95,7 +97,7 @@ export function PortalSidebar({
         {groups.map((group, gi) => (
           <div key={group.label ?? gi} className="flex flex-col gap-1">
             {group.label && (
-              <p className="mb-1.5 mt-1 px-3 text-[9px] font-semibold uppercase tracking-[0.15em] text-white/35">
+              <p className={cn("mb-1.5 mt-1 px-3 text-[9px] font-semibold uppercase tracking-[0.15em]", variant === "light" ? "text-[#667085]" : "text-white/35")}>
                 {group.label}
               </p>
             )}
@@ -108,18 +110,18 @@ export function PortalSidebar({
                   href={link.href}
                   className={cn(
                     "group relative flex items-center gap-3 rounded-md px-3 py-2.5 text-[13px] font-medium transition-colors",
-                    active ? "text-white" : "text-white/60 hover:text-white",
+                    active ? "text-white" : variant === "light" ? "text-[#344054] hover:text-[#8f3032]" : "text-white/60 hover:text-white",
                   )}
                 >
                   {active && (
                     <motion.span
                       layoutId={`${layoutId}-active-pill`}
-                      className="absolute inset-0 rounded-md bg-white/[0.09] shadow-[inset_3px_0_0_#0b7a50]"
+                      className={cn("absolute inset-0 rounded-md", variant === "light" ? "bg-[#8f3032] shadow-[0_8px_18px_rgba(143,48,50,0.16)]" : "bg-white/[0.09] shadow-[inset_3px_0_0_#0b7a50]")}
                       transition={{ type: "spring", stiffness: 500, damping: 42 }}
                     />
                   )}
                   {!active && (
-                    <span className="absolute inset-0 rounded-md bg-white/0 transition-colors group-hover:bg-white/[0.06]" />
+                    <span className={cn("absolute inset-0 rounded-md transition-colors", variant === "light" ? "bg-transparent group-hover:bg-[#8f3032]/[0.06]" : "bg-white/0 group-hover:bg-white/[0.06]")} />
                   )}
                   <Icon size={17} strokeWidth={2} className="relative z-10 transition-transform duration-200 group-hover:translate-x-0.5" />
                   <span className="relative z-10 truncate">{link.label}</span>
@@ -127,7 +129,7 @@ export function PortalSidebar({
                     <span
                       className={cn(
                         "relative z-10 ml-auto rounded-full px-1.5 py-0.5 text-[10px] font-semibold leading-none",
-                        active ? "bg-[#8f3032] text-white" : "bg-white/10 text-white/75",
+                        active ? "bg-white/15 text-white" : variant === "light" ? "bg-[#8f3032]/10 text-[#8f3032]" : "bg-white/10 text-white/75",
                       )}
                     >
                       {link.badge}
@@ -142,12 +144,12 @@ export function PortalSidebar({
 
       <div className="relative overflow-hidden px-5 pb-5 pt-8">
         <BuildingSilhouette />
-        <div className="relative border-t border-white/[0.08] pt-4">
+        <div className={cn("relative border-t pt-4", variant === "light" ? "border-[#e5e7e1]" : "border-white/[0.08]")}>
           <div className="flex items-center gap-2.5">
-            <span className="flex h-8 w-8 items-center justify-center rounded-md bg-white/[0.07] text-[#f89582]"><GraduationCap size={16} /></span>
+            <span className={cn("flex h-8 w-8 items-center justify-center rounded-md", variant === "light" ? "bg-[#8f3032]/10 text-[#8f3032]" : "bg-white/[0.07] text-[#f89582]")}><GraduationCap size={16} /></span>
             <div className="leading-tight">
-              <p className="text-[11.5px] font-semibold text-white/85">Silver Oak University</p>
-              <p className="mt-0.5 text-[10px] text-white/35">Academic workspace</p>
+              <p className={cn("text-[11.5px] font-semibold", variant === "light" ? "text-[#344054]" : "text-white/85")}>Silver Oak University</p>
+              <p className={cn("mt-0.5 text-[10px]", variant === "light" ? "text-[#98a2b3]" : "text-white/35")}>Academic workspace</p>
             </div>
           </div>
         </div>
