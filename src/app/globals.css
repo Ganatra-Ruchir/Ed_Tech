@@ -7,9 +7,9 @@
   --surface-muted: #ecefe9;
   --border: #dfe3dc;
   --ink-muted: #667085;
-  --brand: #ef5b3f;
-  --brand-strong: #d9472e;
-  --nav: #17212b;
+  --brand: #087a4f;
+  --brand-strong: #8f3032;
+  --nav: #241719;
   --shadow-color: 210 25% 10%;
 }
 
@@ -45,7 +45,7 @@ a {
 }
 
 ::selection {
-  background-color: rgba(239, 91, 63, 0.2);
+  background-color: rgba(8, 122, 79, 0.2);
 }
 
 /* Thin, unobtrusive scrollbars — matches the dense, quiet tables/sidebars used everywhere */
@@ -63,7 +63,7 @@ a {
 }
 
 :focus-visible {
-  outline: 2px solid rgba(239, 91, 63, 0.55);
+  outline: 2px solid rgba(8, 122, 79, 0.55);
   outline-offset: 2px;
 }
 *::-webkit-scrollbar-track {
