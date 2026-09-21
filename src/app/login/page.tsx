@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-import { ArrowRight, BarChart3, GraduationCap, Lock, Mail, Users } from "lucide-react";
+import { ArrowRight, BarChart3, GraduationCap, Lock, Mail, ShieldCheck, Users } from "lucide-react";
 
 const HERO_IMAGES = [
   "/campus-gate.png",
@@ -19,6 +19,7 @@ export default function LoginPage() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [heroImage, setHeroImage] = useState(0);
+  const [role, setRole] = useState<"Student" | "Faculty" | "Admin">("Student");
 
   useEffect(() => {
     const timer = window.setInterval(() => {
@@ -50,8 +51,8 @@ export default function LoginPage() {
   }
 
   return (
-    <main className="grid min-h-screen bg-[#f7f8f5] lg:grid-cols-[minmax(420px,0.88fr)_1.12fr]">
-      <section className="relative hidden min-h-screen overflow-hidden bg-[linear-gradient(145deg,#241719_0%,#3b1d25_48%,#6f3039_100%)] p-10 text-white lg:flex lg:flex-col lg:justify-between xl:p-14">
+    <main className="relative min-h-screen overflow-hidden bg-[#f7f8f5]">
+      <section className="absolute inset-0 hidden min-h-screen overflow-hidden bg-[linear-gradient(145deg,#241719_0%,#3b1d25_48%,#6f3039_100%)] p-10 text-white lg:flex lg:flex-col lg:justify-between xl:p-14">
         <div className="absolute inset-0" aria-hidden="true">
           {HERO_IMAGES.map((source, index) => (
             <Image
@@ -101,8 +102,8 @@ export default function LoginPage() {
         <div className="absolute -bottom-24 -right-12 select-none text-[19rem] font-bold leading-none tracking-[-0.08em] text-white/[0.025]" aria-hidden="true">SO</div>
       </section>
 
-      <section className="flex min-h-screen items-center justify-center px-5 py-12 sm:px-10">
-        <div className="w-full max-w-[520px] rounded-2xl border border-[#e4e7e0] bg-white p-6 shadow-[0_22px_70px_rgba(36,23,25,0.08)] sm:p-10">
+      <section className="relative z-10 flex min-h-screen items-center justify-center px-5 py-12 sm:px-10">
+        <div className="w-full max-w-[520px] rounded-2xl border border-white/70 bg-white/80 p-6 shadow-[0_24px_80px_rgba(36,23,25,0.2)] backdrop-blur-xl sm:p-10">
           <div className="mb-10 flex items-center gap-3 lg:hidden">
           <span className="animate-brand-breathe flex h-10 w-10 items-center justify-center overflow-hidden rounded-md bg-white shadow-sm"><Image src="/silver-oak-logo.png" alt="Silver Oak University" width={40} height={40} className="h-full w-full object-contain" /></span>
             <div><p className="text-sm font-semibold text-[#17212b]">Silver Oak University</p><p className="text-[10px] uppercase tracking-[0.14em] text-[#667085]">Learning Hub</p></div>
@@ -114,19 +115,31 @@ export default function LoginPage() {
             <p className="mt-2 text-sm leading-6 text-[#667085]">Use your university account to continue to Silver Oak University Learning Hub.</p>
           </div>
 
+          <div className="mb-6 grid grid-cols-3 overflow-hidden rounded-md border border-[#d6dbd3] bg-white/70 p-0.5">
+            {[
+              ["Student", GraduationCap],
+              ["Faculty", Users],
+              ["Admin", ShieldCheck],
+            ].map(([label, Icon]) => {
+              const value = label as "Student" | "Faculty" | "Admin";
+              const RoleIcon = Icon as typeof GraduationCap;
+              return <button key={value} type="button" onClick={() => setRole(value)} className={`flex items-center justify-center gap-1.5 rounded-md px-2 py-2 text-xs font-semibold transition-colors ${role === value ? "bg-[#8f3032] text-white shadow-sm" : "text-[#475467] hover:bg-[#f4f5f0]"}`}><RoleIcon size={15} />{value}</button>;
+            })}
+          </div>
+
           <form onSubmit={handleSubmit} className="space-y-5">
             <div>
               <label htmlFor="login-email" className="mb-1.5 block text-xs font-semibold text-[#475467]">University email</label>
               <div className="relative">
                 <Mail size={16} className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-[#98a2b3]" />
-                <input id="login-email" type="email" required value={email} onChange={(e) => setEmail(e.target.value)} className="w-full rounded-md border border-[#d6dbd3] bg-white py-3 pl-10 pr-3 text-sm text-[#17212b] shadow-sm placeholder:text-[#98a2b3] focus:border-[#ef5b3f] focus:outline-none focus:ring-3 focus:ring-[#ef5b3f]/10" placeholder="you@sou.edu" />
+                <input id="login-email" type="email" required value={email} onChange={(e) => setEmail(e.target.value)} className="w-full rounded-md border border-[#d6dbd3] bg-white/80 py-3 pl-10 pr-3 text-sm text-[#17212b] shadow-sm placeholder:text-[#98a2b3] focus:border-[#8f3032] focus:outline-none focus:ring-3 focus:ring-[#8f3032]/10" placeholder={role === "Student" ? "you@sou.edu" : `${role.toLowerCase()}@sou.edu`} />
               </div>
             </div>
             <div>
               <label htmlFor="login-password" className="mb-1.5 block text-xs font-semibold text-[#475467]">Password</label>
               <div className="relative">
                 <Lock size={16} className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-[#98a2b3]" />
-                <input id="login-password" type="password" required value={password} onChange={(e) => setPassword(e.target.value)} className="w-full rounded-md border border-[#d6dbd3] bg-white py-3 pl-10 pr-3 text-sm text-[#17212b] shadow-sm placeholder:text-[#98a2b3] focus:border-[#ef5b3f] focus:outline-none focus:ring-3 focus:ring-[#ef5b3f]/10" placeholder="Enter your password" />
+                <input id="login-password" type="password" required value={password} onChange={(e) => setPassword(e.target.value)} className="w-full rounded-md border border-[#d6dbd3] bg-white/80 py-3 pl-10 pr-3 text-sm text-[#17212b] shadow-sm placeholder:text-[#98a2b3] focus:border-[#8f3032] focus:outline-none focus:ring-3 focus:ring-[#8f3032]/10" placeholder="Enter your password" />
               </div>
             </div>
 
@@ -138,7 +151,8 @@ export default function LoginPage() {
             </button>
           </form>
 
-          <p className="mt-8 text-center text-xs text-[#98a2b3]">Access is limited to registered students, faculty, and administrators.</p>
+          <div className="mt-6 flex items-center justify-center gap-2 border-t border-[#dfe3dc] pt-5 text-xs text-[#98a2b3]"><ShieldCheck size={14} /> Secure access for registered students, faculty, and administrators.</div>
+          <p className="mt-3 text-center text-[11px] text-[#98a2b3]">Need help? Contact university IT support.</p>
         </div>
       </section>
     </main>
