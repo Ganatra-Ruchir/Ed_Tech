@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowRight, GraduationCap, Lock, Mail } from "lucide-react";
+import Image from "next/image";
+import { ArrowRight, Lock, Mail } from "lucide-react";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -35,23 +36,18 @@ export default function LoginPage() {
 
   return (
     <main className="grid min-h-screen bg-[#f4f5f0] lg:grid-cols-[minmax(360px,0.82fr)_1.18fr]">
-      <section className="relative hidden min-h-screen overflow-hidden bg-[#17212b] p-10 text-white lg:flex lg:flex-col lg:justify-between xl:p-14">
+      <section className="relative hidden min-h-screen overflow-hidden bg-[#241719] p-10 text-white lg:flex lg:flex-col lg:justify-between xl:p-14">
         <div className="relative z-10 flex items-center gap-3">
-          <span className="animate-brand-breathe flex h-11 w-11 items-center justify-center rounded-md bg-[#ef5b3f] text-sm font-bold tracking-[0.08em]">SO</span>
+          <span className="animate-brand-breathe flex h-11 w-11 items-center justify-center overflow-hidden rounded-md bg-white shadow-sm"><Image src="/silver-oak-logo.png" alt="Silver Oak University" width={44} height={44} className="h-full w-full object-contain" priority /></span>
           <div>
             <p className="text-sm font-semibold">Silver Oak University</p>
             <p className="mt-0.5 text-[10px] font-medium uppercase tracking-[0.16em] text-white/40">Learning Hub</p>
           </div>
         </div>
 
-        <div className="relative z-10 max-w-lg">
-          <p className="mb-5 text-[11px] font-semibold uppercase tracking-[0.2em] text-[#f89582]">Academic workspace</p>
-          <h1 className="text-5xl font-semibold leading-[1.08] tracking-[-0.03em] xl:text-6xl">
-            Every learner.<br />Every milestone.<br /><span className="text-[#f89582]">One clear view.</span>
-          </h1>
-          <div className="mt-10 flex items-center gap-3 border-t border-white/10 pt-6 text-sm text-white/45">
-            <GraduationCap size={18} className="animate-brand-breathe text-[#f89582]" />
-            Progress, evaluation, and evidence in one place
+        <div className="relative z-10 flex flex-1 items-center justify-center py-10">
+          <div className="w-full max-w-[560px] overflow-hidden rounded-2xl border border-white/15 bg-white p-2 shadow-[0_24px_80px_rgba(0,0,0,0.25)]">
+            <Image src="/silver-oak-login-visual.png" alt="Silver Oak University" width={1518} height={615} className="h-auto w-full rounded-xl object-cover" priority />
           </div>
         </div>
 
@@ -65,7 +61,7 @@ export default function LoginPage() {
       <section className="flex min-h-screen items-center justify-center px-5 py-12 sm:px-10">
         <div className="w-full max-w-[430px]">
           <div className="mb-10 flex items-center gap-3 lg:hidden">
-            <span className="animate-brand-breathe flex h-10 w-10 items-center justify-center rounded-md bg-[#ef5b3f] text-[13px] font-bold tracking-[0.08em] text-white">SO</span>
+          <span className="animate-brand-breathe flex h-10 w-10 items-center justify-center overflow-hidden rounded-md bg-white shadow-sm"><Image src="/silver-oak-logo.png" alt="Silver Oak University" width={40} height={40} className="h-full w-full object-contain" /></span>
             <div><p className="text-sm font-semibold text-[#17212b]">Silver Oak University</p><p className="text-[10px] uppercase tracking-[0.14em] text-[#667085]">Learning Hub</p></div>
           </div>
 
