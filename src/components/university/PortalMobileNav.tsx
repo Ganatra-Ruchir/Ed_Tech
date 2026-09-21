@@ -11,6 +11,7 @@ import {
   Building2,
   ClipboardCheck,
   ClipboardList,
+  CalendarCheck,
   Clock,
   FileText,
   GraduationCap,
@@ -38,6 +39,7 @@ const ICONS: Record<string, LucideIcon> = {
   FileText,
   ClipboardCheck,
   ClipboardList,
+  CalendarCheck,
   Clock,
   Users,
   GraduationCap,
@@ -63,13 +65,10 @@ export function PortalMobileNav({ title, links }: { title: string; links: Portal
 
   return (
     <>
-      <div
-        className="flex items-center justify-between px-4 py-3 text-white md:hidden"
-        style={{ background: "linear-gradient(90deg, #5c0f24 0%, #6b1029 100%)" }}
-      >
+      <div className="flex items-center justify-between border-b border-white/[0.06] bg-[#17212b] px-4 py-3 text-white md:hidden">
         <div className="flex items-center gap-2">
           <Crest />
-          <p className="text-[14px] font-semibold text-white">{title}</p>
+          <div><p className="text-[13px] font-semibold text-white">{title}</p><p className="text-[9px] uppercase tracking-[0.12em] text-white/40">Learning Hub</p></div>
         </div>
         <button
           onClick={() => setOpen(true)}
@@ -95,15 +94,14 @@ export function PortalMobileNav({ title, links }: { title: string; links: Portal
               animate={{ x: 0 }}
               exit={{ x: "-100%" }}
               transition={{ type: "spring", stiffness: 420, damping: 40 }}
-              className="absolute inset-y-0 left-0 flex w-72 max-w-[85vw] flex-col text-white shadow-2xl"
-              style={{ background: "linear-gradient(180deg, #5c0f24 0%, #6b1029 45%, #56091f 100%)" }}
+              className="absolute inset-y-0 left-0 flex w-72 max-w-[85vw] flex-col bg-[#17212b] text-white shadow-2xl"
             >
               <div className="flex items-center justify-between px-5 py-5">
                 <div className="flex items-center gap-2.5">
                   <Crest />
                   <div className="leading-tight">
                     <p className="text-[14px] font-semibold text-white">{title}</p>
-                    <p className="text-[10px] uppercase tracking-wide text-white/60">Silver Oak University</p>
+                    <p className="text-[10px] uppercase tracking-[0.12em] text-white/40">Learning Hub</p>
                   </div>
                 </div>
                 <button
@@ -132,7 +130,7 @@ export function PortalMobileNav({ title, links }: { title: string; links: Portal
                           onClick={() => setOpen(false)}
                           className={cn(
                             "relative flex items-center gap-2.5 rounded-lg px-3 py-2.5 text-[13.5px] font-medium",
-                            active ? "bg-white text-[#6b1029]" : "text-white/85 hover:bg-white/10 hover:text-white",
+                            active ? "bg-white/[0.09] text-white shadow-[inset_3px_0_0_#ef5b3f]" : "text-white/65 hover:bg-white/[0.06] hover:text-white",
                           )}
                         >
                           <Icon size={17} strokeWidth={2} />
@@ -150,7 +148,7 @@ export function PortalMobileNav({ title, links }: { title: string; links: Portal
                     <GraduationCap size={18} className="text-white/70" />
                     <div className="leading-tight">
                       <p className="text-[12.5px] font-semibold text-white">Silver Oak University</p>
-                      <p className="text-[10.5px] text-white/50">Knowledge for a Brighter Tomorrow</p>
+                      <p className="text-[10.5px] text-white/40">Academic workspace</p>
                     </div>
                   </div>
                 </div>

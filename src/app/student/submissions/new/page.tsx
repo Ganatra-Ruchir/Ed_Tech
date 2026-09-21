@@ -73,7 +73,13 @@ function NewSubmissionForm({ assignment, loadingAssignment }: { assignment: { id
     e.preventDefault();
     setError(null);
 
-    if (!title.trim()) {
+    if (loadingAssignment) {
+      setError("Assignment details are still loading. Please wait a moment and try again.");
+      return;
+    }
+
+    const effectiveTitle = (assignment?.title ?? title ?? "").trim();
+    if (!effectiveTitle) {
       setError("Please give your submission a title.");
       return;
     }
@@ -83,7 +89,7 @@ function NewSubmissionForm({ assignment, loadingAssignment }: { assignment: { id
     }
 
     const formData = new FormData();
-    formData.set("title", (assignment?.title ?? title).trim());
+    formData.set("title", effectiveTitle);
     formData.set("notes", notes);
     if (assignment) formData.set("assignmentId", assignment.id);
     files.forEach((f) => formData.append("files", f));
@@ -111,14 +117,14 @@ function NewSubmissionForm({ assignment, loadingAssignment }: { assignment: { id
     <div className="max-w-3xl space-y-5">
       <Link
         href="/student/submissions"
-        className="inline-flex items-center gap-1.5 text-xs font-medium text-zinc-500 transition-colors hover:text-[#6b1029]"
+        className="inline-flex items-center gap-1.5 text-xs font-medium text-zinc-500 transition-colors hover:text-[#ef5b3f]"
       >
         <ArrowLeft size={13} /> Back to submissions
       </Link>
 
       <PageHeader title={assignment ? `Submit: ${assignment.title}` : "New Submission"} description={loadingAssignment ? "Loading assignment details..." : assignment ? `${assignment.batchName} · Upload your work for this assigned task.` : "Upload your milestone work for faculty review."} />
 
-      {assignment && <Card className="p-4"><p className="text-sm text-zinc-700">{assignment.description || "Follow the faculty instructions and attach your completed work."}</p>{assignment.attachmentUrl && <a href={assignment.attachmentUrl} target="_blank" rel="noreferrer" className="mt-2 inline-block text-xs font-medium text-[#6b1029] hover:underline">View assignment PDF</a>}</Card>}
+      {assignment && <Card className="p-4"><p className="text-sm text-zinc-700">{assignment.description || "Follow the faculty instructions and attach your completed work."}</p>{assignment.attachmentUrl && <a href={assignment.attachmentUrl} target="_blank" rel="noreferrer" className="mt-2 inline-block text-xs font-medium text-[#ef5b3f] hover:underline">View assignment PDF</a>}</Card>}
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <Card className="p-5">
@@ -127,11 +133,11 @@ function NewSubmissionForm({ assignment, loadingAssignment }: { assignment: { id
               <Label>Title</Label>
               <Input
                 required
-                value={assignment?.title ?? title}
+                value={assignment ? assignment.title : title}
                 onChange={(e) => setTitle(e.target.value)}
                 readOnly={Boolean(assignment)}
                 placeholder="e.g. Milestone 2 — Prototype Development"
-                className="focus:!border-[#6b1029]/40 focus:!ring-[#6b1029]/10"
+                className="focus:!border-[#ef5b3f]/40 focus:!ring-[#ef5b3f]/10"
               />
             </div>
 
@@ -142,7 +148,7 @@ function NewSubmissionForm({ assignment, loadingAssignment }: { assignment: { id
                 onChange={(e) => setNotes(e.target.value)}
                 rows={4}
                 placeholder="Anything your reviewer should know about this milestone — scope, blockers, what to look at first."
-                className="focus:!border-[#6b1029]/40 focus:!ring-[#6b1029]/10"
+                className="focus:!border-[#ef5b3f]/40 focus:!ring-[#ef5b3f]/10"
               />
               <p className="mt-1 text-[11px] text-zinc-400">Optional, but it helps your faculty review faster.</p>
             </div>
@@ -161,10 +167,10 @@ function NewSubmissionForm({ assignment, loadingAssignment }: { assignment: { id
                   addFiles(e.dataTransfer.files);
                 }}
                 className={`rounded-lg border-2 border-dashed px-4 py-7 text-center transition-colors ${
-                  dragging ? "border-[#6b1029] bg-[#6b1029]/[0.04]" : "border-zinc-200 bg-zinc-50/60"
+                  dragging ? "border-[#ef5b3f] bg-[#ef5b3f]/[0.04]" : "border-zinc-200 bg-zinc-50/60"
                 }`}
               >
-                <span className="mx-auto flex h-10 w-10 items-center justify-center rounded-full bg-[#6b1029]/[0.08] text-[#6b1029]">
+                <span className="mx-auto flex h-10 w-10 items-center justify-center rounded-full bg-[#ef5b3f]/[0.08] text-[#ef5b3f]">
                   <UploadCloud size={19} />
                 </span>
                 <p className="mt-2.5 text-[13px] font-medium text-zinc-700">
@@ -174,7 +180,7 @@ function NewSubmissionForm({ assignment, loadingAssignment }: { assignment: { id
                 <button
                   type="button"
                   onClick={() => inputRef.current?.click()}
-                  className="mt-3 inline-flex items-center gap-1.5 rounded-md bg-[#6b1029] px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-[#7c1638]"
+                  className="mt-3 inline-flex items-center gap-1.5 rounded-md bg-[#ef5b3f] px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-[#d9472e]"
                 >
                   <Plus size={13} /> Choose files
                 </button>
@@ -207,7 +213,7 @@ function NewSubmissionForm({ assignment, loadingAssignment }: { assignment: { id
                         exit={{ opacity: 0, x: -8 }}
                         className="flex items-center gap-2.5 rounded-md border border-zinc-200 bg-white px-3 py-2"
                       >
-                        <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-[#6b1029]/[0.08] text-[#6b1029]">
+                        <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-[#ef5b3f]/[0.08] text-[#ef5b3f]">
                           <FileText size={13} />
                         </span>
                         <span className="min-w-0 flex-1">
@@ -245,7 +251,7 @@ function NewSubmissionForm({ assignment, loadingAssignment }: { assignment: { id
               <Button
                 type="submit"
                 disabled={submitting}
-                className="!bg-[#6b1029] hover:!bg-[#7c1638] disabled:!bg-[#6b1029]/40"
+                className="!bg-[#ef5b3f] hover:!bg-[#d9472e] disabled:!bg-[#ef5b3f]/40"
               >
                 {submitting ? "Submitting…" : "Submit for review"}
               </Button>
@@ -258,7 +264,7 @@ function NewSubmissionForm({ assignment, loadingAssignment }: { assignment: { id
 
         <Card className="p-4">
           <div className="flex items-start gap-2.5">
-            <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-[#6b1029]/[0.08] text-[#6b1029]">
+            <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-[#ef5b3f]/[0.08] text-[#ef5b3f]">
               <Info size={15} />
             </span>
             <div>

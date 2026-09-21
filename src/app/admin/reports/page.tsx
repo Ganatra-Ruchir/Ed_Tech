@@ -83,7 +83,7 @@ export default async function AdminReportsPage() {
                         href={r.pdfPath}
                         target="_blank"
                         rel="noreferrer"
-                        className="inline-flex items-center gap-1 whitespace-nowrap text-xs font-medium text-[#6b1029] hover:underline"
+                        className="inline-flex items-center gap-1 whitespace-nowrap text-xs font-medium text-[#ef5b3f] hover:underline"
                       >
                         <FileDown size={12} /> Open PDF
                       </a>

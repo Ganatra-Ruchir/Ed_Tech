@@ -2,7 +2,7 @@ import type { LucideIcon } from "lucide-react";
 import { cn } from "@/lib/cn";
 
 const TONES = {
-  maroon: "bg-[#6b1029]/[0.08] text-[#6b1029]",
+  maroon: "bg-[#ef5b3f]/[0.08] text-[#ef5b3f]",
   emerald: "bg-emerald-50 text-emerald-600",
   amber: "bg-amber-50 text-amber-600",
   violet: "bg-violet-50 text-violet-600",
@@ -32,15 +32,15 @@ export function AdminStatCard({
   footnote?: string;
 }) {
   return (
-    <div className="rounded-xl border border-zinc-200 bg-white p-4 shadow-sm shadow-zinc-900/[0.02] transition-colors hover:border-zinc-300">
-      <div className="flex items-start gap-3">
-        <span className={cn("flex h-10 w-10 shrink-0 items-center justify-center rounded-lg", TONES[tone])}>
+    <div className="group rounded-md border border-[#dfe3dc] bg-white p-4 shadow-[0_1px_2px_rgba(23,33,43,0.04)] transition-[border-color,box-shadow] hover:border-[#cbd1c9] hover:shadow-[0_8px_24px_rgba(23,33,43,0.06)]">
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0">
+          <p className="truncate text-[10px] font-semibold uppercase tracking-[0.1em] text-[#667085]">{label}</p>
+          <p className="mt-1.5 text-[28px] font-semibold leading-tight text-[#17212b]">{value}</p>
+        </div>
+        <span className={cn("flex h-9 w-9 shrink-0 items-center justify-center rounded-md", TONES[tone])}>
           <Icon size={18} strokeWidth={2} />
         </span>
-        <div className="min-w-0">
-          <p className="truncate text-[11px] font-medium uppercase tracking-wide text-zinc-400">{label}</p>
-          <p className="mt-0.5 text-[26px] font-bold leading-tight tracking-tight text-zinc-900">{value}</p>
-        </div>
       </div>
       {(delta || footnote) && (
         <div className="mt-2.5 flex flex-wrap items-center gap-x-2 gap-y-1">
@@ -49,7 +49,7 @@ export function AdminStatCard({
               {delta}
             </span>
           )}
-          {footnote && <span className="text-[11px] text-zinc-400">{footnote}</span>}
+          {footnote && <span className="text-[11px] text-[#667085]">{footnote}</span>}
         </div>
       )}
     </div>

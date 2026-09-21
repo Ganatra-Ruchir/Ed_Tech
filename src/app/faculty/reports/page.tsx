@@ -72,7 +72,7 @@ export default async function FacultyReportsPage() {
                     : (batchName.get(r.batchId ?? "") ?? "Batch report");
                 return (
                   <li key={r.id} className="flex items-center gap-3 px-3.5 py-2.5">
-                    <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-[#6b1029]/[0.08] text-[#6b1029]">
+                    <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-[#ef5b3f]/[0.08] text-[#ef5b3f]">
                       <FileText size={13} />
                     </span>
                     <span className="min-w-0 flex-1">

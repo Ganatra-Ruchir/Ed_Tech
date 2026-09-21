@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Student Progress & Evaluation Platform",
+  title: "Silver Oak Learning Hub",
   description: "Evidence-linked student supervision, review, and analytics platform.",
 };
 
@@ -23,7 +23,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col bg-zinc-50 text-zinc-900">{children}</body>
+      <body className="min-h-full flex flex-col bg-[#f4f5f0] text-[#17212b]">{children}</body>
     </html>
   );
 }

@@ -1,14 +1,21 @@
 @import "tailwindcss";
 
 :root {
-  --background: #fafafa;
-  --foreground: #18181b;
-  --shadow-color: 240 5% 10%;
+  --background: #f4f5f0;
+  --foreground: #17212b;
+  --surface: #ffffff;
+  --surface-muted: #ecefe9;
+  --border: #dfe3dc;
+  --ink-muted: #667085;
+  --brand: #ef5b3f;
+  --brand-strong: #d9472e;
+  --nav: #17212b;
+  --shadow-color: 210 25% 10%;
 }
 
 @theme inline {
-  --color-brand: #6b1029;
-  --color-brand-hover: #7c1638;
+  --color-brand: var(--brand);
+  --color-brand-hover: var(--brand-strong);
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
@@ -23,22 +30,41 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
+button,
+a,
+input,
+textarea,
+select {
+  -webkit-tap-highlight-color: transparent;
+}
+
+button,
+a {
+  transition-property: color, background-color, border-color, box-shadow, opacity, transform;
+  transition-duration: 150ms;
+}
+
 ::selection {
-  background-color: rgba(107, 16, 41, 0.18);
+  background-color: rgba(239, 91, 63, 0.2);
 }
 
 /* Thin, unobtrusive scrollbars — matches the dense, quiet tables/sidebars used everywhere */
 * {
   scrollbar-width: thin;
-  scrollbar-color: #d4d4d8 transparent;
+  scrollbar-color: #c7cdc5 transparent;
 }
 *::-webkit-scrollbar {
   width: 8px;
   height: 8px;
 }
 *::-webkit-scrollbar-thumb {
-  background-color: #d4d4d8;
+  background-color: #c7cdc5;
   border-radius: 9999px;
+}
+
+:focus-visible {
+  outline: 2px solid rgba(239, 91, 63, 0.55);
+  outline-offset: 2px;
 }
 *::-webkit-scrollbar-track {
   background: transparent;
@@ -61,6 +87,55 @@ body {
     opacity: 1;
   }
 }
+
+@keyframes brand-breathe {
+  0%, 100% {
+    transform: translateY(0);
+    box-shadow: 0 4px 14px rgba(239, 91, 63, 0.12);
+  }
+  50% {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 22px rgba(239, 91, 63, 0.24);
+  }
+}
+
+@keyframes signal-pulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.55;
+    transform: scale(1.35);
+  }
+}
+
+@keyframes building-rise {
+  0%, 100% { transform: scaleY(0.72); }
+  50% { transform: scaleY(1); }
+}
+
+@keyframes skeleton-pulse {
+  0%, 100% { opacity: 0.45; }
+  50% { opacity: 0.85; }
+}
+
+.animate-brand-breathe {
+  animation: brand-breathe 3.6s ease-in-out infinite;
+}
+
+.animate-signal-pulse {
+  animation: signal-pulse 1.8s ease-in-out infinite;
+}
+
+.animate-building-rise {
+  animation: building-rise 4.8s ease-in-out infinite;
+  transform-origin: bottom;
+}
+
+.animate-skeleton-pulse {
+  animation: skeleton-pulse 1.6s ease-in-out infinite;
+}
 .animate-drawer-slide-in {
   animation: drawer-slide-in 220ms cubic-bezier(0.16, 1, 0.3, 1);
 }
@@ -74,4 +149,15 @@ body {
 }
 .elevate-on-hover:hover {
   box-shadow: 0 2px 8px -2px rgba(24, 24, 27, 0.08), 0 1px 2px rgba(24, 24, 27, 0.04);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }

@@ -107,7 +107,7 @@ export function TestsBoard({ tests }: { tests: BoardTest[] }) {
                       ) : overdue ? (
                         <span className="text-xs text-zinc-300">-</span>
                       ) : (
-                        <LinkButton href={`/student/tests/${t.id}`} size="sm" className="!bg-[#6b1029] hover:!bg-[#7c1638]">
+                        <LinkButton href={`/student/tests/${t.id}`} size="sm" className="!bg-[#ef5b3f] hover:!bg-[#d9472e]">
                           Start Test
                         </LinkButton>
                       )}

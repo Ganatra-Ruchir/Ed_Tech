@@ -55,7 +55,7 @@ export function OfficeAttendanceCard({ initial }: { initial: FacultyAttendanceSt
     <Card className="p-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-2.5">
-          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-[#6b1029]/10 text-[#6b1029]">
+          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-[#ef5b3f]/10 text-[#ef5b3f]">
             <Clock size={15} />
           </span>
           <div>

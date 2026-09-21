@@ -20,10 +20,14 @@ export async function GET(request: Request) {
     where.batchId = { in: batchIds };
     where.publishedAt = { not: null };
   } else if (session.role === "FACULTY") {
-    const batchIds = await userBatchIds(session.sub);
-    where.batchId = batchId ? batchId : { in: batchIds };
-    if (batchId && !batchIds.includes(batchId)) {
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    if (session.isCC) {
+      if (batchId) where.batchId = batchId;
+    } else {
+      const batchIds = await userBatchIds(session.sub);
+      where.batchId = batchId ? batchId : { in: batchIds };
+      if (batchId && !batchIds.includes(batchId)) {
+        return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+      }
     }
   } else if (batchId) {
     where.batchId = batchId;
@@ -58,6 +62,8 @@ const questionSchema = z.object({
   text: z.string().min(1),
   options: z.array(z.string().min(1)).optional(),
   correctAnswer: z.string().optional(),
+  required: z.boolean().default(true),
+  points: z.number().int().min(1).max(100).default(1),
 });
 
 const createTestSchema = z.object({
@@ -84,11 +90,17 @@ export async function POST(request: Request) {
   if (!allowed) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
   for (const q of data.questions) {
-    if (q.type === "MCQ" && (!q.options || q.options.length < 2 || !q.correctAnswer)) {
-      return NextResponse.json(
-        { error: "MCQ questions require at least 2 options and a correct answer" },
-        { status: 400 },
-      );
+    if (q.type === "MCQ") {
+      const options = (q.options ?? []).map((option) => option.trim()).filter(Boolean);
+      if (options.length < 2 || !q.correctAnswer || !options.includes(q.correctAnswer.trim())) {
+        return NextResponse.json(
+          { error: "MCQ questions require at least 2 valid options and a correct answer matching one option" },
+          { status: 400 },
+        );
+      }
+      if (new Set(options).size !== options.length) {
+        return NextResponse.json({ error: "MCQ options must be unique" }, { status: 400 });
+      }
     }
   }
 
@@ -107,6 +119,8 @@ export async function POST(request: Request) {
           optionsJson: q.options ? JSON.stringify(q.options) : null,
           correctAnswer: q.correctAnswer ?? null,
           order: idx + 1,
+          required: q.required,
+          points: q.points,
         })),
       },
     },

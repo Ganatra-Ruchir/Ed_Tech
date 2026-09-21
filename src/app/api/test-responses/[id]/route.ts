@@ -59,7 +59,7 @@ export async function PATCH(
 
   const response = await prisma.testResponse.findUnique({
     where: { id },
-    include: { test: true, answers: true },
+    include: { test: { include: { questions: true } }, answers: true },
   });
   if (!response) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
@@ -79,7 +79,11 @@ export async function PATCH(
   );
 
   const refreshedAnswers = await prisma.answer.findMany({ where: { testResponseId: id } });
-  const score = refreshedAnswers.filter((a) => a.isCorrect === true).length;
+  const pointsByQuestion = new Map(response.test.questions.map((question) => [question.id, question.points]));
+  const score = refreshedAnswers.reduce(
+    (sum, answer) => sum + (answer.isCorrect === true ? pointsByQuestion.get(answer.questionId) ?? 0 : 0),
+    0,
+  );
 
   const updated = await prisma.testResponse.update({
     where: { id },

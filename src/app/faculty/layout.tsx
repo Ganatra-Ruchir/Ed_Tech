@@ -4,6 +4,8 @@ import { prisma } from "@/lib/prisma";
 import { userBatchIds } from "@/lib/permissions";
 import { PortalTopbar } from "@/components/university/PortalTopbar";
 import { FacultySidebar, FacultyMobileNav } from "@/components/faculty/FacultyNav";
+import { PortalPageTransition } from "@/components/university/PortalPageTransition";
+import { getMessageNotifications } from "@/lib/message-notifications";
 
 export default async function FacultyLayout({
   children,
@@ -24,7 +26,7 @@ export default async function FacultyLayout({
 
   // Two small indexed counts — enough to badge the queue and light the bell
   // without repeating a page's full query on every navigation.
-  const [pendingReviews, ungradedResponses] = await Promise.all([
+  const [pendingReviews, ungradedResponses, currentUser, recentSubmissions, recentUngradedResponses, messageNotifications] = await Promise.all([
     prisma.submission.count({
       where: { batchId: { in: batchIds }, status: { in: ["SUBMITTED", "IN_REVIEW"] } },
     }),
@@ -34,25 +36,53 @@ export default async function FacultyLayout({
         answers: { some: { question: { type: "SHORT_ANSWER" }, isCorrect: null } },
       },
     }),
+    prisma.user.findUnique({ where: { id: session.sub }, select: { profileImageUrl: true } }),
+    prisma.submission.findMany({
+      where: { batchId: { in: batchIds }, status: { in: ["SUBMITTED", "IN_REVIEW"] } },
+      select: { id: true, title: true, status: true, student: { select: { name: true } }, assignment: { select: { title: true } }, batch: { select: { name: true } } },
+      orderBy: { createdAt: "desc" },
+      take: 5,
+    }),
+    prisma.testResponse.findMany({
+      where: { test: { batchId: { in: batchIds } }, answers: { some: { question: { type: "SHORT_ANSWER" }, isCorrect: null } } },
+      select: { id: true, student: { select: { name: true } }, test: { select: { title: true } } },
+      orderBy: { submittedAt: "desc" },
+      take: 5,
+    }),
+    getMessageNotifications(session.sub),
   ]);
 
+  const notifications = [
+    ...messageNotifications,
+    ...recentSubmissions.map((submission) => ({
+      title: `${submission.student.name} submitted ${submission.assignment?.title ?? submission.title}`,
+      detail: `${submission.batch.name} · ${submission.status === "IN_REVIEW" ? "Review in progress" : "Ready for review"}`,
+      href: `/faculty/submissions/${submission.id}`,
+    })),
+    ...recentUngradedResponses.map((response) => ({
+      title: `${response.student.name} completed ${response.test.title}`,
+      detail: "Short answers are waiting for grading",
+      href: `/faculty/test-responses/${response.id}`,
+    })),
+    ...(pendingReviews > recentSubmissions.length ? [{ title: `${pendingReviews - recentSubmissions.length} more submissions`, detail: "Open the review queue", href: "/faculty/review" }] : []),
+    ...(ungradedResponses > recentUngradedResponses.length ? [{ title: `${ungradedResponses - recentUngradedResponses.length} more responses`, detail: "Open all tests", href: "/faculty/tests" }] : []),
+  ];
+
   return (
-    <div className="flex min-h-screen bg-zinc-50">
+    <div className="flex min-h-screen bg-[#f4f5f0]">
       <FacultySidebar isCC={session.isCC} pendingReviews={pendingReviews} />
       <div className="flex min-h-screen w-full min-w-0 flex-1 flex-col">
         <FacultyMobileNav isCC={session.isCC} pendingReviews={pendingReviews} />
         <PortalTopbar
           userName={session.name}
           userRole={session.isCC ? "Faculty · Course Coordinator" : "Faculty"}
-          hasAlerts={pendingReviews + ungradedResponses > 0}
-          notifications={[
-            ...(pendingReviews > 0 ? [{ title: `${pendingReviews} submissions need review`, detail: "Open the review queue", href: "/faculty/review" }] : []),
-            ...(ungradedResponses > 0 ? [{ title: `${ungradedResponses} test responses need grading`, detail: "Review student responses", href: "/faculty/tests" }] : []),
-          ]}
+          userImageUrl={currentUser?.profileImageUrl}
+          hasAlerts={pendingReviews + ungradedResponses + messageNotifications.length > 0}
+          notifications={notifications}
           searchEndpoint="/api/faculty/search"
           searchPlaceholder="Search students, submissions, or tests…"
         />
-        <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-6 sm:px-6 lg:px-8">{children}</main>
+        <main className="mx-auto w-full max-w-[1320px] flex-1 px-4 py-7 sm:px-6 lg:px-8 lg:py-9"><PortalPageTransition>{children}</PortalPageTransition></main>
       </div>
       {modal}
     </div>

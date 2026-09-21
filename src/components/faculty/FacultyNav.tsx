@@ -20,6 +20,7 @@ function buildLinks(isCC: boolean, pendingReviews: number): PortalNavLink[] {
       ...(pendingReviews > 0 ? { badge: pendingReviews } : {}),
     },
     { href: "/faculty/batches", label: "My Batches", icon: "Users" },
+    { href: "/faculty/attendance", label: "Attendance", icon: "CalendarCheck" },
     { href: "/faculty/assignments", label: "Assignments", icon: "ClipboardList" },
     { href: "/faculty/students", label: "Students", icon: "GraduationCap" },
     { href: "/faculty/at-risk", label: "Needs Attention", icon: "AlertTriangle" },

@@ -31,7 +31,7 @@ export function TableToolbar({
             value={search}
             onChange={(e) => onSearchChange(e.target.value)}
             placeholder={placeholder}
-            className="w-full rounded-md border border-zinc-200 bg-white py-1.5 pl-8 pr-2.5 text-[13px] text-zinc-900 placeholder:text-zinc-400 focus:border-[#6b1029] focus:outline-none focus:ring-2 focus:ring-[#6b1029]/15"
+            className="w-full rounded-md border border-zinc-200 bg-white py-1.5 pl-8 pr-2.5 text-[13px] text-zinc-900 placeholder:text-zinc-400 focus:border-[#ef5b3f] focus:outline-none focus:ring-2 focus:ring-[#ef5b3f]/15"
           />
         </div>
       )}
@@ -55,7 +55,7 @@ export function FilterChip({
       onClick={onClick}
       className={
         active
-          ? "rounded-full bg-[#6b1029]/[0.07] px-2.5 py-1 text-xs font-medium text-[#6b1029] ring-1 ring-inset ring-[#6b1029]/20"
+          ? "rounded-full bg-[#ef5b3f]/[0.07] px-2.5 py-1 text-xs font-medium text-[#ef5b3f] ring-1 ring-inset ring-[#ef5b3f]/20"
           : "rounded-full px-2.5 py-1 text-xs font-medium text-zinc-500 hover:bg-zinc-100 hover:text-zinc-700"
       }
     >

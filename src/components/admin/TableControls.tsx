@@ -27,7 +27,7 @@ export function AdminSearchInput({
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
-        className="w-full rounded-md border border-zinc-200 bg-white py-1.5 pl-8 pr-2.5 text-[13px] text-zinc-900 placeholder:text-zinc-400 focus:border-[#6b1029]/40 focus:outline-none focus:ring-2 focus:ring-[#6b1029]/10"
+        className="w-full rounded-md border border-zinc-200 bg-white py-1.5 pl-8 pr-2.5 text-[13px] text-zinc-900 placeholder:text-zinc-400 focus:border-[#ef5b3f]/40 focus:outline-none focus:ring-2 focus:ring-[#ef5b3f]/10"
       />
     </div>
   );
@@ -48,7 +48,7 @@ export function AdminSelect({
     <select
       value={value}
       onChange={(e) => onChange(e.target.value)}
-      className="cursor-pointer rounded-md border border-zinc-200 bg-white py-1.5 pl-2.5 pr-7 text-[12.5px] font-medium text-zinc-700 focus:border-[#6b1029]/40 focus:outline-none focus:ring-2 focus:ring-[#6b1029]/10"
+      className="cursor-pointer rounded-md border border-zinc-200 bg-white py-1.5 pl-2.5 pr-7 text-[12.5px] font-medium text-zinc-700 focus:border-[#ef5b3f]/40 focus:outline-none focus:ring-2 focus:ring-[#ef5b3f]/10"
     >
       <option value="">{allLabel}</option>
       {options.map((o) => (
@@ -75,7 +75,7 @@ export function AdminFilterChip({
       className={cn(
         "rounded-full px-2.5 py-1 text-xs font-medium transition-colors",
         active
-          ? "bg-[#6b1029]/[0.08] text-[#6b1029] ring-1 ring-inset ring-[#6b1029]/20"
+          ? "bg-[#ef5b3f]/[0.08] text-[#ef5b3f] ring-1 ring-inset ring-[#ef5b3f]/20"
           : "text-zinc-500 hover:bg-zinc-100 hover:text-zinc-700",
       )}
     >

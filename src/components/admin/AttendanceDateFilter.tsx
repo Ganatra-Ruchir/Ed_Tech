@@ -11,7 +11,7 @@ export function AttendanceDateFilter({ value }: { value: string }) {
 
   return (
     <label className="inline-flex items-center gap-2 rounded-lg border border-zinc-200 bg-white px-3 py-2 text-[13px] text-zinc-600 shadow-sm">
-      <Calendar size={14} className="text-[#6b1029]" />
+      <Calendar size={14} className="text-[#ef5b3f]" />
       <span className="sr-only">Filter by date</span>
       <input
         type="date"

@@ -37,7 +37,7 @@ export async function GET(
 const submitSchema = z.object({
   answers: z
     .array(z.object({ questionId: z.string().min(1), answerText: z.string() }))
-    .min(1),
+    .default([]),
 });
 
 export async function POST(
@@ -77,26 +77,47 @@ export async function POST(
   if (!parsed.success) return NextResponse.json({ error: "Invalid answers" }, { status: 400 });
 
   const questionById = new Map(test.questions.map((q) => [q.id, q]));
-  const answerData = parsed.data.answers
-    .filter((a) => questionById.has(a.questionId))
-    .map((a) => {
-      const question = questionById.get(a.questionId)!;
-      const isCorrect =
-        question.type === "MCQ" ? a.answerText === question.correctAnswer : null;
-      return { questionId: a.questionId, answerText: a.answerText, isCorrect };
-    });
+  const seenQuestionIds = new Set<string>();
+  const normalizedAnswers = parsed.data.answers.map((answer) => ({
+    questionId: answer.questionId.trim(),
+    answerText: answer.answerText.trim(),
+  }));
 
-  if (answerData.length !== test.questions.length) {
+  for (const answer of normalizedAnswers) {
+    if (!answer.questionId || !answer.answerText) {
+      return NextResponse.json({ error: "Answers cannot be blank" }, { status: 400 });
+    }
+    if (!questionById.has(answer.questionId) || seenQuestionIds.has(answer.questionId)) {
+      return NextResponse.json({ error: "Each question may only be answered once" }, { status: 400 });
+    }
+    seenQuestionIds.add(answer.questionId);
+  }
+
+  const missingRequired = test.questions.some((question) => question.required && !seenQuestionIds.has(question.id));
+  if (missingRequired) {
     return NextResponse.json(
-      { error: "All questions must be answered" },
+      { error: "All required questions must be answered" },
       { status: 400 },
     );
   }
 
-  const mcqCorrect = answerData.filter((a) => a.isCorrect === true).length;
+  const answerData = test.questions.map((question) => {
+    const answer = normalizedAnswers.find((entry) => entry.questionId === question.id);
+    if (!answer) {
+      return null;
+    }
+    const isCorrect =
+      question.type === "MCQ" ? answer.answerText === question.correctAnswer : null;
+    return { questionId: question.id, answerText: answer.answerText, isCorrect };
+  }).filter((entry): entry is { questionId: string; answerText: string; isCorrect: boolean | null } => entry !== null);
+
+  const mcqScore = answerData.reduce((sum, answer) => {
+    const question = questionById.get(answer.questionId);
+    return sum + (answer.isCorrect === true ? question?.points ?? 0 : 0);
+  }, 0);
   // Short answers start ungraded (0) until faculty scores them; MCQs auto-grade.
-  const score = mcqCorrect;
-  const maxScore = test.questions.length;
+  const score = mcqScore;
+  const maxScore = test.questions.reduce((sum, question) => sum + question.points, 0);
 
   const response = await prisma.testResponse.create({
     data: {

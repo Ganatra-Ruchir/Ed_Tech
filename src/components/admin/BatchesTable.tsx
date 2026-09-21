@@ -118,7 +118,7 @@ export function BatchesTable({
                   <Td>
                     <Link
                       href={`/admin/batches/${b.id}`}
-                      className="inline-flex items-center gap-1 whitespace-nowrap text-xs font-medium text-[#6b1029] hover:underline"
+                      className="inline-flex items-center gap-1 whitespace-nowrap text-xs font-medium text-[#ef5b3f] hover:underline"
                     >
                       View <ArrowRight size={12} />
                     </Link>

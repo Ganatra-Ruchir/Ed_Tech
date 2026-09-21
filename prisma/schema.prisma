@@ -363,6 +363,8 @@ model Question {
   optionsJson   String? // JSON-encoded string[] for MCQ options
   correctAnswer String?
   order         Int          @default(0)
+  required      Boolean      @default(true)
+  points        Int          @default(1)
 
   test    Test     @relation(fields: [testId], references: [id], onDelete: Cascade)
   answers Answer[]

@@ -27,7 +27,7 @@ export function SemesterSelect({ semesters, value }: { semesters: string[]; valu
           const qs = params.toString();
           router.push(qs ? `${pathname}?${qs}` : pathname);
         }}
-        className="appearance-none rounded-md border border-zinc-200 bg-white py-1.5 pl-3 pr-8 text-[13px] font-medium text-zinc-700 focus:border-[#6b1029]/40 focus:outline-none focus:ring-2 focus:ring-[#6b1029]/10"
+        className="appearance-none rounded-md border border-zinc-200 bg-white py-1.5 pl-3 pr-8 text-[13px] font-medium text-zinc-700 focus:border-[#ef5b3f]/40 focus:outline-none focus:ring-2 focus:ring-[#ef5b3f]/10"
       >
         <option value="">All semesters</option>
         {semesters.map((s) => (

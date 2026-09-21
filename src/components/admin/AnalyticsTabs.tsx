@@ -54,7 +54,7 @@ export function AnalyticsTabs({ data }: { data: AnalyticsTabsData }) {
             {tab === t.id && (
               <motion.span
                 layoutId="admin-analytics-tab"
-                className="absolute inset-0 rounded-md bg-[#6b1029]"
+                className="absolute inset-0 rounded-md bg-[#ef5b3f]"
                 transition={{ type: "spring", stiffness: 500, damping: 42 }}
               />
             )}

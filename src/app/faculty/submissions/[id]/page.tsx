@@ -61,7 +61,7 @@ export default async function FacultySubmissionDetail({
           </div>
           <Link
             href={`/faculty/students/${submission.student.id}`}
-            className="inline-flex shrink-0 items-center gap-1.5 rounded-md border border-[#6b1029]/20 bg-[#6b1029]/[0.06] px-3 py-2 text-[12.5px] font-medium text-[#6b1029] transition-colors hover:bg-[#6b1029] hover:text-white"
+            className="inline-flex shrink-0 items-center gap-1.5 rounded-md border border-[#ef5b3f]/20 bg-[#ef5b3f]/[0.06] px-3 py-2 text-[12.5px] font-medium text-[#ef5b3f] transition-colors hover:bg-[#ef5b3f] hover:text-white"
           >
             View Student Profile <ExternalLink size={12} />
           </Link>
@@ -71,7 +71,7 @@ export default async function FacultySubmissionDetail({
       <Card className="p-4">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="flex min-w-0 items-center gap-3">
-            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-[#6b1029]/[0.07] text-[#6b1029]">
+            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-[#ef5b3f]/[0.07] text-[#ef5b3f]">
               <FileText size={16} />
             </span>
             <div className="min-w-0">

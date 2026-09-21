@@ -89,7 +89,7 @@ export default async function StudentSubmissionDetail({
     <div className="max-w-3xl space-y-5">
       <Link
         href="/student/submissions"
-        className="inline-flex items-center gap-1.5 text-xs font-medium text-zinc-500 transition-colors hover:text-[#6b1029]"
+        className="inline-flex items-center gap-1.5 text-xs font-medium text-zinc-500 transition-colors hover:text-[#ef5b3f]"
       >
         <ArrowLeft size={13} /> Back to submissions
       </Link>
@@ -102,7 +102,7 @@ export default async function StudentSubmissionDetail({
               <StatusBadge status={submission.status} />
             </div>
             <p className="mt-1 flex flex-wrap items-center gap-1.5 text-[12.5px] text-zinc-500">
-              <span className="rounded-full bg-[#6b1029]/[0.08] px-2 py-0.5 text-[10.5px] font-medium text-[#6b1029]">
+              <span className="rounded-full bg-[#ef5b3f]/[0.08] px-2 py-0.5 text-[10.5px] font-medium text-[#ef5b3f]">
                 {submission.batch.name}
               </span>
               <span className="inline-flex items-center gap-1">
@@ -131,7 +131,7 @@ export default async function StudentSubmissionDetail({
             <AlertCircle size={15} className="mt-0.5 shrink-0" />
             Your faculty asked for a revision. Read the feedback below, then upload an updated version.
           </p>
-          <LinkButton href="/student/submissions/new" size="sm" className="!bg-[#6b1029] hover:!bg-[#7c1638]">
+          <LinkButton href="/student/submissions/new" size="sm" className="!bg-[#ef5b3f] hover:!bg-[#d9472e]">
             <Plus size={13} /> Upload revision
           </LinkButton>
         </div>
@@ -139,7 +139,7 @@ export default async function StudentSubmissionDetail({
 
       <section>
         <h2 className="mb-2 flex items-center gap-1.5 text-[13px] font-semibold text-zinc-900">
-          <FileText size={14} className="text-[#6b1029]" /> Files
+          <FileText size={14} className="text-[#ef5b3f]" /> Files
         </h2>
         <Card>
           {submission.files.length === 0 ? (
@@ -154,9 +154,9 @@ export default async function StudentSubmissionDetail({
                       href={f.fileUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="group flex items-center gap-2.5 rounded-md border border-zinc-200 px-3 py-2.5 transition-colors hover:border-[#6b1029]/30 hover:bg-[#6b1029]/[0.03]"
+                      className="group flex items-center gap-2.5 rounded-md border border-zinc-200 px-3 py-2.5 transition-colors hover:border-[#ef5b3f]/30 hover:bg-[#ef5b3f]/[0.03]"
                     >
-                      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-[#6b1029]/[0.08] text-[#6b1029]">
+                      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-[#ef5b3f]/[0.08] text-[#ef5b3f]">
                         <Icon size={15} />
                       </span>
                       <span className="min-w-0 flex-1">
@@ -165,7 +165,7 @@ export default async function StudentSubmissionDetail({
                           {fmtSize(f.fileSize) || f.fileType}
                         </span>
                       </span>
-                      <Download size={14} className="shrink-0 text-zinc-300 transition-colors group-hover:text-[#6b1029]" />
+                      <Download size={14} className="shrink-0 text-zinc-300 transition-colors group-hover:text-[#ef5b3f]" />
                     </a>
                   </li>
                 );
@@ -177,7 +177,7 @@ export default async function StudentSubmissionDetail({
 
       <section>
         <h2 className="mb-2 flex items-center gap-1.5 text-[13px] font-semibold text-zinc-900">
-          <MessageSquare size={14} className="text-[#6b1029]" /> Feedback
+          <MessageSquare size={14} className="text-[#ef5b3f]" /> Feedback
           {submission.feedback.length > 0 && (
             <span className="rounded-full bg-zinc-100 px-1.5 py-0.5 text-[10px] font-semibold text-zinc-500">
               {submission.feedback.length}
@@ -215,7 +215,7 @@ export default async function StudentSubmissionDetail({
       {submission.evidence.length > 0 && (
         <section>
           <h2 className="mb-2 flex items-center gap-1.5 text-[13px] font-semibold text-zinc-900">
-            <Sparkles size={14} className="text-[#6b1029]" /> Evidence Tags
+            <Sparkles size={14} className="text-[#ef5b3f]" /> Evidence Tags
           </h2>
           <Card className="p-4">
             <ul className="space-y-2.5">
@@ -237,7 +237,7 @@ export default async function StudentSubmissionDetail({
 
       <section>
         <h2 className="mb-2 flex items-center gap-1.5 text-[13px] font-semibold text-zinc-900">
-          <Clock size={14} className="text-[#6b1029]" /> Activity
+          <Clock size={14} className="text-[#ef5b3f]" /> Activity
         </h2>
         <Card className="p-4">
           <ol className="space-y-3">

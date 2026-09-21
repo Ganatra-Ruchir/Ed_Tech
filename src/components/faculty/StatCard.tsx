@@ -4,13 +4,13 @@ import { cn } from "@/lib/cn";
 
 export type StatTone = "maroon" | "emerald" | "sky" | "amber" | "rose" | "violet";
 
-const TONES: Record<StatTone, { bg: string; chip: string }> = {
-  maroon: { bg: "bg-[#6b1029]/[0.06]", chip: "bg-[#6b1029]/10 text-[#6b1029]" },
-  emerald: { bg: "bg-emerald-50/80", chip: "bg-emerald-100 text-emerald-700" },
-  sky: { bg: "bg-sky-50/80", chip: "bg-sky-100 text-sky-700" },
-  amber: { bg: "bg-amber-50/80", chip: "bg-amber-100 text-amber-700" },
-  rose: { bg: "bg-rose-50/80", chip: "bg-rose-100 text-rose-700" },
-  violet: { bg: "bg-violet-50/80", chip: "bg-violet-100 text-violet-700" },
+const TONES: Record<StatTone, string> = {
+  maroon: "bg-[#ef5b3f]/10 text-[#d9472e]",
+  emerald: "bg-emerald-50 text-emerald-700",
+  sky: "bg-sky-50 text-sky-700",
+  amber: "bg-amber-50 text-amber-700",
+  rose: "bg-rose-50 text-rose-700",
+  violet: "bg-violet-50 text-violet-700",
 };
 
 /**
@@ -33,18 +33,17 @@ export function StatCard({
   delta?: { text: string; direction: "up" | "down" | "flat" };
   hint?: string;
 }) {
-  const t = TONES[tone];
   return (
-    <div className={cn("rounded-lg p-4", t.bg)}>
+    <div className="rounded-md border border-[#dfe3dc] bg-white p-4 shadow-[0_1px_2px_rgba(23,33,43,0.04)]">
       <div className="flex items-start justify-between gap-2">
-        <p className="text-xs font-medium text-zinc-500">{label}</p>
+        <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-[#667085]">{label}</p>
         {Icon && (
-          <span className={cn("flex h-7 w-7 shrink-0 items-center justify-center rounded-lg", t.chip)}>
+          <span className={cn("flex h-8 w-8 shrink-0 items-center justify-center rounded-md", TONES[tone])}>
             <Icon size={14} />
           </span>
         )}
       </div>
-      <p className="mt-2 text-2xl font-bold tracking-tight text-zinc-900">{value}</p>
+      <p className="mt-2 text-[28px] font-semibold leading-none text-[#17212b]">{value}</p>
       {delta ? (
         <p
           className={cn(
@@ -59,7 +58,7 @@ export function StatCard({
           {delta.text}
         </p>
       ) : hint ? (
-        <p className="mt-1.5 text-[11px] text-zinc-400">{hint}</p>
+        <p className="mt-2 text-[11px] text-[#667085]">{hint}</p>
       ) : (
         <p className="mt-1.5 text-[11px] text-transparent">.</p>
       )}

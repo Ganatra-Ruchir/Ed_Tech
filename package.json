@@ -5,11 +5,12 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
+    "test": "node --no-warnings --experimental-strip-types --test tests/qa-regressions.test.ts",
     "postinstall": "prisma generate",
     "start": "next start",
     "lint": "eslint",
     "db:migrate": "prisma migrate dev",
-    "db:seed": "tsx prisma/seed.ts",
+    "db:seed": "node prisma/seed.mjs",
     "db:reset": "prisma migrate reset"
   },
   "dependencies": {

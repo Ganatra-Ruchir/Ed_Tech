@@ -57,7 +57,7 @@ export function StreamFeed({ posts }: { posts: StreamPost[] }) {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search announcements…"
-            className="w-full rounded-md border border-zinc-200 bg-white py-1.5 pl-8 pr-2.5 text-[13px] text-zinc-900 placeholder:text-zinc-400 focus:border-[#6b1029]/40 focus:outline-none focus:ring-2 focus:ring-[#6b1029]/10"
+            className="w-full rounded-md border border-zinc-200 bg-white py-1.5 pl-8 pr-2.5 text-[13px] text-zinc-900 placeholder:text-zinc-400 focus:border-[#ef5b3f]/40 focus:outline-none focus:ring-2 focus:ring-[#ef5b3f]/10"
           />
         </div>
         {batches.length > 1 && (
@@ -91,14 +91,14 @@ export function StreamFeed({ posts }: { posts: StreamPost[] }) {
               <Card className="p-4 sm:pl-12">
                 <span
                   aria-hidden="true"
-                  className="absolute left-[13px] top-6 hidden h-3 w-3 rounded-full border-2 border-white bg-[#6b1029] ring-1 ring-zinc-200 sm:block"
+                  className="absolute left-[13px] top-6 hidden h-3 w-3 rounded-full border-2 border-white bg-[#ef5b3f] ring-1 ring-zinc-200 sm:block"
                 />
                 <div className="flex items-start gap-3">
                   <Avatar name={p.facultyName} />
                   <div className="min-w-0 flex-1">
                     <div className="flex flex-wrap items-center gap-2">
                       <p className="text-[13.5px] font-semibold text-zinc-900">{p.title}</p>
-                      <span className="rounded-full bg-[#6b1029]/[0.08] px-2 py-0.5 text-[10.5px] font-medium text-[#6b1029]">
+                      <span className="rounded-full bg-[#ef5b3f]/[0.08] px-2 py-0.5 text-[10.5px] font-medium text-[#ef5b3f]">
                         {p.batchName}
                       </span>
                     </div>
@@ -110,7 +110,7 @@ export function StreamFeed({ posts }: { posts: StreamPost[] }) {
                       </span>
                     </p>
                     <p className="mt-2 whitespace-pre-wrap text-[13px] leading-relaxed text-zinc-700">{p.body}</p>
-                    {p.attachmentUrl && <a href={p.attachmentUrl} target="_blank" rel="noreferrer" className="mt-3 inline-flex items-center gap-1.5 text-xs font-medium text-[#6b1029] hover:underline"><FileText size={13} /> {p.attachmentName ?? "View attached PDF"}</a>}
+                    {p.attachmentUrl && <a href={p.attachmentUrl} target="_blank" rel="noreferrer" className="mt-3 inline-flex items-center gap-1.5 text-xs font-medium text-[#ef5b3f] hover:underline"><FileText size={13} /> {p.attachmentName ?? "View attached PDF"}</a>}
                   </div>
                 </div>
               </Card>

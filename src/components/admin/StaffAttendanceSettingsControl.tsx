@@ -37,7 +37,7 @@ export function StaffAttendanceSettingsControl({ officeStartTime }: { officeStar
   return (
     <div className="flex flex-col items-end gap-1">
       <label className="inline-flex items-center gap-2 rounded-lg border border-zinc-200 bg-white px-3 py-2 text-[13px] text-zinc-600 shadow-sm">
-        <Settings2 size={14} className="text-[#6b1029]" />
+        <Settings2 size={14} className="text-[#ef5b3f]" />
         <span className="text-zinc-500">Office starts</span>
         <input
           type="time"

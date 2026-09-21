@@ -37,7 +37,7 @@ function iconFor(fileType: string) {
 }
 
 const fieldClass =
-  "w-full rounded-md border border-zinc-200 bg-white px-3 py-2 text-[13px] text-zinc-900 placeholder:text-zinc-400 focus:border-[#6b1029]/40 focus:outline-none focus:ring-2 focus:ring-[#6b1029]/10";
+  "w-full rounded-md border border-zinc-200 bg-white px-3 py-2 text-[13px] text-zinc-900 placeholder:text-zinc-400 focus:border-[#ef5b3f]/40 focus:outline-none focus:ring-2 focus:ring-[#ef5b3f]/10";
 
 export function ReviewPanel({
   submissionId,
@@ -153,7 +153,7 @@ export function ReviewPanel({
               className={cn(
                 "-mb-px border-b-2 px-3 py-2 text-[13px] font-medium transition-colors",
                 tab === t.key
-                  ? "border-[#6b1029] text-[#6b1029]"
+                  ? "border-[#ef5b3f] text-[#ef5b3f]"
                   : "border-transparent text-zinc-500 hover:text-zinc-800",
               )}
             >
@@ -176,7 +176,7 @@ export function ReviewPanel({
                     const Icon = iconFor(f.fileType);
                     return (
                       <li key={f.id} className="flex items-center gap-3 px-4 py-2.5">
-                        <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-[#6b1029]/[0.07] text-[#6b1029]">
+                        <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-[#ef5b3f]/[0.07] text-[#ef5b3f]">
                           <Icon size={15} />
                         </span>
                         <span className="min-w-0 flex-1">
@@ -221,7 +221,7 @@ export function ReviewPanel({
                 {existingEvidence.map((e) => (
                   <li key={e.id} className="px-4 py-3">
                     <div className="flex items-center gap-2">
-                      <span className="rounded-md bg-[#6b1029]/[0.08] px-2 py-0.5 text-[11px] font-medium text-[#6b1029]">
+                      <span className="rounded-md bg-[#ef5b3f]/[0.08] px-2 py-0.5 text-[11px] font-medium text-[#ef5b3f]">
                         {e.tag}
                       </span>
                       <span className="text-[11px] text-zinc-400">
@@ -317,7 +317,7 @@ export function ReviewPanel({
           <button
             onClick={addEvidence}
             disabled={busy}
-            className="mt-3 flex w-full items-center justify-center gap-1.5 rounded-md bg-[#6b1029] px-3 py-2 text-[13px] font-medium text-white transition-colors hover:bg-[#7c1638] disabled:opacity-50"
+            className="mt-3 flex w-full items-center justify-center gap-1.5 rounded-md bg-[#ef5b3f] px-3 py-2 text-[13px] font-medium text-white transition-colors hover:bg-[#d9472e] disabled:opacity-50"
           >
             <Plus size={14} /> Add Evidence
           </button>
@@ -352,7 +352,7 @@ export function ReviewPanel({
             <button
               onClick={saveReview}
               disabled={busy}
-              className="shrink-0 rounded-md bg-[#6b1029] px-3 py-2 text-[13px] font-medium text-white transition-colors hover:bg-[#7c1638] disabled:opacity-50"
+              className="shrink-0 rounded-md bg-[#ef5b3f] px-3 py-2 text-[13px] font-medium text-white transition-colors hover:bg-[#d9472e] disabled:opacity-50"
             >
               {busy ? "Saving…" : "Save"}
             </button>

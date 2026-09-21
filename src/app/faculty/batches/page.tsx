@@ -81,7 +81,7 @@ export default async function FacultyBatchesPage({
             return (
               <Card key={b.id} className="overflow-hidden">
                 <div className="flex items-start gap-3 px-4 pb-3 pt-4">
-                  <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[#6b1029]/[0.08] text-[#6b1029]">
+                  <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[#ef5b3f]/[0.08] text-[#ef5b3f]">
                     <Building2 size={18} />
                   </span>
                   <div className="min-w-0">
@@ -105,7 +105,7 @@ export default async function FacultyBatchesPage({
                 <div className="px-4 py-3">
                   <Link
                     href={`/faculty/batches/${b.id}`}
-                    className="flex w-full items-center justify-center gap-1.5 rounded-md border border-[#6b1029]/20 bg-[#6b1029]/[0.06] px-3 py-2 text-[12.5px] font-medium text-[#6b1029] transition-colors hover:bg-[#6b1029] hover:text-white"
+                    className="flex w-full items-center justify-center gap-1.5 rounded-md border border-[#ef5b3f]/20 bg-[#ef5b3f]/[0.06] px-3 py-2 text-[12.5px] font-medium text-[#ef5b3f] transition-colors hover:bg-[#ef5b3f] hover:text-white"
                   >
                     View Details <ArrowRight size={13} />
                   </Link>

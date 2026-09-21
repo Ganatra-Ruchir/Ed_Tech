@@ -42,7 +42,7 @@ export default async function FacultyTestsPage() {
         title="My Tests"
         description="Create, manage and view test performance."
         actions={
-          <LinkButton href="/faculty/tests/new" size="sm" className="!bg-[#6b1029] hover:!bg-[#7c1638]">
+          <LinkButton href="/faculty/tests/new" size="sm" className="!bg-[#ef5b3f] hover:!bg-[#d9472e]">
             <Plus size={14} /> Create Test
           </LinkButton>
         }

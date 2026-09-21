@@ -120,7 +120,7 @@ export default async function AdminDashboard({
         <section className="lg:col-span-2">
           <div className="mb-2 flex items-center justify-between">
             <h2 className="flex items-center gap-1.5 text-[13px] font-semibold text-zinc-900">
-              <Activity size={14} className="text-[#6b1029]" /> Recent Activities
+              <Activity size={14} className="text-[#ef5b3f]" /> Recent Activities
             </h2>
             <Link href="/admin/audit" className="flex items-center gap-1 text-xs font-medium text-zinc-500 hover:text-zinc-900">
               View audit log <ArrowRight size={11} />
@@ -140,7 +140,7 @@ export default async function AdminDashboard({
                     <span
                       className={
                         item.kind === "submission"
-                          ? "flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#6b1029]/[0.08] text-[#6b1029]"
+                          ? "flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#ef5b3f]/[0.08] text-[#ef5b3f]"
                           : "flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-zinc-100 text-zinc-500"
                       }
                     >
@@ -166,7 +166,7 @@ export default async function AdminDashboard({
 
         <section>
           <h2 className="mb-2 flex items-center gap-1.5 text-[13px] font-semibold text-zinc-900">
-            <Zap size={14} className="text-[#6b1029]" /> Quick Actions
+            <Zap size={14} className="text-[#ef5b3f]" /> Quick Actions
           </h2>
           <Card className="p-2">
             <ul className="grid grid-cols-1 gap-1 sm:grid-cols-2 lg:grid-cols-1">
@@ -176,9 +176,9 @@ export default async function AdminDashboard({
                   <li key={action.href}>
                     <Link
                       href={action.href}
-                      className="flex items-center gap-2.5 rounded-md px-2.5 py-2 text-[13px] font-medium text-zinc-700 transition-colors hover:bg-[#6b1029]/[0.06] hover:text-[#6b1029]"
+                      className="flex items-center gap-2.5 rounded-md px-2.5 py-2 text-[13px] font-medium text-zinc-700 transition-colors hover:bg-[#ef5b3f]/[0.06] hover:text-[#ef5b3f]"
                     >
-                      <Icon size={15} className="shrink-0 text-[#6b1029]" />
+                      <Icon size={15} className="shrink-0 text-[#ef5b3f]" />
                       <span className="truncate">{action.label}</span>
                       <ArrowRight size={13} className="ml-auto shrink-0 text-zinc-300" />
                     </Link>

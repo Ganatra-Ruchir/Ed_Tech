@@ -154,7 +154,7 @@ export default async function StudentReportsPage() {
             </div>
             <ProgressBar
               value={overallProgress}
-              className="mt-2 !bg-[#6b1029]/10 [&>div]:!bg-[#6b1029]"
+              className="mt-2 !bg-[#ef5b3f]/10 [&>div]:!bg-[#ef5b3f]"
             />
             <p className="mt-1.5 text-[11px] text-zinc-400">
               Average of your submission approval and test completion rates.
@@ -186,7 +186,7 @@ export default async function StudentReportsPage() {
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
         <Card className="p-4 lg:col-span-2">
           <p className="mb-3 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-zinc-400">
-            <TrendingUp size={13} className="text-[#6b1029]" /> Progress Over Time
+            <TrendingUp size={13} className="text-[#ef5b3f]" /> Progress Over Time
           </p>
           <ScoreTrend points={trendPoints} />
         </Card>
@@ -209,7 +209,7 @@ export default async function StudentReportsPage() {
       {tags.length > 0 && (
         <section>
           <h2 className="mb-2 flex items-center gap-1.5 text-[13px] font-semibold text-zinc-900">
-            <Sparkles size={14} className="text-[#6b1029]" /> Evidence Recognised by Faculty
+            <Sparkles size={14} className="text-[#ef5b3f]" /> Evidence Recognised by Faculty
           </h2>
           <Card className="p-4">
             <ul className="flex flex-wrap gap-2">
@@ -226,7 +226,7 @@ export default async function StudentReportsPage() {
 
       <section>
         <h2 className="mb-2 flex items-center gap-1.5 text-[13px] font-semibold text-zinc-900">
-          <FileText size={14} className="text-[#6b1029]" /> Generated Reports
+          <FileText size={14} className="text-[#ef5b3f]" /> Generated Reports
         </h2>
         <Card>
           {reports.length === 0 ? (
@@ -240,7 +240,7 @@ export default async function StudentReportsPage() {
               {reports.map((r) => (
                 <li key={r.id} className="flex items-center justify-between gap-3 px-4 py-3">
                   <div className="flex min-w-0 items-center gap-2.5">
-                    <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-[#6b1029]/[0.08] text-[#6b1029]">
+                    <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-[#ef5b3f]/[0.08] text-[#ef5b3f]">
                       <FileText size={14} />
                     </span>
                     <div className="min-w-0">

@@ -21,10 +21,14 @@ export async function GET(request: Request) {
   if (session.role === "STUDENT") {
     where.studentId = session.sub;
   } else if (session.role === "FACULTY") {
-    const batchIds = await userBatchIds(session.sub);
-    where.batchId = batchId ? batchId : { in: batchIds };
-    if (batchId && !batchIds.includes(batchId)) {
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    if (session.isCC) {
+      if (batchId) where.batchId = batchId;
+    } else {
+      const batchIds = await userBatchIds(session.sub);
+      where.batchId = batchId ? batchId : { in: batchIds };
+      if (batchId && !batchIds.includes(batchId)) {
+        return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+      }
     }
   } else if (session.role === "ADMIN") {
     if (batchId) where.batchId = batchId;
@@ -79,40 +83,46 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "At least one file is required" }, { status: 400 });
   }
 
-  const submission = await prisma.submission.create({
-    data: {
-      studentId: session.sub,
-      batchId,
-      assignmentId,
-      title,
-      notes,
-      status: "SUBMITTED",
-    },
-  });
-
   for (const file of fileEntries) {
-    // Validate every submitted file against the shared allow-list (extension +
-    // size). Never trust the browser-supplied MIME type — derive it from the
-    // filename so a "text/html" upload can't be served back inline as script.
     const err = validateDocumentUpload({ name: file.name, size: file.size });
     if (err) return NextResponse.json({ error: err }, { status: 400 });
-    const buffer = Buffer.from(await file.arrayBuffer());
-    const safeType = contentTypeFor(file.name);
-    const stored = await storeFile({
-      buffer,
-      filename: file.name,
-      contentType: safeType,
-      folder: "uploads",
-    });
-    await prisma.submissionFile.create({
+  }
+
+  let submission;
+  try {
+    submission = await prisma.submission.create({
       data: {
-        submissionId: submission.id,
-        fileName: file.name,
-        fileUrl: stored.url,
-        fileType: safeType,
-        fileSize: buffer.byteLength,
+        studentId: session.sub,
+        batchId,
+        assignmentId,
+        title,
+        notes,
+        status: "SUBMITTED",
       },
     });
+
+    for (const file of fileEntries) {
+      const buffer = Buffer.from(await file.arrayBuffer());
+      const safeType = contentTypeFor(file.name);
+      const stored = await storeFile({
+        buffer,
+        filename: file.name,
+        contentType: safeType,
+        folder: "uploads",
+      });
+      await prisma.submissionFile.create({
+        data: {
+          submissionId: submission.id,
+          fileName: file.name,
+          fileUrl: stored.url,
+          fileType: safeType,
+          fileSize: buffer.byteLength,
+        },
+      });
+    }
+  } catch (error) {
+    console.error("submission.create.failed", error);
+    return NextResponse.json({ error: "Failed to create submission. Please try again." }, { status: 500 });
   }
 
   await logAudit({

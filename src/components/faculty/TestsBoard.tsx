@@ -64,7 +64,7 @@ export function TestsBoard({ tests }: { tests: TestRow[] }) {
             className={cn(
               "rounded-md px-3 py-1.5 text-xs font-medium transition-colors",
               tab === t.key
-                ? "bg-[#6b1029] text-white"
+                ? "bg-[#ef5b3f] text-white"
                 : "border border-zinc-200 bg-white text-zinc-600 hover:bg-zinc-50 hover:text-zinc-900",
             )}
           >
@@ -81,7 +81,7 @@ export function TestsBoard({ tests }: { tests: TestRow[] }) {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search tests by title or batch…"
-              className="w-full rounded-md border border-zinc-200 bg-white py-1.5 pl-8 pr-2.5 text-[12.5px] text-zinc-900 placeholder:text-zinc-400 focus:border-[#6b1029]/40 focus:outline-none focus:ring-2 focus:ring-[#6b1029]/10"
+              className="w-full rounded-md border border-zinc-200 bg-white py-1.5 pl-8 pr-2.5 text-[12.5px] text-zinc-900 placeholder:text-zinc-400 focus:border-[#ef5b3f]/40 focus:outline-none focus:ring-2 focus:ring-[#ef5b3f]/10"
             />
           </div>
           <p className="ml-auto text-[12px] text-zinc-400">
@@ -131,7 +131,7 @@ export function TestsBoard({ tests }: { tests: TestRow[] }) {
                     <td className="px-3 py-2.5">
                       <Link
                         href={`/faculty/tests/${t.id}`}
-                        className="inline-flex items-center gap-1 rounded-md border border-[#6b1029]/20 bg-[#6b1029]/[0.06] px-2.5 py-1 text-xs font-medium text-[#6b1029] transition-colors hover:bg-[#6b1029] hover:text-white"
+                        className="inline-flex items-center gap-1 rounded-md border border-[#ef5b3f]/20 bg-[#ef5b3f]/[0.06] px-2.5 py-1 text-xs font-medium text-[#ef5b3f] transition-colors hover:bg-[#ef5b3f] hover:text-white"
                       >
                         View
                       </Link>

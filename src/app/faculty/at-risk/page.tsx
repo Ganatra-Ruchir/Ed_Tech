@@ -85,7 +85,7 @@ export default async function FacultyAtRiskPage() {
                 </div>
                 <Link
                   href={`/faculty/students/${student.id}`}
-                  className="shrink-0 text-xs font-medium text-[#6b1029] hover:underline"
+                  className="shrink-0 text-xs font-medium text-[#ef5b3f] hover:underline"
                 >
                   Open record
                 </Link>

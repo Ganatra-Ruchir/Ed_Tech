@@ -5,7 +5,7 @@
  * routes and forms.
  */
 
-export const MAX_UPLOAD_BYTES = 25 * 1024 * 1024; // 25 MB
+export const MAX_UPLOAD_BYTES = 50 * 1024 * 1024; // 50 MB
 export const MAX_AVATAR_BYTES = 5 * 1024 * 1024; // 5 MB
 
 /** Documents, archives, images, code — everything a student might submit. */

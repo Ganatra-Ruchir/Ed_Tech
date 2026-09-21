@@ -39,7 +39,7 @@ export function DownloadReportButton({ studentId }: { studentId: string }) {
 
   return (
     <div className="flex flex-col items-end gap-1">
-      <Button onClick={handleClick} disabled={loading} size="sm" className="!bg-[#6b1029] hover:!bg-[#7c1638]">
+      <Button onClick={handleClick} disabled={loading} size="sm" className="!bg-[#ef5b3f] hover:!bg-[#d9472e]">
         <FileDown size={14} /> {loading ? "Generating…" : "Download PDF"}
       </Button>
       {error && <p className="text-xs text-rose-600">{error}</p>}

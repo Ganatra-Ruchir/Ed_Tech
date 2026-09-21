@@ -61,7 +61,7 @@ export function AvatarUploader({
         <Avatar name={name} imageUrl={preview} size="lg" />
         {busy && (
           <span className="absolute inset-0 flex items-center justify-center rounded-full bg-white/70">
-            <Loader2 size={16} className="animate-spin text-[#6b1029]" />
+            <Loader2 size={16} className="animate-spin text-[#ef5b3f]" />
           </span>
         )}
       </div>
@@ -71,7 +71,7 @@ export function AvatarUploader({
             type="button"
             onClick={() => inputRef.current?.click()}
             disabled={busy}
-            className="inline-flex items-center gap-1.5 rounded-md bg-[#6b1029] px-3 py-1.5 text-xs font-medium text-white hover:bg-[#7c1638] disabled:opacity-60"
+            className="inline-flex items-center gap-1.5 rounded-md bg-[#ef5b3f] px-3 py-1.5 text-xs font-medium text-white hover:bg-[#d9472e] disabled:opacity-60"
           >
             <Camera size={13} /> {preview ? "Change photo" : "Upload photo"}
           </button>

@@ -35,7 +35,7 @@ function BackLink() {
   return (
     <Link
       href="/student/tests"
-      className="inline-flex items-center gap-1.5 text-xs font-medium text-zinc-500 transition-colors hover:text-[#6b1029]"
+      className="inline-flex items-center gap-1.5 text-xs font-medium text-zinc-500 transition-colors hover:text-[#ef5b3f]"
     >
       <ArrowLeft size={13} /> Back to tests
     </Link>
@@ -79,7 +79,7 @@ export default async function StudentTestPage({
   if (existingResponse) {
     const answerByQuestion = new Map(existingResponse.answers.map((a) => [a.questionId, a]));
     const score = existingResponse.score ?? 0;
-    const maxScore = existingResponse.maxScore ?? test.questions.length;
+    const maxScore = existingResponse.maxScore ?? test.questions.reduce((sum, question) => sum + question.points, 0);
     const scorePct = maxScore > 0 ? (score / maxScore) * 100 : 0;
     const hasShortAnswers = test.questions.some((q) => q.type === "SHORT_ANSWER");
 
@@ -112,7 +112,7 @@ export default async function StudentTestPage({
               <p className="text-2xl font-bold text-zinc-900">
                 {score} <span className="text-base font-medium text-zinc-400">/ {maxScore}</span>
               </p>
-              <ProgressBar value={scorePct} className="mt-2 !bg-[#6b1029]/10 [&>div]:!bg-[#6b1029]" />
+              <ProgressBar value={scorePct} className="mt-2 !bg-[#ef5b3f]/10 [&>div]:!bg-[#ef5b3f]" />
               <p className="mt-1 text-[11px] text-zinc-400">{scorePct.toFixed(0)}% of the marks available</p>
             </div>
           </div>
@@ -178,7 +178,7 @@ export default async function StudentTestPage({
         {existingResponse.feedback.length > 0 && (
           <section>
             <h2 className="mb-2 flex items-center gap-1.5 text-[13px] font-semibold text-zinc-900">
-              <MessageSquare size={14} className="text-[#6b1029]" /> Faculty Feedback
+              <MessageSquare size={14} className="text-[#ef5b3f]" /> Faculty Feedback
             </h2>
             <ul className="space-y-2.5">
               {existingResponse.feedback.map((f) => (
@@ -204,7 +204,7 @@ export default async function StudentTestPage({
         {existingResponse.evidence.length > 0 && (
           <section>
             <h2 className="mb-2 flex items-center gap-1.5 text-[13px] font-semibold text-zinc-900">
-              <Sparkles size={14} className="text-[#6b1029]" /> Evidence Tags
+              <Sparkles size={14} className="text-[#ef5b3f]" /> Evidence Tags
             </h2>
             <Card className="p-4">
               <ul className="space-y-2.5">
@@ -268,6 +268,8 @@ export default async function StudentTestPage({
         type: q.type,
         text: q.text,
         options: q.optionsJson ? (JSON.parse(q.optionsJson) as string[]) : null,
+        required: q.required,
+        points: q.points,
       }))}
     />
   );

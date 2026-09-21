@@ -60,7 +60,7 @@ function Chip({
       className={cn(
         "flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium transition-colors",
         active
-          ? "bg-[#6b1029] text-white"
+          ? "bg-[#ef5b3f] text-white"
           : "border border-zinc-200 bg-white text-zinc-600 hover:bg-zinc-50 hover:text-zinc-900",
       )}
     >
@@ -80,7 +80,7 @@ function SelectShell({ children }: { children: React.ReactNode }) {
 }
 
 const selectClass =
-  "appearance-none rounded-md border border-zinc-200 bg-white py-1.5 pl-2.5 pr-7 text-[12.5px] text-zinc-700 focus:border-[#6b1029]/40 focus:outline-none focus:ring-2 focus:ring-[#6b1029]/10";
+  "appearance-none rounded-md border border-zinc-200 bg-white py-1.5 pl-2.5 pr-7 text-[12.5px] text-zinc-700 focus:border-[#ef5b3f]/40 focus:outline-none focus:ring-2 focus:ring-[#ef5b3f]/10";
 
 export function ReviewQueueBoard({
   items,
@@ -240,7 +240,7 @@ export function ReviewQueueBoard({
               value={search}
               onChange={(e) => resetTo(() => setSearch(e.target.value))}
               placeholder="Search student or project…"
-              className="w-full rounded-md border border-zinc-200 bg-white py-1.5 pl-8 pr-2.5 text-[12.5px] text-zinc-900 placeholder:text-zinc-400 focus:border-[#6b1029]/40 focus:outline-none focus:ring-2 focus:ring-[#6b1029]/10"
+              className="w-full rounded-md border border-zinc-200 bg-white py-1.5 pl-8 pr-2.5 text-[12.5px] text-zinc-900 placeholder:text-zinc-400 focus:border-[#ef5b3f]/40 focus:outline-none focus:ring-2 focus:ring-[#ef5b3f]/10"
             />
           </div>
 
@@ -253,12 +253,12 @@ export function ReviewQueueBoard({
         </div>
 
         {selected.length > 0 && (
-          <div className="flex flex-wrap items-center gap-3 border-b border-zinc-100 bg-[#6b1029]/[0.04] px-3 py-2">
-            <p className="text-xs font-medium text-[#6b1029]">{selected.length} selected</p>
+          <div className="flex flex-wrap items-center gap-3 border-b border-zinc-100 bg-[#ef5b3f]/[0.04] px-3 py-2">
+            <p className="text-xs font-medium text-[#ef5b3f]">{selected.length} selected</p>
             <button
               onClick={bulkSetInReview}
               disabled={busy}
-              className="rounded-md bg-[#6b1029] px-2.5 py-1.5 text-xs font-medium text-white hover:bg-[#7c1638] disabled:opacity-50"
+              className="rounded-md bg-[#ef5b3f] px-2.5 py-1.5 text-xs font-medium text-white hover:bg-[#d9472e] disabled:opacity-50"
             >
               {busy ? "Updating…" : "Mark in review"}
             </button>
@@ -296,7 +296,7 @@ export function ReviewQueueBoard({
                             : selected.filter((id) => !selectableOnPage.includes(id)),
                         )
                       }
-                      className="h-3.5 w-3.5 rounded border-zinc-300 accent-[#6b1029]"
+                      className="h-3.5 w-3.5 rounded border-zinc-300 accent-[#ef5b3f]"
                     />
                   </th>
                   <th className="px-3 py-2.5 font-medium">Student</th>
@@ -323,7 +323,7 @@ export function ReviewQueueBoard({
                               : selected.filter((id) => id !== item.id),
                           )
                         }
-                        className="h-3.5 w-3.5 rounded border-zinc-300 accent-[#6b1029] disabled:opacity-30"
+                        className="h-3.5 w-3.5 rounded border-zinc-300 accent-[#ef5b3f] disabled:opacity-30"
                       />
                     </td>
                     <td className="px-3 py-2.5">
@@ -350,7 +350,7 @@ export function ReviewQueueBoard({
                     <td className="px-3 py-2.5">
                       <Link
                         href={item.href}
-                        className="inline-flex items-center gap-1 rounded-md border border-[#6b1029]/20 bg-[#6b1029]/[0.06] px-2.5 py-1 text-xs font-medium text-[#6b1029] transition-colors hover:bg-[#6b1029] hover:text-white"
+                        className="inline-flex items-center gap-1 rounded-md border border-[#ef5b3f]/20 bg-[#ef5b3f]/[0.06] px-2.5 py-1 text-xs font-medium text-[#ef5b3f] transition-colors hover:bg-[#ef5b3f] hover:text-white"
                       >
                         {item.kind === "submission" ? "Review" : "Grade"} <ArrowRight size={11} />
                       </Link>
@@ -386,7 +386,7 @@ export function ReviewQueueBoard({
                       className={cn(
                         "h-7 min-w-7 rounded-md px-2 text-xs font-medium",
                         p === currentPage
-                          ? "bg-[#6b1029] text-white"
+                          ? "bg-[#ef5b3f] text-white"
                           : "border border-zinc-200 text-zinc-600 hover:bg-zinc-50",
                       )}
                     >

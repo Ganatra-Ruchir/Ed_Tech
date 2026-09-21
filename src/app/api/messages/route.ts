@@ -20,10 +20,14 @@ export async function GET(request: Request) {
   }
 
   const conversations = await prisma.conversation.findMany({ where: { members: { some: { userId: session.sub } } }, include: { members: { include: { user: { select: { id: true, name: true, email: true, role: true, profileImageUrl: true } } } }, messages: { orderBy: { createdAt: "desc" }, take: 1 } }, orderBy: { updatedAt: "desc" } });
-  if (!conversationId) return NextResponse.json({ conversations });
+  if (!conversationId) return NextResponse.json({ conversations, currentUserId: session.sub });
   const allowed = conversations.some((conversation) => conversation.id === conversationId);
   if (!allowed) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   const messages = await prisma.message.findMany({ where: { conversationId }, include: { sender: { select: { id: true, name: true, role: true } }, attachments: true }, orderBy: { createdAt: "asc" } });
+  await prisma.conversationMember.update({
+    where: { conversationId_userId: { conversationId, userId: session.sub } },
+    data: { lastReadAt: new Date() },
+  });
   return NextResponse.json({ messages });
 }
 
@@ -33,8 +37,9 @@ export async function POST(request: Request) {
   const guard = await requireRole();
   if (!guard.ok) return guard.response;
   const { session } = guard;
-  const formData = await request.formData().catch(() => null);
-  if (formData) {
+  const contentType = request.headers.get("content-type") ?? "";
+  if (contentType.includes("multipart/form-data")) {
+    const formData = await request.formData();
     const conversationId = String(formData.get("conversationId") ?? "");
     const body = String(formData.get("body") ?? "").trim();
     const file = formData.get("file");
@@ -42,13 +47,18 @@ export async function POST(request: Request) {
     const member = await prisma.conversationMember.findUnique({ where: { conversationId_userId: { conversationId, userId: session.sub } } });
     if (!member) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     if (file instanceof File && file.size > MAX_FILE_BYTES) return NextResponse.json({ error: "File must be 25 MB or smaller" }, { status: 400 });
-    const message = await prisma.message.create({ data: { conversationId, senderId: session.sub, body: body || "Attachment", attachments: file instanceof File ? undefined : undefined } });
+    const message = await prisma.message.create({ data: { conversationId, senderId: session.sub, body: body || "Attachment" } });
     if (file instanceof File && file.size > 0) {
       const buffer = Buffer.from(await file.arrayBuffer());
       const stored = await storeFile({ buffer, filename: file.name, contentType: file.type || "application/octet-stream", folder: "messages" });
       await prisma.messageAttachment.create({ data: { messageId: message.id, fileName: file.name, fileUrl: stored.url, storageKey: stored.storageKey, fileType: file.type || "application/octet-stream", fileSize: buffer.byteLength } });
     }
-    return NextResponse.json({ message }, { status: 201 });
+    await prisma.conversation.update({ where: { id: conversationId }, data: { updatedAt: new Date() } });
+    const hydratedMessage = await prisma.message.findUnique({
+      where: { id: message.id },
+      include: { sender: { select: { id: true, name: true, role: true } }, attachments: true },
+    });
+    return NextResponse.json({ message: hydratedMessage }, { status: 201 });
   }
 
   const parsed = createSchema.safeParse(await request.json().catch(() => null));
@@ -57,6 +67,18 @@ export async function POST(request: Request) {
   const users = await prisma.user.count({ where: { id: { in: userIds } } });
   if (users !== userIds.length) return NextResponse.json({ error: "One or more users were not found" }, { status: 400 });
   const isGroup = parsed.data.isGroup || userIds.length > 2;
+  if (!isGroup) {
+    const expectedMemberIds = [...userIds].sort();
+    const directConversations = await prisma.conversation.findMany({
+      where: { isGroup: false, members: { some: { userId: session.sub } } },
+      include: { members: { select: { userId: true } } },
+    });
+    const existing = directConversations.find((item) => {
+      const memberIds = item.members.map((member) => member.userId).sort();
+      return memberIds.length === expectedMemberIds.length && memberIds.every((id, index) => id === expectedMemberIds[index]);
+    });
+    if (existing) return NextResponse.json({ conversation: existing });
+  }
   const conversation = await prisma.conversation.create({ data: { title: isGroup ? (parsed.data.title || "New group") : null, isGroup, createdById: session.sub, members: { create: userIds.map((userId) => ({ userId })) } }, include: { members: { include: { user: { select: { id: true, name: true, email: true, role: true, profileImageUrl: true } } } } } });
   return NextResponse.json({ conversation }, { status: 201 });
 }

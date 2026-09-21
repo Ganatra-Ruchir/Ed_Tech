@@ -67,7 +67,7 @@ export function AuditLogTable({
   const visible = filtered.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
 
   const dateInputClass =
-    "rounded-md border border-zinc-200 bg-white px-2 py-1.5 text-[12.5px] text-zinc-700 focus:border-[#6b1029]/40 focus:outline-none focus:ring-2 focus:ring-[#6b1029]/10";
+    "rounded-md border border-zinc-200 bg-white px-2 py-1.5 text-[12.5px] text-zinc-700 focus:border-[#ef5b3f]/40 focus:outline-none focus:ring-2 focus:ring-[#ef5b3f]/10";
 
   return (
     <div className="overflow-hidden rounded-lg border border-zinc-200 bg-white shadow-sm shadow-zinc-900/[0.02]">

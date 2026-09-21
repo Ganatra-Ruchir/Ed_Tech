@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { readLocalFile } from "@/lib/storage";
+import { contentTypeFor } from "@/lib/uploads";
 import { canAccessSubmission, canAccessStudent, canAccessBatch } from "@/lib/permissions";
 
 // Force a download for anything that isn't a safe inline type. Serving an
@@ -61,10 +62,12 @@ export async function GET(
     const avatarUser = await prisma.user.findFirst({ where: { profileImageUrl: url }, select: { id: true } });
     if (avatarUser) {
       const buffer = await readLocalFile(key);
+      const fileName = key.split("/").at(-1) ?? "avatar";
+      const contentType = contentTypeFor(fileName);
       return new NextResponse(new Uint8Array(buffer), {
         headers: {
           ...NOSNIFF,
-          "Content-Type": "image/*",
+          "Content-Type": contentType,
           "Content-Disposition": `inline; filename="avatar"`,
           "Cache-Control": "private, max-age=300",
         },
@@ -79,7 +82,13 @@ export async function GET(
 
     let allowed = false;
     if (report.studentId) allowed = await canAccessStudent(session, report.studentId);
-    else if (report.batchId) allowed = await canAccessBatch(session, report.batchId);
+    else if (report.batchId) {
+      if (session.role !== "FACULTY" && session.role !== "ADMIN") {
+        allowed = false;
+      } else {
+        allowed = await canAccessBatch(session, report.batchId);
+      }
+    }
     if (!allowed) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
     const buffer = await readLocalFile(key);

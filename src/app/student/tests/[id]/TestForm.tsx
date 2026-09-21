@@ -15,6 +15,8 @@ type Question = {
   type: "MCQ" | "SHORT_ANSWER";
   text: string;
   options: string[] | null;
+  required: boolean;
+  points: number;
 };
 
 export function TestForm({
@@ -49,10 +51,12 @@ export function TestForm({
     e.preventDefault();
     setError(null);
 
-    const payload = questions.map((q) => ({ questionId: q.id, answerText: (answers[q.id] ?? "").trim() }));
-    if (payload.some((a) => !a.answerText)) {
+    const payload = questions
+      .map((q) => ({ questionId: q.id, answerText: (answers[q.id] ?? "").trim() }))
+      .filter((answer) => answer.answerText);
+    if (questions.some((q) => q.required && !isAnswered(q))) {
       setShowMissing(true);
-      setError("Please answer all questions before submitting.");
+      setError("Please answer every required question before submitting.");
       return;
     }
 
@@ -82,7 +86,7 @@ export function TestForm({
     <form onSubmit={handleSubmit} className="max-w-3xl space-y-5">
       <Link
         href="/student/tests"
-        className="inline-flex items-center gap-1.5 text-xs font-medium text-zinc-500 transition-colors hover:text-[#6b1029]"
+        className="inline-flex items-center gap-1.5 text-xs font-medium text-zinc-500 transition-colors hover:text-[#ef5b3f]"
       >
         <ArrowLeft size={13} /> Back to tests
       </Link>
@@ -107,27 +111,29 @@ export function TestForm({
               {answeredCount} of {questions.length} answered
             </p>
           </div>
-          <ProgressBar value={progress} className="mt-1.5 !bg-[#6b1029]/10 [&>div]:!bg-[#6b1029]" />
+          <ProgressBar value={progress} className="mt-1.5 !bg-[#ef5b3f]/10 [&>div]:!bg-[#ef5b3f]" />
         </div>
       </Card>
 
       {questions.map((q, idx) => {
         const answered = isAnswered(q);
-        const missing = showMissing && !answered;
+        const missing = showMissing && q.required && !answered;
         return (
           <Card key={q.id} className={`p-4 ${missing ? "!border-rose-300" : ""}`}>
             <div className="flex items-start gap-2.5">
               <span
                 className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[11px] font-semibold ${
-                  answered ? "bg-[#6b1029] text-white" : "bg-zinc-100 text-zinc-500"
+                  answered ? "bg-[#ef5b3f] text-white" : "bg-zinc-100 text-zinc-500"
                 }`}
               >
                 {answered ? <Check size={12} /> : idx + 1}
               </span>
               <div className="min-w-0 flex-1">
-                <p className="text-[13.5px] font-medium text-zinc-900">{q.text}</p>
+                <p className="text-[13.5px] font-medium text-zinc-900">
+                  {q.text} {q.required && <span className="text-[#ef5b3f]" aria-label="required">*</span>}
+                </p>
                 <p className="mt-0.5 text-[10.5px] font-medium uppercase tracking-wide text-zinc-400">
-                  {q.type === "MCQ" ? "Multiple choice" : "Short answer"}
+                  {q.type === "MCQ" ? "Multiple choice" : "Short answer"} · {q.points} {q.points === 1 ? "point" : "points"}{q.required ? "" : " · Optional"}
                 </p>
 
                 {q.type === "MCQ" && q.options && q.options.length > 0 ? (
@@ -140,7 +146,7 @@ export function TestForm({
                           whileTap={{ scale: 0.995 }}
                           className={`flex cursor-pointer items-center gap-2.5 rounded-md border px-3 py-2 text-[13px] transition-colors ${
                             selected
-                              ? "border-[#6b1029] bg-[#6b1029]/[0.05] text-zinc-900"
+                              ? "border-[#ef5b3f] bg-[#ef5b3f]/[0.05] text-zinc-900"
                               : "border-zinc-200 text-zinc-700 hover:border-zinc-300 hover:bg-zinc-50"
                           }`}
                         >
@@ -150,7 +156,7 @@ export function TestForm({
                             value={opt}
                             checked={selected}
                             onChange={() => setAnswer(q.id, opt)}
-                            className="accent-[#6b1029]"
+                            className="accent-[#ef5b3f]"
                           />
                           {opt}
                         </motion.label>
@@ -163,13 +169,13 @@ export function TestForm({
                     value={answers[q.id] ?? ""}
                     onChange={(e) => setAnswer(q.id, e.target.value)}
                     placeholder="Type your answer here"
-                    className="mt-3 focus:!border-[#6b1029]/40 focus:!ring-[#6b1029]/10"
+                    className="mt-3 focus:!border-[#ef5b3f]/40 focus:!ring-[#ef5b3f]/10"
                   />
                 )}
 
                 {missing && (
                   <p className="mt-2 flex items-center gap-1.5 text-[11.5px] text-rose-600">
-                    <AlertCircle size={12} /> This question still needs an answer.
+                    <AlertCircle size={12} /> This required question still needs an answer.
                   </p>
                 )}
               </div>
@@ -191,7 +197,7 @@ export function TestForm({
         <Button
           type="submit"
           disabled={submitting}
-          className="!bg-[#6b1029] hover:!bg-[#7c1638] disabled:!bg-[#6b1029]/40"
+          className="!bg-[#ef5b3f] hover:!bg-[#d9472e] disabled:!bg-[#ef5b3f]/40"
         >
           {submitting ? "Submitting…" : "Submit answers"}
         </Button>

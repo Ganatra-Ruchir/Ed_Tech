@@ -322,7 +322,7 @@ export default async function FacultyDashboard({
                   href={a.href}
                   className={
                     a.primary
-                      ? "flex items-center justify-center gap-1.5 rounded-md bg-[#6b1029] px-3 py-2.5 text-[12.5px] font-medium text-white transition-colors hover:bg-[#7c1638]"
+                      ? "flex items-center justify-center gap-1.5 rounded-md bg-[#ef5b3f] px-3 py-2.5 text-[12.5px] font-medium text-white transition-colors hover:bg-[#d9472e]"
                       : "flex items-center justify-center gap-1.5 rounded-md border border-zinc-200 bg-white px-3 py-2.5 text-[12.5px] font-medium text-zinc-700 transition-colors hover:bg-zinc-50"
                   }
                 >
@@ -336,7 +336,7 @@ export default async function FacultyDashboard({
         <section className="lg:col-span-3">
           <div className="mb-2 flex items-center justify-between">
             <h2 className="flex items-center gap-1.5 text-[13px] font-semibold text-zinc-900">
-              <Activity size={14} className="text-[#6b1029]" /> Recent Activity
+              <Activity size={14} className="text-[#ef5b3f]" /> Recent Activity
             </h2>
             <Link
               href="/faculty/review"

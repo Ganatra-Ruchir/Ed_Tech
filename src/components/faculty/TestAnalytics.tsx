@@ -79,7 +79,7 @@ export function TestAnalytics({
             className={cn(
               "-mb-px border-b-2 px-3 py-2 text-[13px] font-medium transition-colors",
               tab === t
-                ? "border-[#6b1029] text-[#6b1029]"
+                ? "border-[#ef5b3f] text-[#ef5b3f]"
                 : "border-transparent text-zinc-500 hover:text-zinc-800",
             )}
           >
@@ -225,7 +225,7 @@ export function TestAnalytics({
                       <td className="px-3 py-2.5">
                         <Link
                           href={`/faculty/test-responses/${r.id}`}
-                          className="inline-flex items-center gap-1 rounded-md border border-[#6b1029]/20 bg-[#6b1029]/[0.06] px-2.5 py-1 text-xs font-medium text-[#6b1029] transition-colors hover:bg-[#6b1029] hover:text-white"
+                          className="inline-flex items-center gap-1 rounded-md border border-[#ef5b3f]/20 bg-[#ef5b3f]/[0.06] px-2.5 py-1 text-xs font-medium text-[#ef5b3f] transition-colors hover:bg-[#ef5b3f] hover:text-white"
                         >
                           {r.ungraded > 0 ? "Grade" : "View"}
                         </Link>

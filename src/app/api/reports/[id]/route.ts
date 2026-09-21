@@ -17,7 +17,13 @@ export async function GET(
 
   let allowed = false;
   if (report.studentId) allowed = await canAccessStudent(session, report.studentId);
-  else if (report.batchId) allowed = await canAccessBatch(session, report.batchId);
+  else if (report.batchId) {
+    if (session.role !== "FACULTY" && session.role !== "ADMIN") {
+      allowed = false;
+    } else {
+      allowed = await canAccessBatch(session, report.batchId);
+    }
+  }
   if (!allowed) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
   return NextResponse.json({ report: { id: report.id, url: report.pdfPath, generatedAt: report.generatedAt } });

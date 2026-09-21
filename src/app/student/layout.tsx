@@ -5,6 +5,8 @@ import { PortalSidebar } from "@/components/university/PortalSidebar";
 import { PortalMobileNav } from "@/components/university/PortalMobileNav";
 import { PortalTopbar } from "@/components/university/PortalTopbar";
 import { STUDENT_LINKS } from "@/components/student/nav-links";
+import { PortalPageTransition } from "@/components/university/PortalPageTransition";
+import { getMessageNotifications } from "@/lib/message-notifications";
 
 export default async function StudentLayout({ children }: { children: React.ReactNode }) {
   const session = await getSession();
@@ -16,7 +18,7 @@ export default async function StudentLayout({ children }: { children: React.Reac
   // bell without duplicating the full dashboard query on every page.
   const now = new Date();
   const dueSoonEnd = new Date(now.getTime() + 3 * 24 * 60 * 60 * 1000);
-  const [needsRevisionCount, dueSoonCount] = await Promise.all([
+  const [needsRevisionCount, dueSoonCount, currentUser, revisionSubmissions, dueSoonTests, messageNotifications] = await Promise.all([
     prisma.submission.count({ where: { studentId: session.sub, status: "NEEDS_REVISION" } }),
     prisma.test.count({
       where: {
@@ -26,25 +28,50 @@ export default async function StudentLayout({ children }: { children: React.Reac
         responses: { none: { studentId: session.sub } },
       },
     }),
+    prisma.user.findUnique({ where: { id: session.sub }, select: { profileImageUrl: true } }),
+    prisma.submission.findMany({
+      where: { studentId: session.sub, status: "NEEDS_REVISION" },
+      select: { id: true, title: true, assignment: { select: { title: true } } },
+      orderBy: { updatedAt: "desc" },
+      take: 5,
+    }),
+    prisma.test.findMany({
+      where: {
+        publishedAt: { not: null },
+        batch: { members: { some: { userId: session.sub } } },
+        dueAt: { gte: now, lte: dueSoonEnd },
+        responses: { none: { studentId: session.sub } },
+      },
+      select: { id: true, title: true, dueAt: true },
+      orderBy: { dueAt: "asc" },
+      take: 5,
+    }),
+    getMessageNotifications(session.sub),
   ]);
 
+  const notifications = [
+    ...messageNotifications,
+    ...revisionSubmissions.map((submission) => ({ title: `${submission.assignment?.title ?? submission.title} needs revision`, detail: "Open the submission and review faculty feedback", href: `/student/submissions/${submission.id}` })),
+    ...dueSoonTests.map((test) => ({ title: `${test.title} is due soon`, detail: test.dueAt ? `Due ${test.dueAt.toLocaleDateString("en-IN", { day: "numeric", month: "short" })}` : "Open the test", href: `/student/tests/${test.id}` })),
+    ...(needsRevisionCount > revisionSubmissions.length ? [{ title: `${needsRevisionCount - revisionSubmissions.length} more revision requests`, detail: "Open all submissions", href: "/student/submissions" }] : []),
+    ...(dueSoonCount > dueSoonTests.length ? [{ title: `${dueSoonCount - dueSoonTests.length} more tests due soon`, detail: "Open all assigned tests", href: "/student/tests" }] : []),
+  ];
+
   return (
-    <div className="flex min-h-screen bg-zinc-50">
+    <div className="flex min-h-screen bg-[#f4f5f0]">
       <PortalSidebar title="Student Portal" layoutId="student" links={STUDENT_LINKS} />
       <div className="flex min-h-screen w-full flex-1 flex-col">
         <PortalMobileNav title="Student Portal" links={STUDENT_LINKS} />
         <PortalTopbar
           userName={session.name}
           userRole="Student"
-          hasAlerts={needsRevisionCount + dueSoonCount > 0}
-          notifications={[
-            ...(needsRevisionCount > 0 ? [{ title: `${needsRevisionCount} submission(s) need revision`, detail: "Open your submissions", href: "/student/submissions" }] : []),
-            ...(dueSoonCount > 0 ? [{ title: `${dueSoonCount} test(s) due soon`, detail: "Open assigned tests", href: "/student/tests" }] : []),
-          ]}
+          userImageUrl={currentUser?.profileImageUrl}
+          hasAlerts={needsRevisionCount + dueSoonCount + messageNotifications.length > 0}
+          notifications={notifications}
           searchEndpoint="/api/student/search"
           searchPlaceholder="Search for tests, submissions, or announcements…"
         />
-        <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-6 sm:px-6 lg:px-8">{children}</main>
+        <main className="mx-auto w-full max-w-[1320px] flex-1 px-4 py-7 sm:px-6 lg:px-8 lg:py-9"><PortalPageTransition>{children}</PortalPageTransition></main>
       </div>
     </div>
   );

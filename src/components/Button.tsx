@@ -14,10 +14,10 @@ type Variant = "primary" | "secondary" | "ghost" | "danger";
 type Size = "sm" | "md";
 
 const VARIANTS: Record<Variant, string> = {
-  primary: "bg-zinc-900 text-white hover:bg-zinc-800 disabled:bg-zinc-300",
+  primary: "bg-[#17212b] text-white shadow-sm hover:bg-[#263441] disabled:bg-zinc-300",
   secondary:
-    "border border-zinc-200 bg-white text-zinc-700 hover:bg-zinc-50 disabled:text-zinc-300",
-  ghost: "text-zinc-600 hover:bg-zinc-100 disabled:text-zinc-300",
+    "border border-[#d6dbd3] bg-white text-[#344054] shadow-sm hover:border-[#bfc6bc] hover:bg-[#f8f9f6] disabled:text-zinc-300",
+  ghost: "text-[#475467] hover:bg-[#e9ece6] disabled:text-zinc-300",
   danger: "bg-rose-600 text-white hover:bg-rose-500 disabled:bg-rose-200",
 };
 
@@ -27,7 +27,7 @@ const SIZES: Record<Size, string> = {
 };
 
 const base =
-  "inline-flex items-center justify-center rounded-md font-medium transition-colors disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#6b1029]/40";
+  "inline-flex items-center justify-center rounded-md font-semibold transition-colors disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ef5b3f]/40";
 
 const MotionLink = motion.create(Link);
 

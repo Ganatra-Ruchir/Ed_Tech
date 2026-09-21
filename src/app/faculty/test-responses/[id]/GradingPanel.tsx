@@ -15,6 +15,8 @@ type Question = {
   answerId: string;
   answerText: string;
   isCorrect: boolean | null;
+  required: boolean;
+  points: number;
 };
 type Evidence = { id: string; tag: string; notes: string | null; faculty: string };
 type FeedbackItem = { id: string; comment: string; faculty: string; createdAt: string };
@@ -50,7 +52,9 @@ export function GradingPanel({
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          answers: Object.entries(grades).map(([id, isCorrect]) => ({ id, isCorrect: Boolean(isCorrect) })),
+          answers: Object.entries(grades)
+            .filter(([id]) => id)
+            .map(([id, isCorrect]) => ({ id, isCorrect: Boolean(isCorrect) })),
         }),
       });
       const data = await res.json();
@@ -103,8 +107,13 @@ export function GradingPanel({
             <p className="text-sm font-medium text-zinc-900">
               {idx + 1}. {q.text}
             </p>
+            <p className="mt-0.5 text-[11px] text-zinc-400">
+              {q.points} {q.points === 1 ? "point" : "points"}{q.required ? "" : " · Optional"}
+            </p>
             <p className="mt-2 text-sm text-zinc-600">Answer: {q.answerText || "-"}</p>
-            {q.type === "MCQ" ? (
+            {!q.answerId ? (
+              <p className="mt-1 text-xs text-zinc-400">Not answered</p>
+            ) : q.type === "MCQ" ? (
               <p className="mt-1 text-xs text-zinc-400">
                 Auto-graded: {q.isCorrect ? "Correct" : "Incorrect"}
               </p>

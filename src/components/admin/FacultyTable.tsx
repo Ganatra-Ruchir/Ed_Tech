@@ -110,7 +110,7 @@ export function FacultyTable({ faculty, departments }: { faculty: FacultyRow[]; 
                   </Td>
                   <Td>
                     {f.isCC ? (
-                      <span className="inline-flex items-center gap-1 whitespace-nowrap rounded-full bg-[#6b1029]/[0.08] px-2.5 py-0.5 text-xs font-medium text-[#6b1029]">
+                      <span className="inline-flex items-center gap-1 whitespace-nowrap rounded-full bg-[#ef5b3f]/[0.08] px-2.5 py-0.5 text-xs font-medium text-[#ef5b3f]">
                         <Star size={11} /> Course coordinator
                       </span>
                     ) : (

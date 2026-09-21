@@ -23,7 +23,7 @@ const CONTENTS: Record<Scope, string[]> = {
 };
 
 const selectClass =
-  "w-full appearance-none rounded-md border border-zinc-200 bg-white py-2 pl-3 pr-8 text-[13px] text-zinc-900 focus:border-[#6b1029]/40 focus:outline-none focus:ring-2 focus:ring-[#6b1029]/10";
+  "w-full appearance-none rounded-md border border-zinc-200 bg-white py-2 pl-3 pr-8 text-[13px] text-zinc-900 focus:border-[#ef5b3f]/40 focus:outline-none focus:ring-2 focus:ring-[#ef5b3f]/10";
 
 export function ReportGenerator({
   students,
@@ -86,7 +86,7 @@ export function ReportGenerator({
               className={cn(
                 "rounded-md px-3 py-1.5 text-xs font-medium transition-colors",
                 scope === s
-                  ? "bg-[#6b1029] text-white"
+                  ? "bg-[#ef5b3f] text-white"
                   : "border border-zinc-200 bg-white text-zinc-600 hover:bg-zinc-50",
               )}
             >
@@ -158,7 +158,7 @@ export function ReportGenerator({
         <button
           onClick={generate}
           disabled={loading || !canGenerate}
-          className="mt-4 flex w-full items-center justify-center gap-2 rounded-md bg-[#6b1029] px-3 py-2.5 text-[13px] font-medium text-white transition-colors hover:bg-[#7c1638] disabled:cursor-not-allowed disabled:opacity-50"
+          className="mt-4 flex w-full items-center justify-center gap-2 rounded-md bg-[#ef5b3f] px-3 py-2.5 text-[13px] font-medium text-white transition-colors hover:bg-[#d9472e] disabled:cursor-not-allowed disabled:opacity-50"
         >
           <FileDown size={15} /> {loading ? "Generating…" : "Generate PDF"}
         </button>
@@ -172,14 +172,14 @@ export function ReportGenerator({
             <div className="flex h-full flex-col">
               <div className="flex items-center gap-2">
                 <svg viewBox="0 0 40 40" className="h-7 w-7 shrink-0" aria-hidden="true">
-                  <circle cx="20" cy="20" r="20" fill="#6b1029" />
+                  <circle cx="20" cy="20" r="20" fill="#ef5b3f" />
                   <path
                     d="M20 8c-3.5 0-6 2.6-6 5.7 0 1.2.4 2.3 1.1 3.2-1.9.9-3.1 2.7-3.1 4.8 0 2.9 2.3 5.2 5.1 5.3v6.2h5.8v-6.2c2.8-.1 5.1-2.4 5.1-5.3 0-2.1-1.2-3.9-3.1-4.8.7-.9 1.1-2 1.1-3.2C26 10.6 23.5 8 20 8z"
                     fill="white"
                   />
                 </svg>
                 <div className="leading-tight">
-                  <p className="text-[11px] font-semibold text-[#6b1029]">Silver Oak University</p>
+                  <p className="text-[11px] font-semibold text-[#ef5b3f]">Silver Oak University</p>
                   <p className="text-[8.5px] uppercase tracking-wide text-zinc-400">
                     Student Progress &amp; Evaluation
                   </p>
@@ -202,7 +202,7 @@ export function ReportGenerator({
                 <div className="h-1.5 w-3/5 rounded-full bg-zinc-100" />
               </div>
 
-              <div className="mt-auto -mx-6 -mb-6 h-14" style={{ background: "linear-gradient(120deg, #6b1029 0%, #93213f 100%)" }} />
+              <div className="mt-auto -mx-6 -mb-6 h-14" style={{ background: "linear-gradient(120deg, #ef5b3f 0%, #f4735c 100%)" }} />
             </div>
           </div>
         </Card>

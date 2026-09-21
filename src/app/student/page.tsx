@@ -31,7 +31,7 @@ function fmtDate(d: Date | null): string {
 }
 
 function daysUntil(d: Date, now: number): number {
-  return Math.ceil((d.getTime() - now) / (1000 * 60 * 60 * 24));
+  return Math.round((d.getTime() - now) / (1000 * 60 * 60 * 24));
 }
 
 const QUOTES = [
@@ -123,14 +123,14 @@ export default async function StudentDashboard() {
           <p className="mt-1 text-sm text-zinc-500">Here&apos;s where your project work and tests stand. Keep going!</p>
         </div>
         <div className="flex items-center gap-4">
-          <div className="hidden max-w-xs items-start gap-2 border-l-2 border-[#6b1029]/40 pl-3 sm:flex">
-            <Quote size={14} className="mt-0.5 shrink-0 text-[#6b1029]/50" />
+          <div className="hidden max-w-xs items-start gap-2 border-l-2 border-[#ef5b3f]/40 pl-3 sm:flex">
+            <Quote size={14} className="mt-0.5 shrink-0 text-[#ef5b3f]/50" />
             <p className="text-xs italic text-zinc-500">&ldquo;{quote}&rdquo;</p>
           </div>
           <LinkButton
             href="/student/submissions/new"
             size="sm"
-            className="!bg-[#6b1029] hover:!bg-[#7c1638]"
+            className="!bg-[#ef5b3f] hover:!bg-[#d9472e]"
           >
             <Plus size={14} /> New Submission
           </LinkButton>
@@ -201,7 +201,7 @@ export default async function StudentDashboard() {
         <section>
           <div className="mb-2 flex items-center justify-between">
             <h2 className="flex items-center gap-1.5 text-[13px] font-semibold text-zinc-900">
-              <Clock size={14} className="text-[#6b1029]" /> Upcoming
+              <Clock size={14} className="text-[#ef5b3f]" /> Upcoming
             </h2>
             <Link href="/student/tests" className="flex items-center gap-1 text-xs font-medium text-zinc-500 hover:text-zinc-900">
               View all <ArrowRight size={11} />
@@ -213,8 +213,9 @@ export default async function StudentDashboard() {
             ) : (
               <ul className="divide-y divide-zinc-100">
                 {upcoming.map((item) => {
-                  const overdue = item.dueAt && item.dueAt.getTime() < now;
-                  const dueSoon = item.dueAt && !overdue && daysUntil(item.dueAt, now) <= 5;
+                  const daysRemaining = item.dueAt ? daysUntil(item.dueAt, now) : null;
+                  const overdue = daysRemaining !== null && daysRemaining < 0;
+                  const dueSoon = daysRemaining !== null && !overdue && daysRemaining <= 5;
                   return (
                     <li key={item.key} className="flex items-center gap-3 px-3.5 py-3">
                       {item.dueAt ? (
@@ -239,7 +240,9 @@ export default async function StudentDashboard() {
                               {overdue ? "Past Due" : "Due Soon"}
                             </span>
                           ) : null}
-                          {item.kind === "revision" ? "Awaiting your revision" : item.dueAt ? `Due in ${daysUntil(item.dueAt, now)} days` : "No due date"}
+                          {item.kind === "revision" ? "Awaiting your revision" : item.dueAt ? (
+                            overdue ? `Overdue by ${Math.abs(daysRemaining)} day${Math.abs(daysRemaining) === 1 ? "" : "s"}` : daysRemaining === 0 ? "Due today" : `Due in ${daysRemaining} day${daysRemaining === 1 ? "" : "s"}`
+                          ) : "No due date"}
                         </p>
                       </div>
                       <Link href={item.href} className="shrink-0 text-zinc-300 hover:text-zinc-600">
@@ -256,7 +259,7 @@ export default async function StudentDashboard() {
         <section>
           <div className="mb-2 flex items-center justify-between">
             <h2 className="flex items-center gap-1.5 text-[13px] font-semibold text-zinc-900">
-              <Megaphone size={14} className="text-[#6b1029]" /> Class Stream
+              <Megaphone size={14} className="text-[#ef5b3f]" /> Class Stream
             </h2>
             <Link href="/student/stream" className="flex items-center gap-1 text-xs font-medium text-zinc-500 hover:text-zinc-900">
               View all <ArrowRight size={11} />
@@ -368,13 +371,13 @@ export default async function StudentDashboard() {
                       <Td className="text-zinc-500">{response ? `${response.score ?? "-"} / ${response.maxScore ?? "-"}` : "-"}</Td>
                       <Td>
                         {response ? (
-                          <Link href={`/student/tests/${t.id}`} className="text-xs font-medium text-[#6b1029] hover:underline">
+                          <Link href={`/student/tests/${t.id}`} className="text-xs font-medium text-[#ef5b3f] hover:underline">
                             View
                           </Link>
                         ) : overdue ? (
                           <span className="text-xs text-zinc-300">-</span>
                         ) : (
-                          <LinkButton href={`/student/tests/${t.id}`} size="sm" className="!bg-[#6b1029] hover:!bg-[#7c1638]">
+                          <LinkButton href={`/student/tests/${t.id}`} size="sm" className="!bg-[#ef5b3f] hover:!bg-[#d9472e]">
                             Continue <ArrowRight size={12} />
                           </LinkButton>
                         )}

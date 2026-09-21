@@ -3,8 +3,9 @@ import { getSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { canAccessBatch } from "@/lib/permissions";
 import { PageHeader } from "@/components/PageHeader";
+import { LinkButton } from "@/components/Button";
+import { CalendarCheck } from "lucide-react";
 import { RosterManager } from "./RosterManager";
-import { AttendanceManager } from "@/components/faculty/AttendanceManager";
 
 export default async function FacultyBatchRosterPage({
   params,
@@ -31,12 +32,12 @@ export default async function FacultyBatchRosterPage({
       <PageHeader
         title={batch.name}
         description={`${batch.department} · Semester ${batch.semester}`}
+        actions={<LinkButton href={`/faculty/attendance?batchId=${id}`} size="sm"><CalendarCheck size={14} /> Take attendance</LinkButton>}
       />
       <RosterManager
         batchId={id}
         students={memberships.map((m) => ({ id: m.user.id, name: m.user.name, email: m.user.email }))}
       />
-      <AttendanceManager batchId={id} students={memberships.map((m) => ({ id: m.user.id, name: m.user.name, email: m.user.email }))} />
     </div>
   );
 }

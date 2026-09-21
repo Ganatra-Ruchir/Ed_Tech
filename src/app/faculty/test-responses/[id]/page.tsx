@@ -58,6 +58,8 @@ export default async function TestResponseDetail({
               answerId: answer?.id ?? "",
               answerText: answer?.answerText ?? "",
               isCorrect: answer?.isCorrect ?? null,
+              required: q.required,
+              points: q.points,
             };
           })}
           evidence={response.evidence.map((e) => ({

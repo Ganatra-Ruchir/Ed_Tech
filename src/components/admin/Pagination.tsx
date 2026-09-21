@@ -57,7 +57,7 @@ export function Pagination({
               className={cn(
                 "h-7 min-w-7 rounded-md px-2 text-[12px] font-medium transition-colors",
                 p === page
-                  ? "bg-[#6b1029] text-white"
+                  ? "bg-[#ef5b3f] text-white"
                   : "border border-zinc-200 text-zinc-600 hover:bg-zinc-50",
               )}
             >

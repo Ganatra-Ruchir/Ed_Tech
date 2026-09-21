@@ -91,8 +91,8 @@ export function AssignmentForm({ batches, defaultBatchId }: { batches: BatchOpti
         </div>
         <div className="sm:col-span-2">
           <Label>Attachment (optional)</Label>
-          <label className="flex cursor-pointer items-center gap-2 rounded-md border border-dashed border-zinc-300 bg-zinc-50 px-3 py-3 text-xs text-zinc-600 hover:border-[#6b1029]/40">
-            <FileUp size={16} className="text-[#6b1029]" />
+          <label className="flex cursor-pointer items-center gap-2 rounded-md border border-dashed border-zinc-300 bg-zinc-50 px-3 py-3 text-xs text-zinc-600 hover:border-[#ef5b3f]/40">
+            <FileUp size={16} className="text-[#ef5b3f]" />
             <span className="min-w-0 flex-1 truncate">{file ? file.name : "PDF, DOC, PPT, image, zip, code… up to 25 MB"}</span>
             <input ref={fileRef} type="file" accept={DOCUMENT_ACCEPT} className="hidden" onChange={(event) => setFile(event.target.files?.[0] ?? null)} />
           </label>

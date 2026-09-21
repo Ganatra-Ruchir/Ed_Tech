@@ -17,17 +17,17 @@ export function KpiCard({
   progress?: number;
 }) {
   return (
-    <div className="rounded-lg border border-zinc-200 bg-white p-3.5 transition-colors hover:border-zinc-300">
-      <div className="flex items-center gap-1.5 text-zinc-400">
+    <div className="rounded-md border border-[#dfe3dc] bg-white p-4 shadow-[0_1px_2px_rgba(23,33,43,0.04)] transition-colors hover:border-[#cbd1c9]">
+      <div className="flex items-center gap-1.5 text-[#667085]">
         {Icon && <Icon size={13} strokeWidth={2} />}
-        <span className="text-[11px] font-medium uppercase tracking-wide">{label}</span>
+        <span className="text-[10px] font-semibold uppercase tracking-[0.1em]">{label}</span>
       </div>
       <div
         className={cn(
-          "mt-1.5 text-[22px] font-semibold tracking-tight",
+          "mt-2 text-[26px] font-semibold leading-none",
           tone === "danger" && "text-rose-600",
           tone === "success" && "text-emerald-600",
-          tone === "default" && "text-zinc-900",
+          tone === "default" && "text-[#17212b]",
         )}
       >
         {value}

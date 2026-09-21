@@ -21,7 +21,7 @@ function Toggle({
       onClick={onClick}
       className={cn(
         "inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium transition-colors",
-        on ? "border-[#6b1029]/30 bg-[#6b1029]/[0.06] text-[#6b1029]" : "border-zinc-200 text-zinc-500 hover:bg-zinc-50",
+        on ? "border-[#ef5b3f]/30 bg-[#ef5b3f]/[0.06] text-[#ef5b3f]" : "border-zinc-200 text-zinc-500 hover:bg-zinc-50",
       )}
     >
       <Icon size={13} /> {label}
@@ -80,7 +80,7 @@ export function AnnouncementComposer({ batches }: { batches: { id: string; name:
     <Card className="p-4">
       <form onSubmit={handleSubmit} className="space-y-3">
         <div className="flex items-center gap-2 text-[13px] font-semibold text-zinc-900">
-          <Megaphone size={15} className="text-[#6b1029]" /> New announcement
+          <Megaphone size={15} className="text-[#ef5b3f]" /> New announcement
         </div>
         <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
           <Select value={batchId} onChange={(e) => setBatchId(e.target.value)}>
@@ -97,8 +97,8 @@ export function AnnouncementComposer({ batches }: { batches: { id: string; name:
         <Input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Title" />
         <Textarea value={body} onChange={(e) => setBody(e.target.value)} rows={3} placeholder="Write an update for the class…" />
 
-        <label className="flex cursor-pointer items-center gap-2 rounded-md border border-dashed border-zinc-300 px-3 py-2 text-xs text-zinc-600 hover:border-[#6b1029]/40">
-          <FileUp size={14} className="text-[#6b1029]" />
+        <label className="flex cursor-pointer items-center gap-2 rounded-md border border-dashed border-zinc-300 px-3 py-2 text-xs text-zinc-600 hover:border-[#ef5b3f]/40">
+          <FileUp size={14} className="text-[#ef5b3f]" />
           <span className="truncate">{file?.name ?? "Attach a file (PDF, DOC, image, zip… up to 25 MB)"}</span>
           <input ref={fileRef} type="file" accept={DOCUMENT_ACCEPT} className="hidden" onChange={(e) => setFile(e.target.files?.[0] ?? null)} />
         </label>
@@ -110,7 +110,7 @@ export function AnnouncementComposer({ batches }: { batches: { id: string; name:
         </div>
 
         {error && <p className="text-sm text-rose-600">{error}</p>}
-        <Button type="submit" disabled={submitting} size="sm" className="!bg-[#6b1029] hover:!bg-[#7c1638]">
+        <Button type="submit" disabled={submitting} size="sm" className="!bg-[#ef5b3f] hover:!bg-[#d9472e]">
           {submitting ? "Posting…" : "Post to class stream"}
         </Button>
       </form>

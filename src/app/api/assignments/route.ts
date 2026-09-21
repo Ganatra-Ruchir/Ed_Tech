@@ -45,6 +45,15 @@ const metadataSchema = z.object({
   dueAt: z.string().optional(),
 });
 
+function parseOptionalDate(value: string | undefined): Date | null {
+  if (!value) return null;
+  const parsed = new Date(value);
+  if (Number.isNaN(parsed.getTime())) {
+    throw new Error("Invalid due date");
+  }
+  return parsed;
+}
+
 export async function POST(request: Request) {
   const guard = await requireRole("FACULTY");
   if (!guard.ok) return guard.response;
@@ -70,13 +79,20 @@ export async function POST(request: Request) {
     if (err) return NextResponse.json({ error: err }, { status: 400 });
   }
 
+  let dueAt: Date | null = null;
+  try {
+    dueAt = parseOptionalDate(parsed.data.dueAt);
+  } catch {
+    return NextResponse.json({ error: "Invalid due date" }, { status: 400 });
+  }
+
   const assignment = await prisma.assignment.create({
     data: {
       batchId: parsed.data.batchId,
       createdByFacultyId: session.sub,
       title: parsed.data.title,
       description: parsed.data.description || null,
-      dueAt: parsed.data.dueAt ? new Date(parsed.data.dueAt) : null,
+      dueAt,
     },
   });
 

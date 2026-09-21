@@ -27,7 +27,7 @@ const BAND_COLORS = {
   excellent: "#0f9d76",
   good: "#5bc99a",
   needsImprovement: "#f0a825",
-  below: "#b83a58",
+  below: "#f89582",
 } as const;
 
 function average(values: number[]): number {
@@ -488,8 +488,8 @@ export async function getAdminAnalyticsData() {
   ]);
 
   const STATUS_META: Record<string, { label: string; color: string }> = {
-    SUBMITTED: { label: "Submitted", color: "#6b1029" },
-    IN_REVIEW: { label: "In review", color: "#b83a58" },
+    SUBMITTED: { label: "Submitted", color: "#ef5b3f" },
+    IN_REVIEW: { label: "In review", color: "#f89582" },
     APPROVED: { label: "Approved", color: "#0f9d76" },
     NEEDS_REVISION: { label: "Needs revision", color: "#f0a825" },
   };

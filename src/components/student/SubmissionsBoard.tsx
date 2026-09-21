@@ -56,7 +56,7 @@ export function SubmissionsBoard({ submissions }: { submissions: BoardSubmission
             </FilterChip>
           ))}
         </div>
-        <LinkButton href="/student/submissions/new" size="sm" className="!bg-[#6b1029] hover:!bg-[#7c1638]">
+        <LinkButton href="/student/submissions/new" size="sm" className="!bg-[#ef5b3f] hover:!bg-[#d9472e]">
           <Plus size={14} /> New Submission
         </LinkButton>
       </div>
@@ -82,7 +82,7 @@ export function SubmissionsBoard({ submissions }: { submissions: BoardSubmission
                   <Td className="text-zinc-500">{fmtDate(s.createdAt)}</Td>
                   <Td className="text-zinc-500">{s.feedbackCount > 0 ? `${s.feedbackCount} comment(s)` : "-"}</Td>
                   <Td>
-                    <Link href={`/student/submissions/${s.id}`} className="text-xs font-medium text-[#6b1029] hover:underline">
+                    <Link href={`/student/submissions/${s.id}`} className="text-xs font-medium text-[#ef5b3f] hover:underline">
                       View
                     </Link>
                   </Td>

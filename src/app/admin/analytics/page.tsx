@@ -88,7 +88,7 @@ export default async function AdminAnalyticsPage() {
                   </div>
                   <Link
                     href={`/admin/students/${s.id}`}
-                    className="inline-flex shrink-0 items-center gap-1 text-xs font-medium text-[#6b1029] hover:underline"
+                    className="inline-flex shrink-0 items-center gap-1 text-xs font-medium text-[#ef5b3f] hover:underline"
                   >
                     View <ArrowRight size={12} />
                   </Link>

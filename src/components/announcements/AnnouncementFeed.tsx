@@ -102,9 +102,9 @@ function AnnouncementCard({ a, canSeeInsights }: { a: AnnouncementDTO; canSeeIns
   }
 
   return (
-    <Card className={cn("overflow-hidden", a.pinned && "ring-1 ring-[#6b1029]/20")}>
+    <Card className={cn("overflow-hidden", a.pinned && "ring-1 ring-[#ef5b3f]/20")}>
       {a.pinned && (
-        <div className="flex items-center gap-1.5 border-b border-[#6b1029]/10 bg-[#6b1029]/[0.04] px-4 py-1.5 text-[11px] font-semibold uppercase tracking-wide text-[#6b1029]">
+        <div className="flex items-center gap-1.5 border-b border-[#ef5b3f]/10 bg-[#ef5b3f]/[0.04] px-4 py-1.5 text-[11px] font-semibold uppercase tracking-wide text-[#ef5b3f]">
           <Pin size={11} /> Pinned
         </div>
       )}
@@ -132,9 +132,9 @@ function AnnouncementCard({ a, canSeeInsights }: { a: AnnouncementDTO; canSeeIns
                 href={a.attachment.url}
                 target="_blank"
                 rel="noreferrer"
-                className="mt-3 flex items-center gap-2.5 rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-2 text-sm hover:border-[#6b1029]/30 hover:bg-white"
+                className="mt-3 flex items-center gap-2.5 rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-2 text-sm hover:border-[#ef5b3f]/30 hover:bg-white"
               >
-                <span className="flex h-8 w-8 items-center justify-center rounded-md bg-[#6b1029]/[0.08] text-[#6b1029]">
+                <span className="flex h-8 w-8 items-center justify-center rounded-md bg-[#ef5b3f]/[0.08] text-[#ef5b3f]">
                   <Paperclip size={15} />
                 </span>
                 <span className="min-w-0 flex-1">
@@ -167,7 +167,7 @@ function AnnouncementCard({ a, canSeeInsights }: { a: AnnouncementDTO; canSeeIns
                   <button
                     onClick={acknowledge}
                     disabled={busy}
-                    className="inline-flex items-center gap-1.5 rounded-md bg-[#6b1029] px-3 py-1.5 text-xs font-medium text-white hover:bg-[#7c1638] disabled:opacity-60"
+                    className="inline-flex items-center gap-1.5 rounded-md bg-[#ef5b3f] px-3 py-1.5 text-xs font-medium text-white hover:bg-[#d9472e] disabled:opacity-60"
                   >
                     <CheckCircle2 size={14} /> Acknowledge
                   </button>
@@ -210,12 +210,12 @@ function AnnouncementCard({ a, canSeeInsights }: { a: AnnouncementDTO; canSeeIns
                       value={comment}
                       onChange={(e) => setComment(e.target.value)}
                       placeholder="Write a reply…"
-                      className="flex-1 rounded-full border border-zinc-200 bg-white px-3.5 py-1.5 text-[13px] focus:border-[#6b1029]/40 focus:outline-none focus:ring-2 focus:ring-[#6b1029]/10"
+                      className="flex-1 rounded-full border border-zinc-200 bg-white px-3.5 py-1.5 text-[13px] focus:border-[#ef5b3f]/40 focus:outline-none focus:ring-2 focus:ring-[#ef5b3f]/10"
                     />
                     <button
                       type="submit"
                       disabled={busy || !comment.trim()}
-                      className="flex h-8 w-8 items-center justify-center rounded-full bg-[#6b1029] text-white hover:bg-[#7c1638] disabled:opacity-50"
+                      className="flex h-8 w-8 items-center justify-center rounded-full bg-[#ef5b3f] text-white hover:bg-[#d9472e] disabled:opacity-50"
                       aria-label="Send reply"
                     >
                       <Send size={14} />
