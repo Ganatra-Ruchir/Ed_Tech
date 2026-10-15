@@ -11,6 +11,7 @@ const HERO_IMAGES = [
   "/campus-building.png",
   "/campus-institute.png",
 ] as const;
+const HERO_ROTATE_MS = 6000;
 
 export default function LoginPage() {
   const router = useRouter();
@@ -21,10 +22,14 @@ export default function LoginPage() {
   const [heroImage, setHeroImage] = useState(0);
   const [role, setRole] = useState<"Student" | "Faculty" | "Admin">("Student");
 
+  // Slow crossfade, and only on screens wide enough to show the hero panel
+  // (it is display:none below the lg breakpoint).
   useEffect(() => {
+    if (!window.matchMedia("(min-width: 1024px)").matches) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     const timer = window.setInterval(() => {
       setHeroImage((current) => (current + 1) % HERO_IMAGES.length);
-    }, 2000);
+    }, HERO_ROTATE_MS);
     return () => window.clearInterval(timer);
   }, []);
 
@@ -70,7 +75,7 @@ export default function LoginPage() {
         </div>
         <div className="pointer-events-none absolute -right-28 top-1/4 h-[32rem] w-[32rem] rounded-full border border-[#0b7a50]/20 bg-[#0b7a50]/10 blur-3xl" />
         <div className="relative z-10 flex items-center gap-3">
-          <span className="animate-brand-breathe flex h-11 w-11 items-center justify-center overflow-hidden rounded-md bg-white shadow-sm"><Image src="/silver-oak-logo.png" alt="Silver Oak University" width={44} height={44} className="h-full w-full object-contain" priority /></span>
+          <span className="flex h-11 w-11 items-center justify-center overflow-hidden rounded-md bg-white shadow-sm"><Image src="/silver-oak-logo.png" alt="Silver Oak University" width={44} height={44} className="h-full w-full object-contain" priority /></span>
           <div>
             <p className="text-sm font-semibold">Silver Oak University</p>
             <p className="mt-0.5 text-[10px] font-medium uppercase tracking-[0.16em] text-white/40">Learning Hub</p>
@@ -103,9 +108,9 @@ export default function LoginPage() {
       </section>
 
       <section className="relative z-10 flex min-h-screen items-center justify-center px-5 py-12 sm:px-10">
-        <div className="w-full max-w-[520px] rounded-2xl border border-white/70 bg-white/80 p-6 shadow-[0_24px_80px_rgba(36,23,25,0.2)] backdrop-blur-xl sm:p-10">
+        <div className="w-full max-w-[520px] rounded-2xl border border-white/70 bg-white/95 p-6 shadow-[0_24px_80px_rgba(36,23,25,0.2)] sm:p-10">
           <div className="mb-10 flex items-center gap-3 lg:hidden">
-          <span className="animate-brand-breathe flex h-10 w-10 items-center justify-center overflow-hidden rounded-md bg-white shadow-sm"><Image src="/silver-oak-logo.png" alt="Silver Oak University" width={40} height={40} className="h-full w-full object-contain" /></span>
+          <span className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-md bg-white shadow-sm"><Image src="/silver-oak-logo.png" alt="Silver Oak University" width={40} height={40} className="h-full w-full object-contain" /></span>
             <div><p className="text-sm font-semibold text-[#17212b]">Silver Oak University</p><p className="text-[10px] uppercase tracking-[0.14em] text-[#667085]">Learning Hub</p></div>
           </div>
 

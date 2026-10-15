@@ -2,7 +2,6 @@
 
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { motion, AnimatePresence } from "motion/react";
 import { ArrowDown, ArrowUp, Check, Circle, Copy, Eye, FileText, GripVertical, ListChecks, Plus, Save, Send, Trash2, X } from "lucide-react";
 import { PageHeader } from "@/components/PageHeader";
 import { Card } from "@/components/Card";
@@ -133,10 +132,8 @@ export function TestBuilder({ batches }: { batches: { id: string; name: string }
         description="Build questions, set answer keys, and assign marks."
         actions={<Button variant="secondary" size="sm" onClick={() => setPreview((value) => !value)}>{preview ? <FileText size={14} /> : <Eye size={14} />}{preview ? "Edit form" : "Preview"}</Button>}
       />
-
-      <AnimatePresence mode="wait">
         {preview ? (
-          <motion.div key="preview" initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="space-y-4">
+          <div key="preview" className="animate-fade-in space-y-4">
             <section className="overflow-hidden rounded-md border border-[#dfe3dc] bg-white shadow-sm">
               <div className="h-2 bg-[#ef5b3f]" />
               <div className="p-5 sm:p-6">
@@ -157,9 +154,9 @@ export function TestBuilder({ batches }: { batches: { id: string; name: string }
                 ) : <div className="mt-5 border-b border-[#98a2b3] pb-2 text-sm text-[#98a2b3]">Short-answer text</div>}
               </Card>
             ))}
-          </motion.div>
+          </div>
         ) : (
-          <motion.div key="editor" initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="space-y-4">
+          <div key="editor" className="animate-fade-in space-y-4">
             <section className="overflow-hidden rounded-md border border-[#dfe3dc] bg-white shadow-sm">
               <div className="h-2 bg-[#ef5b3f]" />
               <div className="space-y-4 p-5 sm:p-6">
@@ -175,7 +172,7 @@ export function TestBuilder({ batches }: { batches: { id: string; name: string }
             {questions.map((question, index) => {
               const active = activeKey === question.key;
               return (
-                <motion.section layout key={question.key} onFocusCapture={() => setActiveKey(question.key)} onClick={() => setActiveKey(question.key)} className={`relative rounded-md border bg-white shadow-sm transition-colors ${active ? "border-[#ef5b3f]" : "border-[#dfe3dc]"}`}>
+                <section key={question.key} onFocusCapture={() => setActiveKey(question.key)} onClick={() => setActiveKey(question.key)} className={`relative rounded-md border bg-white shadow-sm transition-colors ${active ? "border-[#ef5b3f]" : "border-[#dfe3dc]"}`}>
                   {active && <span className="absolute inset-y-0 left-0 w-1 rounded-l-md bg-[#ef5b3f]" />}
                   <div className="flex justify-center py-1 text-[#b4bbb2]"><GripVertical size={18} /></div>
                   <div className="space-y-4 px-4 pb-4 sm:px-5 sm:pb-5">
@@ -218,17 +215,16 @@ export function TestBuilder({ batches }: { batches: { id: string; name: string }
                       <label className="flex cursor-pointer items-center gap-2 text-xs font-medium text-[#475467]">Required<input type="checkbox" checked={question.required} onChange={(event) => updateQuestion(question.key, { required: event.target.checked })} className="peer sr-only" /><span className="relative h-5 w-9 rounded-full bg-[#d0d5dd] transition-colors peer-checked:bg-[#ef5b3f] after:absolute after:left-0.5 after:top-0.5 after:h-4 after:w-4 after:rounded-full after:bg-white after:transition-transform peer-checked:after:translate-x-4" /></label>
                     </div>
                   </div>
-                </motion.section>
+                </section>
               );
             })}
 
             <button type="button" onClick={() => addQuestion()} className="flex w-full items-center justify-center gap-2 rounded-md border border-dashed border-[#b8c0b5] bg-white px-4 py-3 text-sm font-semibold text-[#475467] transition-colors hover:border-[#ef5b3f] hover:text-[#d9472e]"><Plus size={16} /> Add question</button>
-          </motion.div>
+          </div>
         )}
-      </AnimatePresence>
 
       {error && <p role="alert" className="rounded-md border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">{error}</p>}
-      <div className="sticky bottom-3 z-10 flex flex-wrap items-center justify-between gap-3 rounded-md border border-[#dfe3dc] bg-white/95 px-4 py-3 shadow-[0_10px_30px_rgba(23,33,43,0.1)] backdrop-blur">
+      <div className="sticky bottom-3 z-10 flex flex-wrap items-center justify-between gap-3 rounded-md border border-[#dfe3dc] bg-white px-4 py-3 shadow-[0_10px_30px_rgba(23,33,43,0.1)]">
         <p className="flex items-center gap-2 text-xs text-[#667085]"><ListChecks size={14} /> {questions.length} questions · {totalPoints} points</p>
         <div className="flex gap-2">
           <Button variant="secondary" onClick={() => handleSubmit(false)} disabled={submitting}><Save size={14} /> Save draft</Button>

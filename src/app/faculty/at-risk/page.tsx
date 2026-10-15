@@ -2,7 +2,7 @@ import Link from "next/link";
 import { AlertTriangle, CheckCircle2 } from "lucide-react";
 import { getSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { userBatchIds } from "@/lib/permissions";
+import { facultyBatchScope } from "@/lib/portal-notifications";
 import { assessStudentsRisk, RISK_LEVEL_ORDER } from "@/lib/risk";
 import { PageHeader } from "@/components/PageHeader";
 import { Card } from "@/components/Card";
@@ -17,12 +17,8 @@ import { EmptyState } from "@/components/EmptyState";
  */
 export default async function FacultyAtRiskPage() {
   const session = await getSession();
-  const batchIds = session!.isCC
-    ? (await prisma.batch.findMany({ select: { id: true } })).map((b) => b.id)
-    : await userBatchIds(session!.sub);
-
   const memberships = await prisma.userBatch.findMany({
-    where: { batchId: { in: batchIds }, user: { role: "STUDENT" } },
+    where: { ...facultyBatchScope(session!), user: { role: "STUDENT" } },
     include: { user: { select: { id: true, name: true, email: true } }, batch: { select: { name: true } } },
   });
 

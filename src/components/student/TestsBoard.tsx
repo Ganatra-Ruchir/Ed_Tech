@@ -7,7 +7,8 @@ import { LinkButton } from "@/components/Button";
 import { EmptyState } from "@/components/EmptyState";
 import { FilterChip } from "@/components/TableToolbar";
 import { Table, THead, Th, Tr, Td, TBody } from "@/components/Table";
-import { TestPerformanceCharts, type ScorePoint } from "./TestPerformanceCharts";
+import { TestPerformanceCharts } from "@/components/charts/LazyCharts";
+import type { ScorePoint } from "@/components/student/TestPerformanceCharts";
 
 export type BoardTest = {
   id: string;

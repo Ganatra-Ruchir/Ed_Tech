@@ -4,7 +4,7 @@ import { getSession } from "@/lib/auth";
 import { canAccessBatch } from "@/lib/permissions";
 import { getBatchOverview } from "@/lib/dashboard";
 import { KpiCard } from "@/components/KpiCard";
-import { TrendChart } from "@/components/TrendChart";
+import { TrendChart } from "@/components/charts/LazyCharts";
 import { GenerateReportButton } from "@/components/GenerateReportButton";
 import { PageHeader } from "@/components/PageHeader";
 import { Card } from "@/components/Card";

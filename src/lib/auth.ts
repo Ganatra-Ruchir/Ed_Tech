@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { cookies } from "next/headers";
 import { SignJWT, jwtVerify } from "jose";
 import bcrypt from "bcryptjs";
@@ -69,13 +70,18 @@ export async function verifySessionToken(
   }
 }
 
-/** Reads and verifies the session from the request cookie. Server-only. */
-export async function getSession(): Promise<SessionPayload | null> {
+/**
+ * Reads and verifies the session from the request cookie. Server-only.
+ * Wrapped in React `cache` so the layout and the page (and any nested server
+ * components) share one JWT verification per request instead of each
+ * re-verifying the token.
+ */
+export const getSession = cache(async (): Promise<SessionPayload | null> => {
   const jar = await cookies();
   const token = jar.get(SESSION_COOKIE)?.value;
   if (!token) return null;
   return verifySessionToken(token);
-}
+});
 
 export async function setSessionCookie(payload: SessionPayload) {
   const token = await createSessionToken(payload);

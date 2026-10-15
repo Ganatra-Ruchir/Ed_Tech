@@ -17,7 +17,6 @@ import {
 import { getSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { getLatestKpis } from "@/lib/kpi";
-import { userBatchIds } from "@/lib/permissions";
 import { StatusBadge } from "@/components/StatusBadge";
 import { ProgressBar } from "@/components/ProgressBar";
 import { Card } from "@/components/Card";
@@ -45,9 +44,11 @@ const QUOTES = [
 export default async function StudentDashboard() {
   const session = await getSession();
   const studentId = session!.sub;
-  const batchIds = await userBatchIds(studentId);
+  // Everything is scoped through relation filters, so all queries run in one
+  // parallel round instead of three sequential ones.
+  const inMyBatches = { batch: { members: { some: { userId: studentId } } } };
 
-  const [submissions, tests, kpis, announcements, materialCount, studentBatches] = await Promise.all([
+  const [submissions, tests, kpis, announcements, materialCount, studentBatches, courseCount] = await Promise.all([
     prisma.submission.findMany({
       where: { studentId },
       include: { files: true, _count: { select: { feedback: true, evidence: true } } },
@@ -58,19 +59,22 @@ export default async function StudentDashboard() {
         publishedAt: { not: null },
         batch: { members: { some: { userId: studentId } } },
       },
-      include: { _count: { select: { questions: true } } },
+      include: {
+        _count: { select: { questions: true } },
+        responses: { where: { studentId }, select: { score: true, maxScore: true }, take: 1 },
+      },
       orderBy: { dueAt: "asc" },
     }),
     getLatestKpis({ scope: "STUDENT", studentId }),
     prisma.announcement.findMany({
-      where: { batchId: { in: batchIds } },
+      where: inMyBatches,
       include: { faculty: { select: { name: true } } },
       orderBy: { createdAt: "desc" },
       take: 2,
     }),
-    prisma.learningMaterial.count({ where: { batchId: { in: batchIds } } }),
+    prisma.learningMaterial.count({ where: inMyBatches }),
     prisma.batch.findMany({
-      where: { id: { in: batchIds } },
+      where: { members: { some: { userId: studentId } } },
       select: {
         id: true,
         name: true,
@@ -81,12 +85,9 @@ export default async function StudentDashboard() {
       orderBy: { name: "asc" },
       take: 6,
     }),
+    prisma.userBatch.count({ where: { userId: studentId } }),
   ]);
 
-  const myResponses = await prisma.testResponse.findMany({
-    where: { studentId, testId: { in: tests.map((t) => t.id) } },
-  });
-  const responseByTest = new Map(myResponses.map((r) => [r.testId, r]));
 
   const kpiByName = Object.fromEntries(kpis.map((k) => [k.metricName, k.value]));
   // This page is already fully dynamic (reads the session cookie), so
@@ -103,7 +104,7 @@ export default async function StudentDashboard() {
   };
   const upcoming: UpcomingItem[] = [
     ...tests
-      .filter((t) => !responseByTest.has(t.id))
+      .filter((t) => t.responses.length === 0)
       .map((t) => ({
         key: `test-${t.id}`,
         label: t.title,
@@ -153,7 +154,7 @@ export default async function StudentDashboard() {
             <span className="flex h-10 w-10 items-center justify-center rounded-full bg-rose-50 text-[#8f3032]"><BookOpen size={18} /></span>
             <div className="min-w-0 flex-1">
               <p className="text-xs font-medium text-zinc-500">My Courses</p>
-              <p className="text-xl font-bold text-zinc-900">{batchIds.length}</p>
+              <p className="text-xl font-bold text-zinc-900">{courseCount}</p>
             </div>
             <ChevronRight size={16} className="text-zinc-300 transition-transform group-hover:translate-x-0.5" />
           </div>
@@ -181,7 +182,7 @@ export default async function StudentDashboard() {
         <Link href="/student/tests" className="group rounded-lg border border-[#e4e7e0] bg-white p-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
           <div className="flex items-center gap-2.5">
             <span className="flex h-10 w-10 items-center justify-center rounded-full bg-violet-50 text-violet-600"><ClipboardList size={18} /></span>
-            <div className="min-w-0 flex-1"><p className="text-xs font-medium text-zinc-500">Upcoming Tests</p><p className="text-xl font-bold text-zinc-900">{tests.filter((test) => !responseByTest.has(test.id)).length}</p></div>
+            <div className="min-w-0 flex-1"><p className="text-xs font-medium text-zinc-500">Upcoming Tests</p><p className="text-xl font-bold text-zinc-900">{tests.filter((test) => test.responses.length === 0).length}</p></div>
             <ChevronRight size={16} className="text-zinc-300 transition-transform group-hover:translate-x-0.5" />
           </div>
           <p className="mt-3 text-[11px] text-zinc-500">{materialCount} materials available</p>
@@ -396,7 +397,7 @@ export default async function StudentDashboard() {
               </THead>
               <TBody>
                 {tests.slice(0, 4).map((t) => {
-                  const response = responseByTest.get(t.id);
+                  const response = t.responses[0];
                   const overdue = t.dueAt && t.dueAt.getTime() < now && !response;
                   return (
                     <Tr key={t.id}>

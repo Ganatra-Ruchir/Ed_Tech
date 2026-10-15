@@ -2,7 +2,6 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { AnimatePresence, motion } from "motion/react";
 import { FileUp, ImagePlus, Megaphone, Pin, CheckSquare, MessageSquare, Palette, X } from "lucide-react";
 import { Card } from "@/components/Card";
 import { Select, Input, Textarea } from "@/components/Field";
@@ -138,14 +137,9 @@ export function AnnouncementComposer({ batches }: { batches: { id: string; name:
             <Palette size={14} /> Edit design
             {!designOpen && (backgroundTheme !== "PLAIN" || banner) && <span className="font-normal text-[#667085]">· Design added</span>}
           </button>
-
-          <AnimatePresence initial={false}>
             {designOpen && (
-              <motion.div
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: "auto" }}
-                exit={{ opacity: 0, height: 0 }}
-                className="overflow-hidden"
+              <div
+                className="animate-fade-in overflow-hidden"
               >
                 <div className="mt-3 space-y-4 rounded-md border border-[#e1e5de] bg-[#f8f9f6] p-4">
                   <fieldset>
@@ -184,9 +178,8 @@ export function AnnouncementComposer({ batches }: { batches: { id: string; name:
                     <input ref={bannerRef} type="file" accept={IMAGE_ACCEPT} className="hidden" onChange={(e) => selectBanner(e.target.files?.[0] ?? null)} />
                   </label>
                 </div>
-              </motion.div>
+              </div>
             )}
-          </AnimatePresence>
         </div>
 
         <label className="flex cursor-pointer items-center gap-2 rounded-md border border-dashed border-zinc-300 px-3 py-2 text-xs text-zinc-600 hover:border-[#ef5b3f]/40">

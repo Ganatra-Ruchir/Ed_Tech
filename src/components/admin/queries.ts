@@ -579,14 +579,12 @@ export async function getAdminReportRows(): Promise<ReportRow[]> {
 }
 
 /**
- * Students currently flagged at-risk. The at_risk KPI is filtered *after*
- * taking the latest snapshot per student — KPI is an append-only log, so
- * filtering by value first could surface a stale row.
+ * Students currently flagged at-risk. getLatestKpis reads current values only
+ * (KPILatest), so filtering by value in the query is safe.
  */
 export async function getAtRiskStudents() {
-  const latest = await getLatestKpis({ scope: "STUDENT", metricName: "at_risk" });
+  const latest = await getLatestKpis({ scope: "STUDENT", metricName: "at_risk", value: 1 });
   const ids = latest
-    .filter((k) => k.value === 1)
     .map((k) => k.studentId)
     .filter((id): id is string => Boolean(id));
   if (ids.length === 0) return [];

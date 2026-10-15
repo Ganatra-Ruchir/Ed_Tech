@@ -1,264 +1,264 @@
 import { prisma } from "@/lib/prisma";
 import type { Prisma } from "@/generated/prisma/client";
+import type { KPIScope } from "@/generated/prisma/enums";
 
 export const AT_RISK_INACTIVITY_DAYS = 14;
 export const AT_RISK_SCORE_THRESHOLD = 50;
 
-function hoursBetween(a: Date, b: Date): number {
-  return Math.abs(b.getTime() - a.getTime()) / (1000 * 60 * 60);
-}
+/**
+ * Metrics whose history is never charted. Their value drifts every time a
+ * recompute runs (it is "days since X"), so logging it would add a history row
+ * per student on every single review without carrying any information.
+ */
+const LATEST_ONLY_METRICS = new Set(["days_since_last_activity"]);
+
+const DAY_MS = 1000 * 60 * 60 * 24;
+
+type KpiInput = {
+  scope: KPIScope;
+  batchId?: string | null;
+  studentId?: string | null;
+  metricName: string;
+  value: number;
+};
+
+type StudentMetrics = {
+  submissionCompletionRate: number;
+  reviewTurnaroundHours: number;
+  avgTestScorePct: number;
+  daysSinceLastActivity: number;
+  atRisk: boolean;
+  totalSubmissions: number;
+  approvedSubmissions: number;
+};
+
+type SubmissionRow = { studentId: string; status: string; createdAt: Date; reviewedAt: Date | null };
+type ResponseRow = { studentId: string; score: number | null; maxScore: number | null; submittedAt: Date | null };
 
 function average(values: number[]): number {
   if (values.length === 0) return 0;
   return values.reduce((a, b) => a + b, 0) / values.length;
 }
 
-async function computeStudentMetrics(studentId: string) {
-  const [submissions, testResponses] = await Promise.all([
-    prisma.submission.findMany({ where: { studentId } }),
-    prisma.testResponse.findMany({ where: { studentId } }),
-  ]);
+function kpiKey(params: Omit<KpiInput, "value">): string {
+  return [params.scope, params.batchId ?? "-", params.studentId ?? "-", params.metricName].join(":");
+}
 
+/** Pure scoring for one student from already-loaded rows (no queries). */
+function scoreStudent(submissions: SubmissionRow[], responses: ResponseRow[], now: number): StudentMetrics {
   const totalSubmissions = submissions.length;
   const approvedSubmissions = submissions.filter((s) => s.status === "APPROVED").length;
-  const submissionCompletionRate =
-    totalSubmissions === 0 ? 0 : (approvedSubmissions / totalSubmissions) * 100;
+  const submissionCompletionRate = totalSubmissions === 0 ? 0 : (approvedSubmissions / totalSubmissions) * 100;
 
-  const reviewed = submissions.filter((s) => s.reviewedAt);
   const reviewTurnaroundHours = average(
-    reviewed.map((s) => hoursBetween(s.createdAt, s.reviewedAt as Date)),
+    submissions
+      .filter((s) => s.reviewedAt)
+      .map((s) => Math.abs((s.reviewedAt as Date).getTime() - s.createdAt.getTime()) / (1000 * 60 * 60)),
   );
 
-  const scoredResponses = testResponses.filter(
-    (r) => r.score !== null && r.maxScore !== null && r.maxScore! > 0,
-  );
-  const avgTestScorePct = average(
-    scoredResponses.map((r) => (r.score! / r.maxScore!) * 100),
-  );
+  const scored = responses.filter((r) => r.score !== null && r.maxScore !== null && r.maxScore > 0);
+  const avgTestScorePct = average(scored.map((r) => (r.score! / r.maxScore!) * 100));
 
-  const activityDates = [
-    ...submissions.map((s) => s.createdAt),
-    ...testResponses.filter((r) => r.submittedAt).map((r) => r.submittedAt as Date),
-  ];
-  const lastActivityAt =
-    activityDates.length > 0
-      ? new Date(Math.max(...activityDates.map((d) => d.getTime())))
-      : null;
-  const daysSinceLastActivity = lastActivityAt
-    ? (Date.now() - lastActivityAt.getTime()) / (1000 * 60 * 60 * 24)
-    : Number.POSITIVE_INFINITY;
+  let lastActivity = 0;
+  for (const s of submissions) lastActivity = Math.max(lastActivity, s.createdAt.getTime());
+  for (const r of responses) if (r.submittedAt) lastActivity = Math.max(lastActivity, r.submittedAt.getTime());
+  const daysSinceLastActivity = lastActivity > 0 ? (now - lastActivity) / DAY_MS : Number.POSITIVE_INFINITY;
 
-  const hasTestActivity = scoredResponses.length > 0;
   const atRisk =
     daysSinceLastActivity > AT_RISK_INACTIVITY_DAYS ||
-    (hasTestActivity && avgTestScorePct < AT_RISK_SCORE_THRESHOLD);
+    (scored.length > 0 && avgTestScorePct < AT_RISK_SCORE_THRESHOLD);
 
   return {
     submissionCompletionRate,
     reviewTurnaroundHours,
     avgTestScorePct,
-    daysSinceLastActivity: Number.isFinite(daysSinceLastActivity)
-      ? daysSinceLastActivity
-      : -1,
+    daysSinceLastActivity: Number.isFinite(daysSinceLastActivity) ? daysSinceLastActivity : -1,
     atRisk,
     totalSubmissions,
     approvedSubmissions,
   };
 }
 
-function kpiKey(params: {
-  scope: string;
-  batchId?: string | null;
-  studentId?: string | null;
-  metricName: string;
-}): string {
-  return [params.scope, params.batchId ?? "-", params.studentId ?? "-", params.metricName].join(
-    ":",
-  );
-}
+/** Two queries total, however many students are passed in. */
+async function computeStudentsMetrics(studentIds: string[]): Promise<Map<string, StudentMetrics>> {
+  const out = new Map<string, StudentMetrics>();
+  if (studentIds.length === 0) return out;
 
-/**
- * KPI rows are an append-only time series (never overwritten) so both the
- * current value and a historical trend can be read back from the same
- * table. Callers needing "the current value" use getLatestKpis below.
- */
-async function recordKpi(params: {
-  scope: "STUDENT" | "BATCH" | "COHORT";
-  batchId?: string | null;
-  studentId?: string | null;
-  metricName: string;
-  value: number;
-}) {
-  await prisma.kPI.create({
-    data: {
-      key: kpiKey(params),
-      scope: params.scope,
-      batchId: params.batchId ?? null,
-      studentId: params.studentId ?? null,
-      metricName: params.metricName,
-      value: params.value,
-    },
-  });
-}
-
-/** Returns only the most recent row per metric series matching `where`. */
-export async function getLatestKpis(where: Prisma.KPIWhereInput) {
-  const rows = await prisma.kPI.findMany({ where, orderBy: { computedAt: "desc" } });
-  const seen = new Set<string>();
-  const latest: typeof rows = [];
-  for (const row of rows) {
-    if (seen.has(row.key)) continue;
-    seen.add(row.key);
-    latest.push(row);
-  }
-  return latest;
-}
-
-export async function recomputeStudentKpis(studentId: string) {
-  const membership = await prisma.userBatch.findFirst({ where: { userId: studentId } });
-  const batchId = membership?.batchId ?? null;
-  const metrics = await computeStudentMetrics(studentId);
-
-  await Promise.all([
-    recordKpi({
-      scope: "STUDENT",
-      studentId,
-      batchId,
-      metricName: "submission_completion_rate",
-      value: metrics.submissionCompletionRate,
+  const [submissions, responses] = await Promise.all([
+    prisma.submission.findMany({
+      where: { studentId: { in: studentIds } },
+      select: { studentId: true, status: true, createdAt: true, reviewedAt: true },
     }),
-    recordKpi({
-      scope: "STUDENT",
-      studentId,
-      batchId,
-      metricName: "avg_test_score_pct",
-      value: metrics.avgTestScorePct,
-    }),
-    recordKpi({
-      scope: "STUDENT",
-      studentId,
-      batchId,
-      metricName: "review_turnaround_hours",
-      value: metrics.reviewTurnaroundHours,
-    }),
-    recordKpi({
-      scope: "STUDENT",
-      studentId,
-      batchId,
-      metricName: "days_since_last_activity",
-      value: metrics.daysSinceLastActivity,
-    }),
-    recordKpi({
-      scope: "STUDENT",
-      studentId,
-      batchId,
-      metricName: "at_risk",
-      value: metrics.atRisk ? 1 : 0,
+    prisma.testResponse.findMany({
+      where: { studentId: { in: studentIds } },
+      select: { studentId: true, score: true, maxScore: true, submittedAt: true },
     }),
   ]);
 
+  const subsBy = new Map<string, SubmissionRow[]>();
+  for (const s of submissions) {
+    const list = subsBy.get(s.studentId);
+    if (list) list.push(s);
+    else subsBy.set(s.studentId, [s]);
+  }
+  const respBy = new Map<string, ResponseRow[]>();
+  for (const r of responses) {
+    const list = respBy.get(r.studentId);
+    if (list) list.push(r);
+    else respBy.set(r.studentId, [r]);
+  }
+
+  const now = Date.now();
+  for (const id of studentIds) {
+    out.set(id, scoreStudent(subsBy.get(id) ?? [], respBy.get(id) ?? [], now));
+  }
+  return out;
+}
+
+function studentKpiRows(studentId: string, batchId: string | null, m: StudentMetrics): KpiInput[] {
+  const base = { scope: "STUDENT" as const, studentId, batchId };
+  return [
+    { ...base, metricName: "submission_completion_rate", value: m.submissionCompletionRate },
+    { ...base, metricName: "avg_test_score_pct", value: m.avgTestScorePct },
+    { ...base, metricName: "review_turnaround_hours", value: m.reviewTurnaroundHours },
+    { ...base, metricName: "days_since_last_activity", value: m.daysSinceLastActivity },
+    { ...base, metricName: "at_risk", value: m.atRisk ? 1 : 0 },
+  ];
+}
+
+/**
+ * Writes many KPI values in a constant number of round trips:
+ *   - KPILatest is replaced for every key (the "current value" table).
+ *   - KPI (history) only gets a row when the value actually changed, so
+ *     recomputing a whole batch after one review no longer appends hundreds
+ *     of identical rows.
+ */
+async function recordKpis(inputs: KpiInput[]) {
+  if (inputs.length === 0) return;
+  const now = new Date();
+  const rows = inputs.map((i) => ({
+    key: kpiKey(i),
+    scope: i.scope,
+    batchId: i.batchId ?? null,
+    studentId: i.studentId ?? null,
+    metricName: i.metricName,
+    value: Number.isFinite(i.value) ? i.value : 0,
+    computedAt: now,
+  }));
+  const keys = rows.map((r) => r.key);
+
+  const previous = await prisma.kPILatest.findMany({
+    where: { key: { in: keys } },
+    select: { key: true, value: true },
+  });
+  const previousByKey = new Map(previous.map((p) => [p.key, p.value]));
+
+  const history = rows.filter((r) => {
+    if (LATEST_ONLY_METRICS.has(r.metricName)) return false;
+    const prev = previousByKey.get(r.key);
+    return prev === undefined || Math.abs(prev - r.value) > 1e-9;
+  });
+
+  await prisma.$transaction([
+    prisma.kPILatest.deleteMany({ where: { key: { in: keys } } }),
+    prisma.kPILatest.createMany({ data: rows }),
+    ...(history.length > 0
+      ? [prisma.kPI.createMany({ data: history })]
+      : []),
+  ]);
+}
+
+/**
+ * Current value of every KPI series matching `where` — one row per series.
+ * Reads the KPILatest table, so cost no longer grows with KPI history.
+ */
+export async function getLatestKpis(where: Prisma.KPILatestWhereInput) {
+  return prisma.kPILatest.findMany({ where });
+}
+
+export async function recomputeStudentKpis(studentId: string) {
+  const [membership, metricsById] = await Promise.all([
+    prisma.userBatch.findFirst({ where: { userId: studentId }, select: { batchId: true } }),
+    computeStudentsMetrics([studentId]),
+  ]);
+  const metrics = metricsById.get(studentId)!;
+  await recordKpis(studentKpiRows(studentId, membership?.batchId ?? null, metrics));
   return metrics;
 }
 
 export async function recomputeBatchKpis(batchId: string) {
   const memberships = await prisma.userBatch.findMany({
     where: { batchId, user: { role: "STUDENT" } },
-    include: { user: true },
+    select: { userId: true },
   });
+  const studentIds = memberships.map((m) => m.userId);
+  const metricsById = await computeStudentsMetrics(studentIds);
 
-  const perStudent = await Promise.all(
-    memberships.map((m) => recomputeStudentKpis(m.userId)),
+  // Student rows keep the student's *first* batch as their batchId, matching
+  // the previous behaviour of recomputeStudentKpis.
+  const firstBatch = new Map<string, string>();
+  if (studentIds.length > 0) {
+    const all = await prisma.userBatch.findMany({
+      where: { userId: { in: studentIds } },
+      select: { userId: true, batchId: true },
+    });
+    for (const row of all) if (!firstBatch.has(row.userId)) firstBatch.set(row.userId, row.batchId);
+  }
+
+  const perStudent = studentIds.map((id) => metricsById.get(id)!);
+  const studentRows = studentIds.flatMap((id) =>
+    studentKpiRows(id, firstBatch.get(id) ?? batchId, metricsById.get(id)!),
   );
 
-  const studentCount = perStudent.length;
-  const atRiskCount = perStudent.filter((m) => m.atRisk).length;
-  const avgCompletionRate = average(perStudent.map((m) => m.submissionCompletionRate));
-  const avgTestScore = average(perStudent.map((m) => m.avgTestScorePct));
-  const avgTurnaround = average(
-    perStudent.map((m) => m.reviewTurnaroundHours).filter((v) => v > 0),
-  );
-  const totalSubmissions = perStudent.reduce((a, m) => a + m.totalSubmissions, 0);
-  const approvedSubmissions = perStudent.reduce((a, m) => a + m.approvedSubmissions, 0);
-
-  await Promise.all([
-    recordKpi({ scope: "BATCH", batchId, metricName: "student_count", value: studentCount }),
-    recordKpi({ scope: "BATCH", batchId, metricName: "at_risk_count", value: atRiskCount }),
-    recordKpi({
-      scope: "BATCH",
-      batchId,
-      metricName: "submission_completion_rate",
-      value: avgCompletionRate,
-    }),
-    recordKpi({ scope: "BATCH", batchId, metricName: "avg_test_score_pct", value: avgTestScore }),
-    recordKpi({
-      scope: "BATCH",
-      batchId,
+  const batchBase = { scope: "BATCH" as const, batchId };
+  const batchRows: KpiInput[] = [
+    { ...batchBase, metricName: "student_count", value: perStudent.length },
+    { ...batchBase, metricName: "at_risk_count", value: perStudent.filter((m) => m.atRisk).length },
+    { ...batchBase, metricName: "submission_completion_rate", value: average(perStudent.map((m) => m.submissionCompletionRate)) },
+    { ...batchBase, metricName: "avg_test_score_pct", value: average(perStudent.map((m) => m.avgTestScorePct)) },
+    {
+      ...batchBase,
       metricName: "review_turnaround_hours",
-      value: avgTurnaround,
-    }),
-    recordKpi({
-      scope: "BATCH",
-      batchId,
-      metricName: "total_submissions",
-      value: totalSubmissions,
-    }),
-    recordKpi({
-      scope: "BATCH",
-      batchId,
-      metricName: "approved_submissions",
-      value: approvedSubmissions,
-    }),
-  ]);
+      value: average(perStudent.map((m) => m.reviewTurnaroundHours).filter((v) => v > 0)),
+    },
+    { ...batchBase, metricName: "total_submissions", value: perStudent.reduce((a, m) => a + m.totalSubmissions, 0) },
+    { ...batchBase, metricName: "approved_submissions", value: perStudent.reduce((a, m) => a + m.approvedSubmissions, 0) },
+  ];
+
+  await recordKpis([...studentRows, ...batchRows]);
 }
 
 export async function recomputeCohortKpis() {
-  const batches = await prisma.batch.findMany();
-  // Only the latest snapshot per batch/metric — KPI is an append-only log,
-  // so a plain findMany would double-count every historical recompute.
-  const batchKpis = await getLatestKpis({
-    scope: "BATCH",
-    metricName: {
-      in: [
-        "student_count",
-        "at_risk_count",
-        "submission_completion_rate",
-        "avg_test_score_pct",
-        "review_turnaround_hours",
-      ],
-    },
-  });
-
-  const byMetric = (name: string) =>
-    batchKpis.filter((k) => k.metricName === name).map((k) => k.value);
-
-  const totalStudents = byMetric("student_count").reduce((a, b) => a + b, 0);
-  const totalAtRisk = byMetric("at_risk_count").reduce((a, b) => a + b, 0);
-
-  await Promise.all([
-    recordKpi({ scope: "COHORT", metricName: "batch_count", value: batches.length }),
-    recordKpi({ scope: "COHORT", metricName: "student_count", value: totalStudents }),
-    recordKpi({ scope: "COHORT", metricName: "at_risk_count", value: totalAtRisk }),
-    recordKpi({
-      scope: "COHORT",
-      metricName: "submission_completion_rate",
-      value: average(byMetric("submission_completion_rate")),
+  const [batchCount, batchKpis] = await Promise.all([
+    prisma.batch.count(),
+    getLatestKpis({
+      scope: "BATCH",
+      metricName: {
+        in: ["student_count", "at_risk_count", "submission_completion_rate", "avg_test_score_pct", "review_turnaround_hours"],
+      },
     }),
-    recordKpi({
-      scope: "COHORT",
-      metricName: "avg_test_score_pct",
-      value: average(byMetric("avg_test_score_pct")),
-    }),
-    recordKpi({
+  ]);
+
+  const byMetric = (name: string) => batchKpis.filter((k) => k.metricName === name).map((k) => k.value);
+  const sum = (values: number[]) => values.reduce((a, b) => a + b, 0);
+
+  await recordKpis([
+    { scope: "COHORT", metricName: "batch_count", value: batchCount },
+    { scope: "COHORT", metricName: "student_count", value: sum(byMetric("student_count")) },
+    { scope: "COHORT", metricName: "at_risk_count", value: sum(byMetric("at_risk_count")) },
+    { scope: "COHORT", metricName: "submission_completion_rate", value: average(byMetric("submission_completion_rate")) },
+    { scope: "COHORT", metricName: "avg_test_score_pct", value: average(byMetric("avg_test_score_pct")) },
+    {
       scope: "COHORT",
       metricName: "review_turnaround_hours",
       value: average(byMetric("review_turnaround_hours").filter((v) => v > 0)),
-    }),
+    },
   ]);
 }
 
 /** Full recompute chain: call after any review/scoring action affecting a student. */
 export async function recomputeKpisForStudentChange(studentId: string) {
-  const membership = await prisma.userBatch.findFirst({ where: { userId: studentId } });
+  const membership = await prisma.userBatch.findFirst({ where: { userId: studentId }, select: { batchId: true } });
   if (membership) {
     await recomputeBatchKpis(membership.batchId);
   } else {

@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { motion } from "motion/react";
 import { CalendarDays, Check, CheckCircle2, History, LoaderCircle, Search, UserCheck, UserX, Users } from "lucide-react";
 import { PageHeader } from "@/components/PageHeader";
 import { Button } from "@/components/Button";
@@ -154,7 +153,7 @@ export function LectureAttendance({ batches, initialBatchId }: { batches: Batch[
               <span className="text-center">Absent</span>
               <span className="text-center">Mark for selected date</span>
             </div>
-            {filteredStudents.map((student, index) => {
+            {filteredStudents.map((student) => {
               const status = marks[student.id];
               const stat = studentStats[student.id] ?? { present: 0, absent: 0, total: 0, percentage: 0 };
               const metrics = [
@@ -163,19 +162,19 @@ export function LectureAttendance({ batches, initialBatchId }: { batches: Batch[
                 { label: "Present", value: stat.present, color: "text-emerald-700" },
                 { label: "Absent", value: stat.absent, color: "text-rose-700" },
               ];
-              return <motion.div key={student.id} initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: Math.min(index * 0.025, 0.25) }} className="grid items-center gap-3 px-4 py-4 sm:px-5 lg:grid-cols-[minmax(220px,1fr)_90px_90px_90px_90px_220px] lg:py-3">
+              return <div key={student.id} className="grid items-center gap-3 px-4 py-4 sm:px-5 lg:grid-cols-[minmax(220px,1fr)_90px_90px_90px_90px_220px] lg:py-3">
                 <div className="flex min-w-0 items-center gap-3"><Avatar name={student.name} /><span className="min-w-0"><span className="block truncate text-sm font-semibold text-[#17212b]">{student.name}</span><span className="block truncate text-[11px] text-[#667085]">{student.studentNumber || student.email}</span></span></div>
                 {metrics.map((metric) => <div key={metric.label} className="flex items-center justify-between rounded-md bg-[#f7f8f5] px-3 py-2 lg:block lg:bg-transparent lg:px-0 lg:py-0 lg:text-center"><span className="text-[11px] font-medium text-[#667085] lg:hidden">{metric.label}</span><span className={`text-sm font-semibold ${metric.color}`}>{metric.value}</span></div>)}
                 <div className="grid grid-cols-2 overflow-hidden rounded-md border border-[#d6dbd3]">
                   <button type="button" onClick={() => { setMarks((current) => ({ ...current, [student.id]: "PRESENT" })); setSaved(false); }} className={`flex h-9 items-center justify-center gap-1.5 text-xs font-semibold transition-colors ${status === "PRESENT" ? "bg-emerald-600 text-white" : "bg-white text-[#667085] hover:bg-emerald-50 hover:text-emerald-700"}`}><Check size={14} /> Present</button>
                   <button type="button" onClick={() => { setMarks((current) => ({ ...current, [student.id]: "ABSENT" })); setSaved(false); }} className={`flex h-9 items-center justify-center gap-1.5 border-l border-[#d6dbd3] text-xs font-semibold transition-colors ${status === "ABSENT" ? "bg-rose-600 text-white" : "bg-white text-[#667085] hover:bg-rose-50 hover:text-rose-700"}`}><UserX size={14} /> Absent</button>
                 </div>
-              </motion.div>;
+              </div>;
             })}
             {filteredStudents.length === 0 && <p className="px-5 py-12 text-center text-sm text-[#667085]">No students match your search.</p>}
           </div>
         )}
-        <div className="sticky bottom-0 flex flex-wrap items-center justify-between gap-3 border-t border-[#e7eae4] bg-white/95 px-4 py-3 backdrop-blur sm:px-5">
+        <div className="sticky bottom-0 flex flex-wrap items-center justify-between gap-3 border-t border-[#e7eae4] bg-white px-4 py-3 sm:px-5">
           <div>{error ? <p role="alert" className="text-xs text-rose-600">{error}</p> : saved ? <p className="flex items-center gap-1.5 text-xs font-medium text-emerald-700"><CheckCircle2 size={14} /> Attendance saved for {new Date(`${date}T00:00:00`).toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric" })}</p> : <p className="text-xs text-[#667085]">{marked} of {students.length} marked</p>}</div>
           <Button onClick={saveAttendance} disabled={saving || loading || students.length === 0 || unmarked > 0}>{saving ? <LoaderCircle size={14} className="animate-spin" /> : <CheckCircle2 size={14} />}{saving ? "Saving..." : "Save attendance"}</Button>
         </div>

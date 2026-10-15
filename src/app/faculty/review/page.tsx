@@ -1,6 +1,5 @@
 import { getSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { userBatchIds } from "@/lib/permissions";
 import { PageHeader } from "@/components/PageHeader";
 import { ReviewQueueBoard, type QueueItem } from "@/components/faculty/ReviewQueueBoard";
 import { timeWindows } from "@/components/faculty/faculty-format";
@@ -10,7 +9,7 @@ export default async function FacultyReviewQueue() {
   const session = await getSession();
 
   const myBatches = await prisma.batch.findMany({
-    where: session!.isCC ? {} : { id: { in: await userBatchIds(session!.sub) } },
+    where: session!.isCC ? {} : { members: { some: { userId: session!.sub } } },
     select: { id: true, name: true },
     orderBy: { name: "asc" },
   });

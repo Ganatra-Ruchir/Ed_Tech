@@ -6,7 +6,7 @@ import { Card } from "@/components/Card";
 import { EmptyState } from "@/components/EmptyState";
 import { KpiCard } from "@/components/KpiCard";
 import { PageHeader } from "@/components/PageHeader";
-import { TrendChart } from "@/components/TrendChart";
+import { TrendChart } from "@/components/charts/LazyCharts";
 import { AnalyticsTabs } from "@/components/admin/AnalyticsTabs";
 import { getAdminAnalyticsData, getAtRiskStudents } from "@/components/admin/queries";
 

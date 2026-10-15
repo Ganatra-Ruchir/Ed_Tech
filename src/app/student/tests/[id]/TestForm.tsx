@@ -3,7 +3,6 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { motion } from "motion/react";
 import { ArrowLeft, AlertCircle, CalendarClock, ListChecks, Check } from "lucide-react";
 import { Card } from "@/components/Card";
 import { Textarea } from "@/components/Field";
@@ -141,9 +140,8 @@ export function TestForm({
                     {q.options.map((opt) => {
                       const selected = answers[q.id] === opt;
                       return (
-                        <motion.label
+                        <label
                           key={opt}
-                          whileTap={{ scale: 0.995 }}
                           className={`flex cursor-pointer items-center gap-2.5 rounded-md border px-3 py-2 text-[13px] transition-colors ${
                             selected
                               ? "border-[#ef5b3f] bg-[#ef5b3f]/[0.05] text-zinc-900"
@@ -159,7 +157,7 @@ export function TestForm({
                             className="accent-[#ef5b3f]"
                           />
                           {opt}
-                        </motion.label>
+                        </label>
                       );
                     })}
                   </div>
@@ -190,7 +188,7 @@ export function TestForm({
         </p>
       )}
 
-      <div className="sticky bottom-0 flex flex-wrap items-center justify-between gap-3 rounded-lg border border-zinc-200 bg-white/95 px-4 py-3 shadow-sm backdrop-blur">
+      <div className="sticky bottom-0 flex flex-wrap items-center justify-between gap-3 rounded-lg border border-zinc-200 bg-white px-4 py-3 shadow-sm">
         <p className="text-[12px] text-zinc-500">
           {answeredCount} of {questions.length} answered · answers can only be submitted once.
         </p>

@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { motion, AnimatePresence } from "motion/react";
 import {
   Pin, Paperclip, Eye, CheckCircle2, MessageSquare, Send, Megaphone, Download,
 } from "lucide-react";
@@ -193,15 +192,8 @@ function AnnouncementCard({ a, canSeeInsights }: { a: AnnouncementDTO; canSeeIns
                 </button>
               )}
             </div>
-
-            <AnimatePresence>
               {showComments && a.allowComments && (
-                <motion.div
-                  initial={{ opacity: 0, height: 0 }}
-                  animate={{ opacity: 1, height: "auto" }}
-                  exit={{ opacity: 0, height: 0 }}
-                  className={cn("mt-3 overflow-hidden border-t pt-3", background.dark ? "border-white/10" : "border-zinc-100")}
-                >
+                <div className={cn("animate-fade-in mt-3 overflow-hidden border-t pt-3", background.dark ? "border-white/10" : "border-zinc-100")}>
                   <ul className="space-y-2.5">
                     {a.comments.map((c) => (
                       <li key={c.id} className="flex items-start gap-2.5">
@@ -232,9 +224,8 @@ function AnnouncementCard({ a, canSeeInsights }: { a: AnnouncementDTO; canSeeIns
                       <Send size={14} />
                     </button>
                   </form>
-                </motion.div>
+                </div>
               )}
-            </AnimatePresence>
           </div>
         </div>
       </div>

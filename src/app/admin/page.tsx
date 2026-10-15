@@ -15,9 +15,9 @@ import { getSession } from "@/lib/auth";
 import { Card } from "@/components/Card";
 import { EmptyState } from "@/components/EmptyState";
 import { AdminStatCard } from "@/components/admin/AdminStatCard";
-import { PerformanceDonut } from "@/components/admin/PerformanceDonut";
+import { PerformanceDonut } from "@/components/charts/LazyCharts";
 import { SemesterFilter } from "@/components/admin/SemesterFilter";
-import { SubmissionTrendChart } from "@/components/admin/SubmissionTrendChart";
+import { SubmissionTrendChart } from "@/components/charts/LazyCharts";
 import { getAdminDashboardData } from "@/components/admin/queries";
 import { PageHeader } from "@/components/PageHeader";
 

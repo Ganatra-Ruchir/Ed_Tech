@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { KpiCard } from "@/components/KpiCard";
-import { TrendChart } from "@/components/TrendChart";
+import { TrendChart } from "@/components/charts/LazyCharts";
 import { GenerateReportButton } from "@/components/GenerateReportButton";
 import { PageHeader } from "@/components/PageHeader";
 import { Card } from "@/components/Card";

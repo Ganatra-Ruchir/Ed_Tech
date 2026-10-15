@@ -1,5 +1,5 @@
 {
-  "name": "webbb",
+  "name": "silver-oak-learning-hub",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -22,9 +22,9 @@
     "bcryptjs": "^3.0.3",
     "clsx": "^2.1.1",
     "dotenv": "^18.0.1",
+    "geist": "^1.7.2",
     "jose": "^6.2.12",
     "lucide-react": "^1.47.0",
-    "motion": "^13.4.0",
     "next": "16.3.5",
     "pg": "^8.23.0",
     "prisma": "7.10.0",

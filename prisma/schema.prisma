@@ -408,9 +408,9 @@ model Submission {
   evidence Evidence[]
   feedback Feedback[]
 
-  @@index([studentId])
-  @@index([batchId])
-  @@index([status])
+  @@index([studentId, status])
+  @@index([batchId, status, createdAt])
+  @@index([status, createdAt])
   @@index([assignmentId])
 }
 
@@ -443,7 +443,7 @@ model Test {
   questions Question[]
   responses TestResponse[]
 
-  @@index([batchId])
+  @@index([batchId, publishedAt, dueAt])
 }
 
 model Question {
@@ -547,6 +547,25 @@ model KPI {
   @@index([batchId])
   @@index([studentId])
   @@index([metricName])
+}
+
+/// Current value of every KPI series — exactly one row per `key`.
+/// `KPI` above is the history log (used for trend charts); reading "the latest
+/// value" from it meant loading the entire ever-growing log and de-duplicating
+/// in JS, which got slower with every review. Reads of current values come from
+/// this table instead and stay constant-time no matter how much history exists.
+model KPILatest {
+  key        String   @id
+  scope      KPIScope
+  batchId    String?
+  studentId  String?
+  metricName String
+  value      Float
+  computedAt DateTime @default(now())
+
+  @@index([scope, metricName])
+  @@index([batchId])
+  @@index([studentId])
 }
 
 model Report {

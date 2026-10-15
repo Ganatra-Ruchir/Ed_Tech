@@ -1,20 +1,19 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { motion, AnimatePresence } from "motion/react";
 import { X } from "lucide-react";
+import { cn } from "@/lib/cn";
+
+const EXIT_MS = 180;
 
 /**
- * A right-hand slide-over panel used for "record" detail views (Linear/Attio
- * style), with a real spring-driven slide and a backdrop fade. Rendered by an
- * `@modal` intercepting-route page, so it overlays the list page underneath
- * while the un-intercepted route stays a plain, shareable, refreshable URL.
+ * Right-hand slide-over for "record" detail views, rendered by an `@modal`
+ * intercepting route so it overlays the list page underneath while the
+ * un-intercepted URL stays shareable and refreshable.
  *
- * Closing plays the exit animation first (`open` flips to false) and only
- * calls `router.back()` once that animation completes, via AnimatePresence's
- * `onExitComplete` — otherwise Next would unmount the route instantly and the
- * exit transition would never be seen.
+ * Closing plays a short CSS exit, then calls `router.back()` to pop the
+ * intercepted route.
  */
 export function Drawer({
   title,
@@ -26,11 +25,15 @@ export function Drawer({
   widthClassName?: string;
 }) {
   const router = useRouter();
-  const [open, setOpen] = useState(true);
+  const [closing, setClosing] = useState(false);
+  const closingRef = useRef(false);
 
-  function close() {
-    setOpen(false);
-  }
+  const close = useCallback(() => {
+    if (closingRef.current) return;
+    closingRef.current = true;
+    setClosing(true);
+    window.setTimeout(() => router.back(), EXIT_MS);
+  }, [router]);
 
   useEffect(() => {
     function onKeyDown(e: KeyboardEvent) {
@@ -42,53 +45,42 @@ export function Drawer({
       document.removeEventListener("keydown", onKeyDown);
       document.body.style.overflow = "";
     };
-  }, []);
+  }, [close]);
 
   return (
-    <AnimatePresence onExitComplete={() => router.back()}>
-      {open && (
-        <div key="drawer-root" className="fixed inset-0 z-50">
-          <motion.div
-            className="absolute inset-0 bg-zinc-900/35"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.18, ease: "easeOut" }}
+    <div className="fixed inset-0 z-50">
+      <div
+        className={cn(
+          "absolute inset-0 bg-zinc-900/35 transition-opacity",
+          closing ? "opacity-0" : "animate-drawer-backdrop-in",
+        )}
+        style={{ transitionDuration: `${EXIT_MS}ms` }}
+        onClick={close}
+      />
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-label={title}
+        className={cn(
+          "absolute inset-y-0 right-0 flex w-full flex-col border-l border-zinc-200 bg-white shadow-2xl transition-transform ease-in",
+          widthClassName,
+          closing ? "translate-x-full" : "animate-drawer-slide-in",
+        )}
+        style={{ transitionDuration: `${EXIT_MS}ms` }}
+      >
+        <div className="flex shrink-0 items-center justify-between border-b border-zinc-100 px-5 py-3.5">
+          <p className="truncate text-[13px] font-semibold text-zinc-900">{title}</p>
+          <button
+            type="button"
             onClick={close}
-          />
-          <motion.div
-            role="dialog"
-            aria-modal="true"
-            aria-label={title}
-            className={`absolute inset-y-0 right-0 flex w-full ${widthClassName} flex-col border-l border-zinc-200 bg-white shadow-2xl`}
-            initial={{ x: "100%" }}
-            animate={{ x: 0 }}
-            exit={{ x: "100%" }}
-            transition={{ type: "spring", stiffness: 420, damping: 40, mass: 0.9 }}
+            aria-label="Close"
+            className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-zinc-400 hover:bg-zinc-900/[0.06] hover:text-zinc-700"
           >
-            <div className="flex shrink-0 items-center justify-between border-b border-zinc-100 px-5 py-3.5">
-              <p className="truncate text-[13px] font-semibold text-zinc-900">{title}</p>
-              <motion.button
-                onClick={close}
-                aria-label="Close"
-                whileHover={{ scale: 1.08, backgroundColor: "rgba(24,24,27,0.06)" }}
-                whileTap={{ scale: 0.92 }}
-                className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-zinc-400 hover:text-zinc-700"
-              >
-                <X size={16} />
-              </motion.button>
-            </div>
-            <motion.div
-              className="flex-1 overflow-y-auto px-5 py-5"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.08, duration: 0.2 }}
-            >
-              {children}
-            </motion.div>
-          </motion.div>
+            <X size={16} />
+          </button>
         </div>
-      )}
-    </AnimatePresence>
+        <div className="flex-1 overflow-y-auto px-5 py-5">{children}</div>
+      </div>
+    </div>
   );
 }

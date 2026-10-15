@@ -31,7 +31,7 @@ export async function GET(request: Request) {
     if (!allowed) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
-  const where: Prisma.KPIWhereInput = { scope };
+  const where: Prisma.KPIWhereInput & Prisma.KPILatestWhereInput = { scope };
   if (batchId) where.batchId = batchId;
   if (studentId) where.studentId = studentId;
 

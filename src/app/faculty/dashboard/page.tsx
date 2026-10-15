@@ -15,7 +15,6 @@ import {
 } from "lucide-react";
 import { getSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { userBatchIds } from "@/lib/permissions";
 import { getFacultyAttendanceStatus } from "@/lib/staff-attendance";
 import { OfficeAttendanceCard } from "@/components/faculty/OfficeAttendanceCard";
 import { Card } from "@/components/Card";
@@ -25,12 +24,8 @@ import { EmptyState } from "@/components/EmptyState";
 import { StatCard } from "@/components/faculty/StatCard";
 import { FacultyTaskBoard } from "@/components/faculty/FacultyTaskBoard";
 import { SemesterSelect } from "@/components/faculty/SemesterSelect";
-import {
-  SubmissionActivityChart,
-  SubmissionStatusDonut,
-  type ActivityPoint,
-  type StatusSlice,
-} from "@/components/faculty/DashboardCharts";
+import { SubmissionActivityChart, SubmissionStatusDonut } from "@/components/charts/LazyCharts";
+import type { ActivityPoint, StatusSlice } from "@/components/faculty/DashboardCharts";
 import {
   average,
   currentHour,
@@ -89,13 +84,14 @@ export default async function FacultyDashboard({
 }) {
   const session = await getSession();
   const { semester } = await searchParams;
-  const attendanceStatus = await getFacultyAttendanceStatus(session!.sub);
-
-  const myBatches = await prisma.batch.findMany({
-    where: session!.isCC ? {} : { id: { in: await userBatchIds(session!.sub) } },
-    select: { id: true, name: true, semester: true },
-    orderBy: { name: "asc" },
-  });
+  const [attendanceStatus, myBatches] = await Promise.all([
+    getFacultyAttendanceStatus(session!.sub),
+    prisma.batch.findMany({
+      where: session!.isCC ? {} : { members: { some: { userId: session!.sub } } },
+      select: { id: true, name: true, semester: true },
+      orderBy: { name: "asc" },
+    }),
+  ]);
 
   const semesters = [...new Set(myBatches.map((b) => b.semester))].sort();
   const activeSemester = semester && semesters.includes(semester) ? semester : "";

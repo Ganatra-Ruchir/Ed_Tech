@@ -1,5 +1,3 @@
-"use client";
-
 import { PortalSidebar, type PortalNavLink } from "@/components/university/PortalSidebar";
 import { PortalMobileNav } from "@/components/university/PortalMobileNav";
 
@@ -41,7 +39,7 @@ function buildLinks(isCC: boolean, pendingReviews: number): PortalNavLink[] {
 }
 
 export function FacultySidebar({ isCC, pendingReviews }: { isCC: boolean; pendingReviews: number }) {
-  return <PortalSidebar title={TITLE} layoutId="faculty-sidebar" links={buildLinks(isCC, pendingReviews)} />;
+  return <PortalSidebar title={TITLE} links={buildLinks(isCC, pendingReviews)} />;
 }
 
 export function FacultyMobileNav({ isCC, pendingReviews }: { isCC: boolean; pendingReviews: number }) {

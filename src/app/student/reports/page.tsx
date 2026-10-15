@@ -21,7 +21,8 @@ import { Tag } from "@/components/Tag";
 import { ProgressBar } from "@/components/ProgressBar";
 import { EmptyState } from "@/components/EmptyState";
 import { DownloadReportButton } from "@/components/student/DownloadReportButton";
-import { ProgressRing, ScoreTrend, type TrendPointView } from "@/components/student/ReportCharts";
+import { ProgressRing, ScoreTrend } from "@/components/charts/LazyCharts";
+import type { TrendPointView } from "@/components/student/ReportCharts";
 import { calculateStudentPerformance } from "@/lib/student-performance";
 
 function fmtDateTime(d: Date): string {

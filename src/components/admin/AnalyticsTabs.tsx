@@ -1,10 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { motion } from "motion/react";
 import { cn } from "@/lib/cn";
-import { CategoryBarChart } from "@/components/admin/CategoryBarChart";
-import { PerformanceDonut } from "@/components/admin/PerformanceDonut";
+import { CategoryBarChart } from "@/components/charts/LazyCharts";
+import { PerformanceDonut } from "@/components/charts/LazyCharts";
 import type { BarPoint, DonutSlice } from "@/components/admin/types";
 
 export type AnalyticsTabsData = {
@@ -52,10 +51,8 @@ export function AnalyticsTabs({ data }: { data: AnalyticsTabsData }) {
             )}
           >
             {tab === t.id && (
-              <motion.span
-                layoutId="admin-analytics-tab"
+              <span
                 className="absolute inset-0 rounded-md bg-[#ef5b3f]"
-                transition={{ type: "spring", stiffness: 500, damping: 42 }}
               />
             )}
             <span className="relative z-10">{t.label}</span>

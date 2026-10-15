@@ -1,6 +1,5 @@
 import { getSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { userBatchIds } from "@/lib/permissions";
 import { LibraryBig } from "lucide-react";
 import { StudentMaterialLibrary } from "@/components/materials/StudentMaterialLibrary";
 import { PageHeader } from "@/components/PageHeader";
@@ -8,9 +7,8 @@ import type { LearningMaterialDTO } from "@/lib/materials";
 
 export default async function StudentMaterialsPage() {
   const session = await getSession();
-  const batchIds = await userBatchIds(session!.sub);
   const records = await prisma.learningMaterial.findMany({
-    where: { batchId: { in: batchIds } },
+    where: { batch: { members: { some: { userId: session!.sub } } } },
     include: { batch: { select: { name: true } }, faculty: { select: { name: true } } },
     orderBy: { createdAt: "desc" },
   });

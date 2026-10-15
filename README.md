@@ -7,14 +7,13 @@ single evidence-linked workflow — built for a Silver Oak University department
 ## Stack
 
 - **Next.js 16** (App Router, Turbopack, TypeScript)
-- **Prisma 7** ORM with the new driver-adapter architecture
-  - **SQLite** (via `@prisma/adapter-better-sqlite3`) for local dev — zero setup, no external DB needed
-  - Swappable to **PostgreSQL** for production (see [Deploying to Vercel](#deploying-to-vercel))
+- **Prisma 7** ORM with the driver-adapter architecture, on **PostgreSQL** (`@prisma/adapter-pg`)
+  in every environment — local dev included
 - **Custom session auth** — signed JWT in an httpOnly cookie (`jose` + `bcryptjs`), not NextAuth.
   Next.js 16 renamed `middleware` to `proxy` and dropped the Edge runtime for it in favor of
   Node.js, which made a from-scratch implementation simpler and more predictable than pulling
   in a library built around the old model.
-- **Recharts** for the analytics trend chart
+- **Recharts** for charts, always loaded lazily via `src/components/charts/LazyCharts.tsx`
 - **@react-pdf/renderer** for PDF report generation (no headless browser needed)
 - **Tailwind CSS v4** for styling, **lucide-react** for icons
 - File storage abstraction: local disk in dev, **Vercel Blob** in production (auto-detected via env var)
@@ -53,18 +52,21 @@ the original brief already scoped out anything beyond web-first, evidence-linked
 
 ## Getting started (local)
 
+You need a PostgreSQL database — a local install, Docker
+(`docker run -e POSTGRES_PASSWORD=dev -p 5432:5432 postgres:16`), or a free hosted one
+(Neon, Supabase, Vercel Postgres).
+
 ```bash
-npm install
-npx prisma migrate deploy   # create prisma/dev.db and apply migrations
-npx prisma generate         # generate the Prisma client into src/generated/prisma
-npm run db:seed             # seed 1 department, 2 batches, 20 students, 3 faculty, 1 admin, sample data
+cp .env.example .env        # then set DATABASE_URL / DATABASE_URL_UNPOOLED and AUTH_SECRET
+npm install                 # also runs `prisma generate`
+npx prisma migrate deploy   # create tables and apply all migrations
+npm run db:seed             # demo department, batches, students, faculty and an admin
 npm run dev
 ```
 
 Open http://localhost:3000 — you'll land on `/login`.
 
-Copy `.env.example` to `.env` if you want to customize `AUTH_SECRET` (a working default is
-already provided for local dev).
+Optional: `DATABASE_POOL_MAX` sets the connection-pool size per server instance (default 10).
 
 ### Demo accounts
 
@@ -121,34 +123,40 @@ on each submission's faculty detail page.
   risks/reflections (short-answer test responses), the evidence trail, and feedback history —
   see `src/lib/pdf/StudentReportDocument.tsx`.
 
+## Performance notes
+
+Conventions that keep the portals fast. Please keep to them when adding pages.
+
+- **Current KPI values come from `KPILatest`, history from `KPI`.** Always read current values
+  through `getLatestKpis()`. `KPI` is the time series for trend charts and only gets a new row
+  when a value changes. Never read the whole `KPI` table to find "the latest" value.
+- **Recompute in bulk.** `src/lib/kpi.ts` scores a whole batch with a fixed number of queries.
+  Don't call a per-student helper in a loop.
+- **One round of queries per page.** Put independent queries in a single `Promise.all`, and scope
+  by relation (`batch: { members: { some: { userId } } }`) instead of first fetching batch ids
+  and then querying with `{ in: ids }`. Each extra sequential `await` is a full round trip to the
+  database.
+- **Layouts stay light.** The portal shell (`src/components/university/PortalShell.tsx`) only
+  awaits what it must show immediately. Anything else (like the notification bell) streams in
+  behind `<Suspense>`.
+- **Every portal has a `loading.tsx`.** Navigation shows a skeleton instantly while the next
+  page's data loads.
+- **Charts are lazy.** Import charts from `@/components/charts/LazyCharts`, never directly from
+  `recharts` in a page.
+- **No animation library, and no infinite animations.** Motion is plain CSS in
+  `src/app/globals.css`, limited to opacity and transform, and one-shot. Avoid `backdrop-blur`
+  on sticky or fixed elements; it is re-computed on every scroll frame.
+
 ## Deploying to Vercel
 
-Two things need to change before this pilot runs on Vercel — Vercel's serverless functions have
-a read-only, ephemeral filesystem, so the local SQLite file and local-disk uploads/reports won't
-persist there.
-
-### 1. Database: switch to PostgreSQL
-
-The schema (`prisma/schema.prisma`) already avoids SQLite-only workarounds beyond what's needed,
-so the swap is small:
+### 1. Database
 
 1. Provision a Postgres database (Vercel Postgres, [Neon](https://neon.tech), or
    [Supabase](https://supabase.com) all have free tiers).
-2. In `prisma/schema.prisma`, change:
-   ```prisma
-   datasource db {
-     provider = "postgresql"
-   }
-   ```
-3. Install the Postgres driver adapter: `npm install @prisma/adapter-pg pg`
-4. In `src/lib/prisma.ts`, swap the adapter:
-   ```ts
-   import { PrismaPg } from "@prisma/adapter-pg";
-   const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL });
-   ```
-5. Set `DATABASE_URL` in Vercel's project environment variables to your Postgres connection string.
-6. Run `npx prisma migrate deploy` against that database (e.g. from CI or locally with the prod
-   `DATABASE_URL`), then `npm run db:seed` if you want the same demo data there.
+2. Set `DATABASE_URL` (pooled) and `DATABASE_URL_UNPOOLED` (direct, used for migrations) in the
+   Vercel project's environment variables, plus a unique `AUTH_SECRET`.
+3. The `vercel-build` script runs `prisma migrate deploy` on every deploy, then the seed script
+   (which does nothing once any user exists).
 
 ### 2. File storage: attach Vercel Blob
 
@@ -169,7 +177,7 @@ multi-institution support, no native mobile app (the UI is responsive web-only).
 ## Known dev-dependency advisory
 
 `npm audit` reports high-severity advisories in `deepmerge-ts` and `mysql2`, both transitive
-dependencies of the Prisma **CLI's** own MySQL/config tooling — not used by this app (SQLite/Postgres
+dependencies of the Prisma **CLI's** own MySQL/config tooling — not used by this app (Postgres
 only, no MySQL) and not part of the deployed runtime bundle. The suggested fix
 (`npm audit fix --force`) downgrades `prisma` to a version without the driver-adapter
 architecture this app is built on, so it's intentionally left as-is.

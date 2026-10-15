@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { motion } from "motion/react";
 import { ArrowRightLeft, CalendarClock, CheckCircle2, Clock3, LoaderCircle, Send, UserRound, XCircle } from "lucide-react";
 import { Button } from "@/components/Button";
 import { Input, Label, Select, Textarea } from "@/components/Field";
@@ -104,10 +103,10 @@ export function FacultyLeaveRequests({ initialRequests, facultyOptions }: { init
 
       <section>
         <h2 className="mb-3 text-sm font-semibold text-[#17212b]">Request history</h2>
-        {requests.length === 0 ? <div className="rounded-md border border-dashed border-[#cbd1c8] bg-white px-5 py-12 text-center text-sm text-[#667085]">You have not submitted any leave requests.</div> : <div className="space-y-3">{requests.map((request, index) => {
+        {requests.length === 0 ? <div className="rounded-md border border-dashed border-[#cbd1c8] bg-white px-5 py-12 text-center text-sm text-[#667085]">You have not submitted any leave requests.</div> : <div className="space-y-3">{requests.map((request) => {
           const meta = STATUS_META[request.status];
           const StatusIcon = meta.icon;
-          return <motion.article key={request.id} initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: Math.min(index * 0.03, 0.2) }} className="rounded-md border border-[#dfe3dc] bg-white p-4 shadow-sm sm:p-5">
+          return <article key={request.id} className="rounded-md border border-[#dfe3dc] bg-white p-4 shadow-sm sm:p-5">
             <div className="flex flex-wrap items-start justify-between gap-3">
               <div><p className="text-sm font-semibold text-[#17212b]">{formatDate(request.startDate)}{request.endDate !== request.startDate && ` - ${formatDate(request.endDate)}`}</p><p className="mt-1 text-xs text-[#667085]">{leaveDayCount(request.startDate, request.endDate)} calendar day{leaveDayCount(request.startDate, request.endDate) === 1 ? "" : "s"} · Requested {new Date(request.createdAt).toLocaleDateString("en-IN")}</p></div>
               <span className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold ${meta.className}`}><StatusIcon size={13} />{meta.label}</span>
@@ -115,7 +114,7 @@ export function FacultyLeaveRequests({ initialRequests, facultyOptions }: { init
             <p className="mt-4 whitespace-pre-wrap text-sm leading-6 text-[#344054]">{request.reason}</p>
             {request.handoverFacultyName && <div className="mt-4 rounded-md border border-sky-100 bg-sky-50/70 px-3 py-3"><p className="flex items-center gap-1.5 text-xs font-semibold text-sky-800"><UserRound size={13} /> Handed over to {request.handoverFacultyName}</p>{request.handoverNotes && <p className="mt-1.5 whitespace-pre-wrap text-sm leading-5 text-sky-900/75">{request.handoverNotes}</p>}</div>}
             {request.adminNote && <div className="mt-4 border-l-2 border-[#ef5b3f] bg-[#fff8f5] px-3 py-2"><p className="text-[11px] font-semibold uppercase text-[#d9472e]">Administrator note</p><p className="mt-1 text-sm text-[#475467]">{request.adminNote}</p></div>}
-          </motion.article>;
+          </article>;
         })}</div>}
       </section>
     </div>

@@ -3,7 +3,6 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { motion, AnimatePresence } from "motion/react";
 import { ArrowLeft, UploadCloud, X, FileText, Info, AlertCircle, Plus } from "lucide-react";
 import { PageHeader } from "@/components/PageHeader";
 import { Card } from "@/components/Card";
@@ -195,23 +194,14 @@ function NewSubmissionForm({ assignment, loadingAssignment }: { assignment: { id
                   className="hidden"
                 />
               </div>
-
-              <AnimatePresence initial={false}>
                 {files.length > 0 && (
-                  <motion.ul
-                    initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: 1, height: "auto" }}
-                    exit={{ opacity: 0, height: 0 }}
-                    className="mt-3 space-y-1.5 overflow-hidden"
+                  <ul
+                    className="animate-fade-in mt-3 space-y-1.5 overflow-hidden"
                   >
                     {files.map((f, i) => (
-                      <motion.li
+                      <li
                         key={`${f.name}:${f.size}`}
-                        layout
-                        initial={{ opacity: 0, y: 6 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, x: -8 }}
-                        className="flex items-center gap-2.5 rounded-md border border-zinc-200 bg-white px-3 py-2"
+                        className="animate-fade-in flex items-center gap-2.5 rounded-md border border-zinc-200 bg-white px-3 py-2"
                       >
                         <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-[#ef5b3f]/[0.08] text-[#ef5b3f]">
                           <FileText size={13} />
@@ -228,11 +218,10 @@ function NewSubmissionForm({ assignment, loadingAssignment }: { assignment: { id
                         >
                           <X size={13} />
                         </button>
-                      </motion.li>
+                      </li>
                     ))}
-                  </motion.ul>
+                  </ul>
                 )}
-              </AnimatePresence>
 
               {files.length > 0 && (
                 <p className="mt-2 text-[11px] text-zinc-400">

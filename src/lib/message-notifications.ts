@@ -1,16 +1,30 @@
 import { prisma } from "@/lib/prisma";
 
+/**
+ * Up to five unread conversations for the notification bell, newest first.
+ * Single query: the viewer's lastReadAt comes back alongside each message
+ * instead of requiring a separate membership lookup first.
+ */
 export async function getMessageNotifications(userId: string) {
-  const memberships = await prisma.conversationMember.findMany({
-    where: { userId },
-    select: { conversationId: true, lastReadAt: true },
-  });
-  if (memberships.length === 0) return [];
-
-  const lastReadByConversation = new Map(memberships.map((membership) => [membership.conversationId, membership.lastReadAt]));
   const messages = await prisma.message.findMany({
-    where: { conversationId: { in: memberships.map((membership) => membership.conversationId) }, senderId: { not: userId } },
-    include: { sender: { select: { name: true } }, conversation: { select: { id: true, title: true, isGroup: true } } },
+    where: {
+      senderId: { not: userId },
+      conversation: { members: { some: { userId } } },
+    },
+    select: {
+      id: true,
+      conversationId: true,
+      createdAt: true,
+      sender: { select: { name: true } },
+      conversation: {
+        select: {
+          id: true,
+          title: true,
+          isGroup: true,
+          members: { where: { userId }, select: { lastReadAt: true }, take: 1 },
+        },
+      },
+    },
     orderBy: { createdAt: "desc" },
     take: 30,
   });
@@ -18,7 +32,7 @@ export async function getMessageNotifications(userId: string) {
   const seenConversations = new Set<string>();
   return messages
     .filter((message) => {
-      const lastReadAt = lastReadByConversation.get(message.conversationId);
+      const lastReadAt = message.conversation.members[0]?.lastReadAt;
       if (lastReadAt && message.createdAt <= lastReadAt) return false;
       if (seenConversations.has(message.conversationId)) return false;
       seenConversations.add(message.conversationId);

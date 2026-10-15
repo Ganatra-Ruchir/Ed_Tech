@@ -2,7 +2,6 @@ import Link from "next/link";
 import { Building2, ArrowRight, Users, FileText, BarChart3 } from "lucide-react";
 import { getSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { userBatchIds } from "@/lib/permissions";
 import { getLatestKpis } from "@/lib/kpi";
 import { PageHeader } from "@/components/PageHeader";
 import { Card } from "@/components/Card";
@@ -20,7 +19,7 @@ export default async function FacultyBatchesPage({
   const { semester } = await searchParams;
 
   const batches = await prisma.batch.findMany({
-    where: session!.isCC ? {} : { id: { in: await userBatchIds(session!.sub) } },
+    where: session!.isCC ? {} : { members: { some: { userId: session!.sub } } },
     select: {
       id: true,
       name: true,

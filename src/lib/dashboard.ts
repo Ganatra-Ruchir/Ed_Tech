@@ -6,18 +6,18 @@ const TREND_METRICS = ["submission_completion_rate", "avg_test_score_pct"] as co
 export type TrendPoint = { computedAt: string; metricName: string; value: number };
 
 export async function getCohortOverview() {
-  const [latest, history, batches] = await Promise.all([
+  const [latest, history, batches, batchLatest] = await Promise.all([
     getLatestKpis({ scope: "COHORT" }),
     prisma.kPI.findMany({
       where: { scope: "COHORT", metricName: { in: [...TREND_METRICS] } },
       orderBy: { computedAt: "asc" },
     }),
     prisma.batch.findMany({ orderBy: { name: "asc" } }),
+    getLatestKpis({ scope: "BATCH" }),
   ]);
 
   const kpiByName = Object.fromEntries(latest.map((k) => [k.metricName, k.value]));
 
-  const batchLatest = await getLatestKpis({ scope: "BATCH" });
   const batchKpiById = new Map<string, Record<string, number>>();
   for (const row of batchLatest) {
     if (!row.batchId) continue;
@@ -54,22 +54,22 @@ export async function getCohortOverview() {
 }
 
 export async function getBatchOverview(batchId: string) {
-  const [batch, latest, history] = await Promise.all([
+  const [batch, latest, history, memberships] = await Promise.all([
     prisma.batch.findUniqueOrThrow({ where: { id: batchId } }),
     getLatestKpis({ scope: "BATCH", batchId }),
     prisma.kPI.findMany({
       where: { scope: "BATCH", batchId, metricName: { in: [...TREND_METRICS] } },
       orderBy: { computedAt: "asc" },
     }),
+    prisma.userBatch.findMany({
+      where: { batchId, user: { role: "STUDENT" } },
+      select: { userId: true, user: { select: { name: true, email: true } } },
+      orderBy: { user: { name: "asc" } },
+    }),
   ]);
 
   const kpiByName = Object.fromEntries(latest.map((k) => [k.metricName, k.value]));
 
-  const memberships = await prisma.userBatch.findMany({
-    where: { batchId, user: { role: "STUDENT" } },
-    include: { user: true },
-    orderBy: { user: { name: "asc" } },
-  });
   const studentLatest = await getLatestKpis({
     scope: "STUDENT",
     studentId: { in: memberships.map((m) => m.userId) },

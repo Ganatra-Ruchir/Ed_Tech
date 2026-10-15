@@ -30,9 +30,8 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-html {
-  scroll-behavior: smooth;
-}
+/* Note: no `scroll-behavior: smooth` on <html>. It made every route change
+   animate the scroll back to the top, which reads as lag on navigation. */
 
 button,
 a,
@@ -44,7 +43,7 @@ select {
 
 button,
 a {
-  transition-property: color, background-color, border-color, box-shadow, opacity, transform;
+  transition-property: color, background-color, border-color;
   transition-duration: 150ms;
 }
 
@@ -52,7 +51,7 @@ a {
   background-color: rgba(8, 122, 79, 0.2);
 }
 
-/* Thin, unobtrusive scrollbars — matches the dense, quiet tables/sidebars used everywhere */
+/* Thin, unobtrusive scrollbars */
 * {
   scrollbar-width: thin;
   scrollbar-color: #c7cdc5 transparent;
@@ -65,108 +64,45 @@ a {
   background-color: #c7cdc5;
   border-radius: 9999px;
 }
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
 
 :focus-visible {
   outline: 2px solid rgba(8, 122, 79, 0.55);
   outline-offset: 2px;
 }
-*::-webkit-scrollbar-track {
-  background: transparent;
+
+/* Portal background: a flat colour. The old faint grid pattern and fixed
+   logo watermark (at 1.8% opacity) cost a repaint on every scroll frame. */
+.portal-shell {
+  background-color: #f6f4f1;
 }
 
-/* Shared motion for drawers / overlays */
-@keyframes drawer-slide-in {
-  from {
-    transform: translateX(100%);
-  }
-  to {
-    transform: translateX(0);
-  }
-}
-@keyframes drawer-backdrop-in {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
+/* ---------------------------------------------------------------------------
+   Motion. Everything here is one-shot and only animates opacity/transform,
+   which the browser can run on the compositor without repainting. There are
+   deliberately no infinite animations other than loading skeletons/spinners.
+   ------------------------------------------------------------------------- */
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
-@keyframes brand-breathe {
-  0%, 100% {
-    transform: translateY(0);
-    box-shadow: 0 4px 14px rgba(8, 122, 79, 0.12);
-  }
-  50% {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 22px rgba(143, 48, 50, 0.24);
-  }
-}
-
-@keyframes logo-spark {
-  0%, 68%, 100% { opacity: 0; transform: scale(0.65) rotate(-15deg); }
-  76% { opacity: 1; transform: scale(1.15) rotate(8deg); }
-  84% { opacity: 0.35; transform: scale(0.9) rotate(0deg); }
-}
-
-@keyframes portal-stagger-in {
-  from { opacity: 0; transform: translateY(8px); }
+@keyframes pop-in {
+  from { opacity: 0; transform: translateY(-4px); }
   to { opacity: 1; transform: translateY(0); }
 }
 
-.animate-logo-spark {
-  animation: logo-spark 5.5s ease-in-out 900ms 1 both;
+@keyframes slide-in-left {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(0); }
 }
 
-.portal-content-stagger > * {
-  animation: portal-stagger-in 320ms cubic-bezier(0.22, 1, 0.36, 1) both;
-}
-.portal-content-stagger > *:nth-child(1) { animation-delay: 35ms; }
-.portal-content-stagger > *:nth-child(2) { animation-delay: 85ms; }
-.portal-content-stagger > *:nth-child(3) { animation-delay: 135ms; }
-.portal-content-stagger > *:nth-child(4) { animation-delay: 185ms; }
-.portal-content-stagger > *:nth-child(5) { animation-delay: 235ms; }
-.portal-content-stagger > *:nth-child(6) { animation-delay: 285ms; }
-
-.portal-shell {
-  position: relative;
-  background-color: #f6f4f1;
-  background-image:
-    linear-gradient(rgba(143, 48, 50, 0.018) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(143, 48, 50, 0.018) 1px, transparent 1px);
-  background-size: 32px 32px;
-}
-
-.portal-shell main {
-  position: relative;
-}
-
-.portal-shell main::before {
-  content: "";
-  position: fixed;
-  right: -90px;
-  bottom: -110px;
-  width: 420px;
-  height: 260px;
-  pointer-events: none;
-  background: url("/silver-oak-logo.png") center / contain no-repeat;
-  opacity: 0.018;
-}
-
-@keyframes signal-pulse {
-  0%, 100% {
-    opacity: 1;
-    transform: scale(1);
-  }
-  50% {
-    opacity: 0.55;
-    transform: scale(1.35);
-  }
-}
-
-@keyframes building-rise {
-  0%, 100% { transform: scaleY(0.72); }
-  50% { transform: scaleY(1); }
+@keyframes drawer-slide-in {
+  from { transform: translateX(100%); }
+  to { transform: translateX(0); }
 }
 
 @keyframes skeleton-pulse {
@@ -174,32 +110,26 @@ a {
   50% { opacity: 0.85; }
 }
 
-.animate-brand-breathe {
-  animation: brand-breathe 3.6s ease-in-out infinite;
+.animate-fade-in,
+.animate-drawer-backdrop-in {
+  animation: fade-in 180ms ease-out both;
 }
-
-.animate-signal-pulse {
-  animation: signal-pulse 1.8s ease-in-out infinite;
+.animate-pop-in {
+  animation: pop-in 140ms ease-out both;
 }
-
-.animate-building-rise {
-  animation: building-rise 4.8s ease-in-out infinite;
-  transform-origin: bottom;
-}
-
-.animate-skeleton-pulse {
-  animation: skeleton-pulse 1.6s ease-in-out infinite;
+.animate-slide-in-left {
+  animation: slide-in-left 220ms cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 .animate-drawer-slide-in {
-  animation: drawer-slide-in 220ms cubic-bezier(0.16, 1, 0.3, 1);
+  animation: drawer-slide-in 220ms cubic-bezier(0.16, 1, 0.3, 1) both;
 }
-.animate-drawer-backdrop-in {
-  animation: drawer-backdrop-in 180ms ease-out;
+.animate-skeleton-pulse {
+  animation: skeleton-pulse 1.6s ease-in-out infinite;
 }
 
 /* Subtle card elevation used on hover for interactive rows/cards */
 .elevate-on-hover {
-  transition: box-shadow 150ms ease, border-color 150ms ease, transform 150ms ease;
+  transition: box-shadow 150ms ease, border-color 150ms ease;
 }
 .elevate-on-hover:hover {
   box-shadow: 0 2px 8px -2px rgba(24, 24, 27, 0.08), 0 1px 2px rgba(24, 24, 27, 0.04);
@@ -209,7 +139,6 @@ a {
   *,
   *::before,
   *::after {
-    scroll-behavior: auto !important;
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;

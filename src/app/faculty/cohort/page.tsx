@@ -6,7 +6,7 @@ import { getCohortOverview } from "@/lib/dashboard";
 import { getLatestKpis } from "@/lib/kpi";
 import { prisma } from "@/lib/prisma";
 import { KpiCard } from "@/components/KpiCard";
-import { TrendChart } from "@/components/TrendChart";
+import { TrendChart } from "@/components/charts/LazyCharts";
 import { PageHeader } from "@/components/PageHeader";
 import { Card } from "@/components/Card";
 import { EmptyState } from "@/components/EmptyState";
@@ -17,9 +17,10 @@ export default async function CohortAnalyticsPage() {
   const session = await getSession();
   if (!session!.isCC) redirect("/faculty");
 
-  const overview = await getCohortOverview();
-
-  const atRiskLatest = await getLatestKpis({ scope: "STUDENT", metricName: "at_risk" });
+  const [overview, atRiskLatest] = await Promise.all([
+    getCohortOverview(),
+    getLatestKpis({ scope: "STUDENT", metricName: "at_risk", value: 1 }),
+  ]);
   const atRiskStudentIds = atRiskLatest
     .filter((k) => k.value === 1)
     .map((k) => k.studentId)

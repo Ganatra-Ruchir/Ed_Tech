@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { Clock, LogIn, LogOut, AlertTriangle } from "lucide-react";
-import { motion, AnimatePresence } from "motion/react";
 import { Card } from "@/components/Card";
 import { Button } from "@/components/Button";
 import { formatClock, type FacultyAttendanceStatusDTO, type StaffAttendanceRecordDTO } from "@/lib/staff-attendance-types";
@@ -92,19 +91,13 @@ export function OfficeAttendanceCard({ initial }: { initial: FacultyAttendanceSt
           )}
         </div>
       </div>
-
-      <AnimatePresence>
         {error && (
-          <motion.p
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: "auto" }}
-            exit={{ opacity: 0, height: 0 }}
-            className="mt-2 text-[11.5px] text-rose-600"
+          <p
+            className="animate-fade-in mt-2 text-[11.5px] text-rose-600"
           >
             {error}
-          </motion.p>
+          </p>
         )}
-      </AnimatePresence>
 
       {history.length > 0 && (
         <div className="mt-3 flex flex-wrap gap-1.5 border-t border-zinc-100 pt-3">

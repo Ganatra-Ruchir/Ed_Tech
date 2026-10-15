@@ -55,6 +55,8 @@ next-env.d.ts
 /data/uploads
 /data/assignments
 /data/announcements
+/data/messages
+/data/materials
 
 # generated pdf reports
 /data/reports

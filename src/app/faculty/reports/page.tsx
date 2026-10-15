@@ -1,6 +1,5 @@
 import { getSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { userBatchIds } from "@/lib/permissions";
 import { PageHeader } from "@/components/PageHeader";
 import { FileText } from "lucide-react";
 import { Card } from "@/components/Card";
@@ -12,7 +11,7 @@ export default async function FacultyReportsPage() {
   const session = await getSession();
 
   const myBatches = await prisma.batch.findMany({
-    where: session!.isCC ? {} : { id: { in: await userBatchIds(session!.sub) } },
+    where: session!.isCC ? {} : { members: { some: { userId: session!.sub } } },
     select: { id: true, name: true, department: true, semester: true },
     orderBy: { name: "asc" },
   });
