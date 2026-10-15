@@ -123,6 +123,12 @@ on each submission's faculty detail page.
   risks/reflections (short-answer test responses), the evidence trail, and feedback history —
   see `src/lib/pdf/StudentReportDocument.tsx`.
 
+## Live classes
+
+Online video classes (screen sharing, whiteboard, polls, Q&A, breakout rooms, waiting room,
+recording, captions and automatic attendance) are built in. They need a free LiveKit account;
+see [LIVE_CLASSES.md](LIVE_CLASSES.md) for the 5-minute setup.
+
 ## Performance notes
 
 Conventions that keep the portals fast. Please keep to them when adding pages.

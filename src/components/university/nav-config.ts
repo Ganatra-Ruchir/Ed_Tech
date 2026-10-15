@@ -19,6 +19,7 @@ import {
   ScrollText,
   UserCircle,
   Users,
+  Video,
 } from "lucide-react";
 
 /**
@@ -49,6 +50,7 @@ export const NAV_ICONS: Record<string, LucideIcon> = {
   ScrollText,
   UserCircle,
   Users,
+  Video,
 };
 
 export function navIcon(name: string): LucideIcon {

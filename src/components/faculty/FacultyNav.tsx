@@ -16,6 +16,7 @@ function buildLinks(isCC: boolean, pendingReviews: number): PortalNavLink[] {
       icon: "Users",
     },
     { href: "/faculty/students", label: "Students", icon: "GraduationCap" },
+    { href: "/faculty/live-classes", label: "Live Classes", icon: "Video" },
     { href: "/faculty/materials", label: "Study Materials", icon: "LibraryBig" },
     { href: "/faculty/tests", label: "Tests & Exams", icon: "ClipboardList" },
     {

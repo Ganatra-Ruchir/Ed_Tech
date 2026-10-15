@@ -82,6 +82,11 @@ model User {
   conversationMemberships ConversationMember[]
   messagesSent Message[] @relation("SentMessages")
   conversationsCreated Conversation[] @relation("CreatedConversations")
+  liveClassesHosted    LiveClass[]            @relation("LiveClassHost")
+  liveClassSeats       LiveClassParticipant[]
+  liveClassVotes       LiveClassPollVote[]
+  liveClassQuestions   LiveClassQuestion[]
+  liveClassQuestionVotes LiveClassQuestionVote[]
   calendarEventsCreated CalendarEvent[]
   learningMaterialsCreated LearningMaterial[]
   leaveRequests LeaveRequest[] @relation("FacultyLeaveRequests")
@@ -189,6 +194,7 @@ model Batch {
   assignments   Assignment[]
   attendance    Attendance[]
   learningMaterials LearningMaterial[]
+  liveClasses   LiveClass[]
 
   @@unique([name, department, semester])
 }
@@ -665,4 +671,158 @@ model PrivateNote {
   author  User @relation("AuthorPrivateNotes", fields: [authorId], references: [id], onDelete: Cascade)
 
   @@index([studentId, createdAt])
+}
+
+
+// ---------------------------------------------------------------------------
+// Live classes (video sessions powered by LiveKit)
+// ---------------------------------------------------------------------------
+
+enum LiveClassStatus {
+  SCHEDULED
+  LIVE
+  ENDED
+  CANCELLED
+}
+
+enum LiveSeatStatus {
+  WAITING
+  ADMITTED
+  DENIED
+  REMOVED
+}
+
+model LiveClass {
+  id              String          @id @default(cuid())
+  batchId         String
+  hostId          String
+  title           String
+  description     String?
+  scheduledAt     DateTime
+  durationMinutes Int             @default(60)
+  status          LiveClassStatus @default(SCHEDULED)
+  /// LiveKit room name. Breakout rooms are `${roomName}__br${n}`.
+  roomName        String          @unique
+
+  // Host settings (all changeable during the class)
+  waitingRoom             Boolean @default(false)
+  muteOnEntry             Boolean @default(true)
+  allowStudentUnmute      Boolean @default(true)
+  allowStudentVideo       Boolean @default(true)
+  allowStudentScreenShare Boolean @default(false)
+  allowChat               Boolean @default(true)
+  locked                  Boolean @default(false)
+  captionsEnabled         Boolean @default(false)
+  autoRecord              Boolean @default(false)
+  breakoutsOpen           Boolean @default(false)
+  breakoutCount           Int     @default(0)
+
+  startedAt DateTime?
+  endedAt   DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  batch        Batch                  @relation(fields: [batchId], references: [id], onDelete: Cascade)
+  host         User                   @relation("LiveClassHost", fields: [hostId], references: [id], onDelete: Cascade)
+  participants LiveClassParticipant[]
+  recordings   LiveClassRecording[]
+  polls        LiveClassPoll[]
+  questions    LiveClassQuestion[]
+
+  @@index([batchId, scheduledAt])
+  @@index([hostId, scheduledAt])
+  @@index([status, scheduledAt])
+}
+
+/// One row per person per class: waiting-room state, breakout assignment and attendance time.
+model LiveClassParticipant {
+  id            String         @id @default(cuid())
+  liveClassId   String
+  userId        String
+  status        LiveSeatStatus @default(ADMITTED)
+  breakoutRoom  Int?
+  firstJoinedAt DateTime?
+  /// Start of the currently open session (null when not in the room).
+  sessionStartedAt DateTime?
+  lastLeftAt    DateTime?
+  totalSeconds  Int            @default(0)
+  joinCount     Int            @default(0)
+  requestedAt   DateTime       @default(now())
+
+  liveClass LiveClass @relation(fields: [liveClassId], references: [id], onDelete: Cascade)
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([liveClassId, userId])
+  @@index([liveClassId, status])
+}
+
+model LiveClassRecording {
+  id              String    @id @default(cuid())
+  liveClassId     String
+  egressId        String    @unique
+  status          String    @default("RECORDING")
+  fileUrl         String?
+  startedAt       DateTime  @default(now())
+  endedAt         DateTime?
+  durationSeconds Int?
+
+  liveClass LiveClass @relation(fields: [liveClassId], references: [id], onDelete: Cascade)
+
+  @@index([liveClassId])
+}
+
+model LiveClassPoll {
+  id          String   @id @default(cuid())
+  liveClassId String
+  question    String
+  /// JSON array of option labels.
+  optionsJson String
+  anonymous   Boolean  @default(false)
+  isOpen      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+
+  liveClass LiveClass           @relation(fields: [liveClassId], references: [id], onDelete: Cascade)
+  votes     LiveClassPollVote[]
+
+  @@index([liveClassId])
+}
+
+model LiveClassPollVote {
+  id          String   @id @default(cuid())
+  pollId      String
+  userId      String
+  optionIndex Int
+  createdAt   DateTime @default(now())
+
+  poll LiveClassPoll @relation(fields: [pollId], references: [id], onDelete: Cascade)
+  user User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([pollId, userId])
+}
+
+model LiveClassQuestion {
+  id          String   @id @default(cuid())
+  liveClassId String
+  authorId    String
+  text        String
+  anonymous   Boolean  @default(false)
+  answered    Boolean  @default(false)
+  createdAt   DateTime @default(now())
+
+  liveClass LiveClass               @relation(fields: [liveClassId], references: [id], onDelete: Cascade)
+  author    User                    @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  votes     LiveClassQuestionVote[]
+
+  @@index([liveClassId, createdAt])
+}
+
+model LiveClassQuestionVote {
+  id         String @id @default(cuid())
+  questionId String
+  userId     String
+
+  question LiveClassQuestion @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  user     User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([questionId, userId])
 }

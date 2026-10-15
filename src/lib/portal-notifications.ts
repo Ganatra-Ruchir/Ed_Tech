@@ -36,7 +36,7 @@ export async function getStudentNotifications(session: SessionPayload): Promise<
     responses: { none: { studentId: userId } },
   };
 
-  const [needsRevisionCount, dueSoonCount, revisionSubmissions, dueSoonTests, recentAnnouncements, messages, recentMaterials] =
+  const [needsRevisionCount, dueSoonCount, revisionSubmissions, dueSoonTests, recentAnnouncements, messages, recentMaterials, liveClasses] =
     await Promise.all([
       prisma.submission.count({ where: { studentId: userId, status: "NEEDS_REVISION" } }),
       prisma.test.count({ where: dueSoonWhere }),
@@ -65,9 +65,24 @@ export async function getStudentNotifications(session: SessionPayload): Promise<
         orderBy: { createdAt: "desc" },
         take: 5,
       }),
+      prisma.liveClass.findMany({
+        where: {
+          ...inMyBatches,
+          OR: [{ status: "LIVE" }, { status: "SCHEDULED", scheduledAt: { gte: now, lte: new Date(now.getTime() + 30 * 60 * 1000) } }],
+        },
+        select: { id: true, title: true, status: true, scheduledAt: true, host: { select: { name: true } } },
+        orderBy: { scheduledAt: "asc" },
+        take: 3,
+      }),
     ]);
 
   return [
+    ...liveClasses.map((c) => ({
+      id: `live-class:${c.id}:${c.status}`,
+      title: c.status === "LIVE" ? `${c.title} is live now` : `${c.title} starts soon`,
+      detail: c.status === "LIVE" ? `Join ${c.host.name}'s class` : `Starts at ${c.scheduledAt.toLocaleTimeString("en-IN", { hour: "numeric", minute: "2-digit" })}`,
+      href: c.status === "LIVE" ? `/live/${c.id}` : "/student/live-classes",
+    })),
     ...messages,
     ...recentAnnouncements.map((a) => ({
       id: `announcement:${a.id}`,

@@ -144,3 +144,244 @@ a {
     transition-duration: 0.01ms !important;
   }
 }
+
+/* ---------------------------------------------------------------------------
+   Live class room. Dark stage tuned to the university maroon; overrides the
+   LiveKit component theme variables.
+   ------------------------------------------------------------------------- */
+.live-room {
+  --lk-bg: #1a1012;
+  --lk-bg2: #241619;
+  --lk-bg3: #2e1d21;
+  --lk-bg4: #3a252a;
+  --lk-bg5: #4a3036;
+  --lk-fg: #ffffff;
+  --lk-accent-bg: #b03a3d;
+  --lk-accent-fg: #ffffff;
+  --lk-accent2: #c4474a;
+  --lk-danger: #e5484d;
+  --lk-border-radius: 10px;
+  --lk-control-bg: transparent;
+  --lk-control-hover-bg: rgba(255, 255, 255, 0.08);
+  font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
+}
+.live-room .lk-participant-tile {
+  border-radius: 10px;
+}
+.lc-group {
+  display: inline-flex;
+  align-items: stretch;
+}
+.lc-tool,
+.live-room .lc-tool.lk-button {
+  position: relative;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  min-width: 56px;
+  padding: 6px 8px;
+  border-radius: 8px;
+  color: rgba(255, 255, 255, 0.85);
+  background: transparent;
+  font-size: 11px;
+  line-height: 1;
+}
+.lc-tool:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+.lc-tool.is-on,
+.lc-tool[data-lk-enabled="true"] {
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
+}
+.lc-tool[data-lk-enabled="false"] {
+  color: #ff9a9c;
+}
+.lc-tool:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+.live-room .lc-tool-caret {
+  min-width: 22px;
+  padding: 6px 2px;
+}
+.lc-tool-label {
+  font-size: 11px;
+  white-space: nowrap;
+}
+.lc-tool.is-leave {
+  color: #ffd0d1;
+}
+.lc-tool.is-end {
+  background: #c4313a;
+  color: #fff;
+}
+.lc-tool.is-end:hover {
+  background: #a92830;
+}
+.lc-dot {
+  position: absolute;
+  top: 3px;
+  right: 10px;
+  min-width: 8px;
+  height: 8px;
+  padding: 0 3px;
+  border-radius: 9999px;
+  background: #f5a524;
+  color: #1a1012;
+  font-size: 9px;
+  font-weight: 700;
+  line-height: 8px;
+}
+.lc-dot:not(:empty) {
+  height: 14px;
+  line-height: 14px;
+  top: 0;
+}
+.lc-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  border-radius: 6px;
+  background: #b03a3d;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 6px 10px;
+}
+.lc-chip:hover {
+  background: #c4474a;
+}
+.lc-chip:disabled {
+  opacity: 0.5;
+}
+.lc-chip.is-quiet {
+  background: rgba(255, 255, 255, 0.1);
+}
+.lc-chip.is-danger {
+  background: #c4313a;
+}
+.lc-icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 6px;
+  color: rgba(255, 255, 255, 0.75);
+}
+.lc-icon-btn:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
+}
+.lc-menu-item {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  font-size: 13px;
+  color: #fff;
+  text-align: left;
+}
+.lc-menu-item:hover {
+  background: rgba(255, 255, 255, 0.07);
+}
+.lc-input {
+  width: 100%;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(255, 255, 255, 0.05);
+  color: #fff;
+  font-size: 13px;
+  padding: 6px 8px;
+}
+.lc-input:focus {
+  outline: none;
+  border-color: #e8a0a2;
+}
+.lc-input option {
+  color: #17212b;
+}
+.lc-switch {
+  width: 34px;
+  height: 20px;
+  accent-color: #b03a3d;
+}
+.lc-wb-tool {
+  display: inline-flex;
+  height: 30px;
+  width: 30px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  color: #475467;
+}
+.lc-wb-tool:hover,
+.lc-wb-tool.is-active {
+  background: #f1efec;
+  color: #17212b;
+}
+.lc-chat.lk-chat {
+  width: 100%;
+  background: transparent;
+}
+.lc-float {
+  position: absolute;
+  bottom: 70px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  animation: lc-float-up 4s ease-out forwards;
+}
+@keyframes lc-float-up {
+  0% { transform: translateY(0); opacity: 0; }
+  10% { opacity: 1; }
+  100% { transform: translateY(-55vh); opacity: 0; }
+}
+.lc-start-audio {
+  position: fixed;
+  bottom: 90px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 40;
+}
+
+/* Light-theme buttons on the live class list pages */
+.lc-light-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 34px;
+  height: 34px;
+  border-radius: 6px;
+  border: 1px solid #d6dbd3;
+  background: #fff;
+  color: #475467;
+}
+.lc-light-btn:hover {
+  background: #f8f9f6;
+  color: #17212b;
+}
+.lc-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #475467;
+}
+.lc-field input,
+.lc-field select,
+.lc-field textarea {
+  border-radius: 6px;
+  border: 1px solid #d6dbd3;
+  padding: 8px 10px;
+  font-size: 13px;
+  font-weight: 400;
+  color: #17212b;
+  background: #fff;
+}
